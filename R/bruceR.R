@@ -1,0 +1,214 @@
+#### For Developer ####
+# Install Package: 'Ctrl + Shift + B'
+# Check Package:   'Ctrl + Shift + E'
+# Test Package:    'Ctrl + Shift + T'
+
+# devtools::check()
+# devtools::spell_check()
+# devtools::check_rhub()
+# devtools::check_win_devel()
+
+# devtools::release()
+# devtools::submit_cran()
+
+
+#### Main Description ####
+
+
+#' bruceR: \strong{BR}oadly \strong{U}seful \strong{C}onvenient and \strong{E}fficient \strong{R} functions
+#'
+#' @description
+#' \strong{BR}oadly
+#' \strong{U}seful
+#' \strong{C}onvenient
+#' and
+#' \strong{E}fficient
+#' \strong{R}
+#' functions that
+#' \strong{BR}ing
+#' \strong{U}sers
+#' \strong{C}oncise
+#' and
+#' \strong{E}legant
+#' \strong{R}
+#' data analyses.
+#'
+#' Check updates on \url{https://github.com/psychbruce/bruceR}
+#'
+#' Loading \code{bruceR} by \code{library(bruceR)} will also load these R packages for you:
+#'
+#' \strong{[Data]:}
+#' \itemize{
+#'   \item \strong{\code{rio}}: Data import and export (for all file formats). (\code{\link[rio]{import}} / \code{\link[rio]{export}})
+#'   \item \strong{\code{dplyr}}: Data manipulation and processing.
+#'   \item \strong{\code{tidyr}}: Data cleaning and reshaping.
+#'   \item \strong{\code{stringr}}: Toolbox for string operation (with regular expressions).
+#'   \item \strong{\code{forcats}}: Toolbox for factor manipulation (for categorical variables).
+#'   \item \strong{\code{data.table}}: Advanced \code{data.frame} with higher efficiency.
+#' }
+#'
+#' \strong{[Stat]:}
+#' \itemize{
+#'   \item \strong{\code{psych}}: Toolbox for psychological and psychometric research.
+#'   \item \strong{\code{emmeans}}: Toolbox for estimated marginal means and contrasts.
+#'   \item \strong{\code{effectsize}}: Indices of effect size and standardized parameters.
+#'   \item \strong{\code{performance}}: Assessment of regression models performance.
+#' }
+#'
+#' \strong{[Plot]:}
+#' \itemize{
+#'   \item \strong{\code{ggplot2}}: Data visualization.
+#'   \item \strong{\code{cowplot}}: Advanced toolbox for \code{ggplot2} (arrange multiple plots and add labels).
+#'   \item \strong{\code{see}}: Advanced toolbox for \code{ggplot2} (extra geoms, scales, themes, and color palettes).
+#' }
+#'
+#' @section Main Functions in \code{bruceR}:
+#'
+#' \describe{
+#'   \item{\strong{(1) Basic Use and Analysis}}{
+#'       \code{\link{Print}}  (print texts to console with rich formats and colors)
+#'
+#'       \code{\link{Describe}}  (descriptive statistics)
+#'
+#'       \code{\link{Freq}}  (frequency statistics with histogram plot)
+#'
+#'       \code{\link{Corr}}  (correlation analysis with correlation-matrix plot)
+#'
+#'       \code{\link{p}}  (compute \emph{p}-values from statistics: \emph{z, t, F, r, chi2})
+#'
+#'       \code{\link{set.wd}}  (a simple extension of \code{\link{setwd}})
+#'
+#'       \code{\link{pkg_depend}}  (check package dependencies)
+#'
+#'       \code{\link{pkg_install_suggested}}  (install suggested packages)
+#'
+#'       \code{\link{dtime}}  (compute time difference)
+#'
+#'       \code{\link{\%notin\%}}  (the reverse of \code{\%in\%}, return a logical vector specifying values not in a table)
+#'
+#'       \code{\link{\%allin\%}}  (return whether all Xs are in a vector)
+#'
+#'       \code{\link{\%anyin\%}}  (return whether any of Xs is in a vector)
+#'
+#'       \code{\link{\%nonein\%}}  (return whether none of Xs is in a vector)
+#'
+#'       \code{\link{\%partin\%}}  (use regular expression to judge whether a pattern exists in a vector)
+#'
+#'       \code{\link{RANDBETWEEN}}  (random sampling, like Excel's function \code{RANDBETWEEN})
+#'
+#'       \code{\link{LOOKUP}}  (search, match, and look up values, like Excel's functions \code{INDEX + MATCH})
+#'   }
+#'
+#'   \item{\strong{(2) Multivariate Computation}}{
+#'       \code{\link{RECODE}}  (recode a variable)
+#'
+#'       \code{\link{RESCALE}}  (rescale a variable; e.g., from 5-point to 7-point scale)
+#'
+#'       \code{\link{SUM}}  (compute multivariate sum)
+#'
+#'       \code{\link{MEAN}}  (compute multivariate mean)
+#'
+#'       \code{\link{STD}}  (compute multivariate standard deviation)
+#'
+#'       \code{\link{MODE}}  (compute multivariate mode)
+#'
+#'       \code{\link{COUNT}}  (count values across variables)
+#'
+#'       \code{\link{CONSEC}}  (count "consecutive identical digits" across variables)
+#'   }
+#'
+#'   \item{\strong{(3) Reliability and Validity Analysis}}{
+#'       \code{\link{Alpha}}  (reliability analysis, Cronbach's \eqn{\alpha})
+#'
+#'       \code{\link{EFA}}  (exploratory factor analysis)
+#'
+#'       \code{\link{CFA}}  (confirmatory factor analysis)
+#'   }
+#'
+#'   \item{\strong{(4) Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison}}{
+#'       \code{\link{MANOVA}}  (multi-factor between-subjects, within-subjects, and mixed design ANOVA)
+#'
+#'       \code{\link{EMMEANS}}  (simple-effect analysis and post-hoc multiple comparison)
+#'   }
+#'
+#'   \item{\strong{(5) Advanced Toolbox and Tidy Report of Statistical Models}}{
+#'       \code{\link{grand_mean_center}}  (center variable(s) on \strong{grand} mean(s))
+#'
+#'       \code{\link{group_mean_center}}  (center variable(s) on \strong{group} mean(s))
+#'
+#'       \code{\link{regress}}  (fast perform OLS, logistic, poisson, and multilevel regression analyses)
+#'
+#'       \code{\link{GLM_summary}}  (advanced report of general/generalized linear models)
+#'
+#'       \code{\link{HLM_summary}}  (advanced report of multilevel/hierarchical linear models)
+#'
+#'       \code{\link{model_summary}}  (tidy report of regression models)
+#'
+#'       \code{\link{med_summary}}  (tidy report of mediation analyses based on the \code{mediation} package)
+#'
+#'       \code{\link{ccf_plot}}  (cross-correlation analysis with a \code{ggplot2} plot)
+#'
+#'       \code{\link{granger_test}}  (Granger causality test based on the \code{lmtest::\link[lmtest]{grangertest}} function)
+#'   }
+#'
+#'   \item{\strong{(6) Theme for \code{ggplot2}}}{
+#'       \code{\link{theme_bruce}}  (a set of nice themes for scientific publication)
+#'   }
+#' }
+#'
+#' @note
+#' Please always use \href{https://rstudio.com/products/rstudio/download/preview/}{RStudio}
+#' as an \href{https://en.wikipedia.org/wiki/Integrated_development_environment}{IDE} instead of using the raw R software.
+#'
+#' @author
+#' \href{https://psychbruce.github.io}{Han-Wu-Shuang (Bruce) Bao}
+#'
+#' E-mail: \email{baohws@@foxmail.com}
+#'
+#' @docType package
+#' @name bruceR-package
+#' @aliases bruceR
+NULL
+
+
+#### Package-Loading Information ####
+
+.onAttach=function(libname, pkgname) {
+  # packageStartupMessage("Welcome to my package")
+
+  suppressMessages({
+    pacman::p_load(
+      ## DATA ##
+      "rio", "dplyr", "tidyr", "stringr", "forcats", "data.table",
+      ## STAT ##
+      "psych", "emmeans", "effectsize", "performance",
+      ## PLOT ##
+      "ggplot2", "cowplot", "see")
+  })
+
+  # {rep_char('=', 56)}
+  # \u2714 yes
+  # \u2501 hyphen
+  LOGO=c(bell="\ud83d\udd14",
+         bulb="\ud83d\udca1",
+         gift="\ud83c\udf81",
+         bolt="\u26a1",
+         star="\u2b50")
+  logo=sample(LOGO, 1)
+  Print("
+  \n
+  <<bold <<magenta
+  {logo} bruceR: <<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions
+  >>>>
+
+  <<bold <<blue Loaded R packages:>>>>
+  <<green <<yellow [Data]:>> rio / dplyr / tidyr / stringr / forcats / data.table>>
+  <<green <<yellow [Stat]:>> psych / emmeans / effectsize / performance>>
+  <<green <<yellow [Plot]:>> ggplot2 / cowplot / see>>
+
+  <<bold <<blue Frequently used functions in `bruceR`:>>>>
+  <<cyan set.wd() / Describe() / Freq() / Corr() / Alpha() / MEAN()>>
+  <<cyan MANOVA() / EMMEANS() / model_summary() / theme_bruce()>>
+  \n
+  ")
+}
