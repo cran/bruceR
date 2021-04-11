@@ -59,21 +59,25 @@ CONSEC(
 \arguments{
 \item{data}{Data frame.}
 
-\item{var}{\strong{[option 1]} Common part across multiple variables (e.g., \code{"RSES", "SWLS"}).}
+\item{var}{\strong{[option 1]}
+Common part across multiple variables (e.g., \code{"RSES", "SWLS"}).}
 
-\item{items}{\strong{[option 1]} Unique part across multiple variables (e.g., \code{1:10}).}
+\item{items}{\strong{[option 1]}
+Unique part across multiple variables (e.g., \code{1:10}).}
 
-\item{vars}{\strong{[option 2]} Character vector specifying the variable list (e.g., \code{c("x1", "x2", "x3")}).}
+\item{vars}{\strong{[option 2]}
+Character vector specifying a variable list (e.g., \code{c("E1", "E2", "E3", "E4", "E5")}).}
 
-\item{varrange}{\strong{[option 3]} Character with \code{":"} specifying the start and stop positions of variables (e.g., \code{"A1:E5"}).}
+\item{varrange}{\strong{[option 3]}
+Character with \code{":"} specifying the start and end positions of a variable list (e.g., \code{"A1:E5"}).}
 
 \item{value}{[only for \code{COUNT}] The value to be counted.}
 
 \item{rev}{[optional] Reverse-scoring variables. It can be
-1) a numeric vector specifying the positions of reverse-scoring variables (not recommended) or
-2) a character vector directly specifying the variable list (recommended).}
+(1) a numeric vector specifying the positions of reverse-scoring variables (not recommended) or
+(2) a character vector directly specifying the variable list (recommended).}
 
-\item{likert}{[optional] Range of likert scale (e.g., \code{1:5}, \code{c(1,5)}).
+\item{likert}{[optional] Range of likert scale (e.g., \code{1:5}, \code{c(1, 5)}).
 If not provided, it will be automatically estimated from the given data (BUT you should use this carefully).}
 
 \item{na.rm}{Ignore missing values. Default is \code{TRUE}.}
@@ -81,33 +85,33 @@ If not provided, it will be automatically estimated from the given data (BUT you
 \item{values}{[only for \code{CONSEC}] Values to be counted as consecutive identical values. Default is all numbers (\code{0:9}).}
 }
 \value{
-A vector of computed variable.
+A vector of computed values.
 }
 \description{
-Easily compute the sum, mean, or other indexes of a scale.
-Reverse scoring can also be easily implemented, without generating extra variables
-(\code{\link{Alpha}} uses a similar method to deal with reverse scoring)!
+Easily compute multivariate sum, mean, and other scores.
+Reverse scoring can also be easily implemented without saving extra variables.
+\code{\link{Alpha}} function uses a similar method to deal with reverse scoring.
 
-Three ways to specify the variable list:
+Three options to specify the variable list:
 \enumerate{
   \item \strong{\code{var + items}}: use the common and unique parts of variable names.
-  \item \strong{\code{vars}}: manually define the variable list.
-  \item \strong{\code{varrange}}: use the start and stop positions.
+  \item \strong{\code{vars}}: directly define a variable list.
+  \item \strong{\code{varrange}}: use the start and end positions of a variable list.
 }
 }
 \section{Functions}{
 \itemize{
 \item \code{COUNT}: \strong{Count} a certain value across multiple variables.
 
-\item \code{MODE}: Compute the \strong{mode} across multiple variables.
+\item \code{MODE}: Compute \strong{mode} across multiple variables.
 
-\item \code{SUM}: Compute the \strong{sum} across multiple variables.
+\item \code{SUM}: Compute \strong{sum} across multiple variables.
 
-\item \code{MEAN}: Compute the \strong{mean} across multiple variables.
+\item \code{MEAN}: Compute \strong{mean} across multiple variables.
 
-\item \code{STD}: Compute the \strong{standard deviation} across multiple variables.
+\item \code{STD}: Compute \strong{standard deviation} across multiple variables.
 
-\item \code{CONSEC}: Compute the \strong{consecutive identical digits} across multiple variables (especially useful in detecting careless responding).
+\item \code{CONSEC}: Compute \strong{consecutive identical digits} across multiple variables (especially useful in detecting careless responding).
 }}
 
 \examples{
@@ -120,15 +124,16 @@ d
 ## I deliberately set this order to show you
 ## the difference between "vars" and "varrange".
 
-d[,":="(na=COUNT(d, "x", 1:5, value=NA),
-        n.2=COUNT(d, "x", 1:5, value=2),
-        sum=SUM(d, "x", 1:5),
-        m1=MEAN(d, "x", 1:5),
-        m2=MEAN(d, vars=c("x1", "x4")),
-        m3=MEAN(d, varrange="x1:x2", rev="x2", likert=1:5),
-        cons1=CONSEC(d, "x", 1:5),
-        cons2=CONSEC(d, varrange="x1:x5")
-        )]
+d[,`:=`(
+  na=COUNT(d, "x", 1:5, value=NA),
+  n.2=COUNT(d, "x", 1:5, value=2),
+  sum=SUM(d, "x", 1:5),
+  m1=MEAN(d, "x", 1:5),
+  m2=MEAN(d, vars=c("x1", "x4")),
+  m3=MEAN(d, varrange="x1:x2", rev="x2", likert=1:5),
+  cons1=CONSEC(d, "x", 1:5),
+  cons2=CONSEC(d, varrange="x1:x5")
+)]
 d
 
 data=as.data.table(bfi)

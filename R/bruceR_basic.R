@@ -1,7 +1,28 @@
 #### Basic Functions ####
 
 
-#' A simple extension of \code{\%in\%}.
+#' Paste strings together.
+#'
+#' Paste strings together. A wrapper of \code{paste0()}.
+#' Why \code{\%^\%}? Because typing \code{\%} and \code{^} is pretty easy by
+#' pressing \strong{Shift + 5 + 6 + 5}.
+#'
+#' @param x,y Any objects, usually a numeric or character string or vector.
+#'
+#' @return A character string/vector of the pasted values.
+#'
+#' @examples
+#' "He" %^% "llo"
+#' "X" %^% 1:10
+#' "Q" %^% 1:5 %^% letters[1:5]
+#'
+#' @export
+`%^%`=function(x, y) {
+  paste0(x, y)
+}
+
+
+#' The opposite of \code{\%in\%}.
 #'
 #' @param x Numeric or character vector.
 #' @param vector Numeric or character vector.
@@ -13,7 +34,7 @@
 #' data
 #' data[ID %notin% c(1, 3, 5, 7, 9)]
 #'
-#' @seealso \code{\link[base]{match}} (\code{\%in\%})
+#' @seealso \code{\link[base:match]{\%in\%}}
 #'
 #' @export
 `%notin%`=function(x, vector) {
@@ -31,7 +52,10 @@
 #' 1:2 %allin% 1:3  # TRUE
 #' 3:4 %allin% 1:3  # FALSE
 #'
-#' @seealso \code{\link[base]{match}} (\code{\%in\%}), \code{\link{\%anyin\%}}, \code{\link{\%nonein\%}}, \code{\link{\%partin\%}}
+#' @seealso \code{\link[base:match]{\%in\%}},
+#' \code{\link{\%anyin\%}},
+#' \code{\link{\%nonein\%}},
+#' \code{\link{\%partin\%}}
 #'
 #' @export
 `%allin%`=function(x, vector) {
@@ -49,7 +73,10 @@
 #' 3:4 %anyin% 1:3  # TRUE
 #' 4:5 %anyin% 1:3  # FALSE
 #'
-#' @seealso \code{\link[base]{match}} (\code{\%in\%}), \code{\link{\%allin\%}}, \code{\link{\%nonein\%}}, \code{\link{\%partin\%}}
+#' @seealso \code{\link[base:match]{\%in\%}},
+#' \code{\link{\%allin\%}},
+#' \code{\link{\%nonein\%}},
+#' \code{\link{\%partin\%}}
 #'
 #' @export
 `%anyin%`=function(x, vector) {
@@ -67,7 +94,10 @@
 #' 3:4 %nonein% 1:3  # FALSE
 #' 4:5 %nonein% 1:3  # TRUE
 #'
-#' @seealso \code{\link[base]{match}} (\code{\%in\%}), \code{\link{\%allin\%}}, \code{\link{\%anyin\%}}, \code{\link{\%partin\%}}
+#' @seealso \code{\link[base:match]{\%in\%}},
+#' \code{\link{\%allin\%}},
+#' \code{\link{\%anyin\%}},
+#' \code{\link{\%partin\%}}
 #'
 #' @export
 `%nonein%`=function(x, vector) {
@@ -87,7 +117,10 @@
 #' "bei" %partin% c("Beijing", "Shanghai")  # FALSE
 #' "[aeiou]ng" %partin% c("Beijing", "Shanghai")  # TRUE
 #'
-#' @seealso \code{\link[base]{match}} (\code{\%in\%}), \code{\link{\%allin\%}}, \code{\link{\%anyin\%}}, \code{\link{\%nonein\%}}
+#' @seealso \code{\link[base:match]{\%in\%}},
+#' \code{\link{\%allin\%}},
+#' \code{\link{\%anyin\%}},
+#' \code{\link{\%nonein\%}}
 #'
 #' @export
 `%partin%`=function(pattern, vector) {
@@ -99,42 +132,72 @@
 #'
 #' Set working directory to the path of the currently opened file.
 #' You can use this function in both \strong{.R/.Rmd files and the R console}.
-#' \href{https://rstudio.com/products/rstudio/download/preview/}{RStudio}
-#' is required for running this function.
+#' \href{https://www.rstudio.com/products/rstudio/download/preview/}{RStudio}
+#' (version >= 1.2) is required for running this function.
 #'
 #' @param path \code{NULL} (default) or a specific path.
 #' Default is to extract the path of the currently opened file
-#' (can be any type, usually an R or Rmd file).
-#' @param execute \code{TRUE} (default) or \code{FALSE}.
-#' Default is to send code \code{setwd("...")} to the R console AND execute it.
+#' (usually .R or .Rmd) using the \code{rstudioapi::getSourceEditorContext} function.
+#' @param directly \code{TRUE} (default) or \code{FALSE}.
+#' Default is to directly execute \code{setwd("...")} within the function (recommended).
+#' Otherwise, it will send code \code{setwd("...")} to the R console
+#' and then execute it (not recommended due to a delay of execution).
 #' @param ask \code{TRUE} or \code{FALSE} (default).
-#' If \code{TRUE}, then you can select a folder with the prompt of a dialog.
+#' If \code{TRUE}, you can select a folder with the prompt of a dialog.
 #'
-#' @return Invisibly return the path of the currently opened file.
+#' @return Invisibly return the path.
 #'
 #' @examples
 #' \dontrun{
-#' # RStudio is required for running this function.
+#' # RStudio (version >= 1.2) is required for running this function.
 #' set.wd()  # set working directory to the path of the currently opened file
-#' set.wd("D:/")  # or any other path (use "/" rather than "\")
+#' set.wd("~/")  # set working directory to the home directory
 #' set.wd("../")  # set working directory to the parent directory
 #' set.wd(ask=TRUE)  # select a folder with the prompt of a dialog
 #' }
 #'
-#' @seealso \code{\link{setwd}}
+#' @seealso \code{\link[base:getwd]{setwd}}
 #'
 #' @export
-set.wd=function(path=NULL, execute=TRUE, ask=FALSE) {
+set.wd=function(path=NULL, directly=TRUE, ask=FALSE) {
+  if(rstudioapi::isAvailable()==FALSE)
+    stop("RStudio is required for running this function!\n\n",
+         "Please download and install the latest version of RStudio:\n",
+         "https://rstudio.com/products/rstudio/download/preview/")
+  is.windows=ifelse(Sys.info()[["sysname"]]=="Windows", TRUE, FALSE)
   if(is.null(path)) {
-    if(ask) {
-      path=rstudioapi::selectDirectory(caption="Select Working Directory")
+    tryCatch({
+      if(ask) {
+        # RStudio version >= 1.1.287
+        if(is.windows)
+          path=iconv(rstudioapi::selectDirectory(), from="UTF-8", to="GBK")
+        else
+          path=rstudioapi::selectDirectory()
+      } else {
+        # # RStudio version >= 1.4.843
+        # if(is.windows)
+        #   file.path=iconv(rstudioapi::documentPath(), from="UTF-8", to="GBK")
+        # else
+        #   file.path=rstudioapi::documentPath()
+
+        # RStudio version >= 0.99.1111
+        path=dirname(rstudioapi::getSourceEditorContext()$path)
+      }
+    }, error=function(e) {
+      # Error: Function documentPath not found in RStudio
+      message("Your RStudio version is: ", rstudioapi::getVersion(), "\n")
+      message("Please update RStudio to the latest version:\n",
+              "https://rstudio.com/products/rstudio/download/preview/\n")
+    })
+  }
+  if(length(path)>0) {
+    if(directly) {
+      eval(parse(text=paste0("setwd(\"", path, "\")")))
+      Print("<<green \u2714>> Set working directory to <<blue \"{getwd()}\">>")
     } else {
-      # path=dirname(rstudioapi::getActiveDocumentContext()$path)  # cannot work in console
-      path.parts=stringr::str_split(rstudioapi::documentPath(), "/", simplify=TRUE)
-      path=paste(path.parts[1:(length(path.parts)-1)], collapse="/")
+      rstudioapi::sendToConsole(paste0("setwd(\"", path, "\")"), execute=TRUE)
     }
   }
-  rstudioapi::sendToConsole(Glue("setwd(\"{path}\")"), execute=execute)
   invisible(path)
 }
 
@@ -152,7 +215,7 @@ set.wd=function(path=NULL, execute=TRUE, ask=FALSE) {
 ## pkg_depend("dplyr", excludes="jmv")  # no unique dependencies
 ## pkg_depend(pacman::p_depends("bruceR", local=TRUE)$Imports)
 ##
-#' @seealso \link{pkg_install_suggested}
+#' @seealso \code{\link{pkg_install_suggested}}
 #'
 #' @export
 pkg_depend=function(pkgs, excludes=NULL) {
@@ -187,7 +250,7 @@ pkg_depend=function(pkgs, excludes=NULL) {
 ## @examples
 ## pkg_install_suggested()
 ##
-#' @seealso \link{pkg_depend}
+#' @seealso \code{\link{pkg_depend}}
 #'
 #' @export
 pkg_install_suggested=function(by="bruceR") {
@@ -215,7 +278,7 @@ pkg_install_suggested=function(by="bruceR") {
 }
 
 
-#' Print texts with rich formats and colors.
+#' Print strings with rich formats and colors.
 #'
 #' @describeIn Print Paste and print strings.
 #'
@@ -224,11 +287,11 @@ pkg_install_suggested=function(by="bruceR") {
 #' Run examples to see what it can do.
 #'
 #' @details
-#' See more details in \code{glue::\link[glue]{glue}} and \code{glue::\link[glue]{glue_col}}.
+#' See more details in \code{\link[glue:glue]{glue::glue()}} and \code{\link[glue:glue]{glue::glue_col()}}.
 #'
-#' @param ... Character strings enclosed by \code{"{ }"} will be evaluated as R codes.
+#' @param ... Character strings enclosed by \code{"{ }"} will be evaluated as R code.
 #'
-#' Character strings enclosed by \code{"<< >>"} will be printed as formatted and colored texts.
+#' Character strings enclosed by \code{"<< >>"} will be printed as formatted and colored text.
 #'
 #' Long strings are broken by line and concatenated together.
 #'
@@ -281,6 +344,26 @@ sprintf_transformer=function(text, envir) {
   } else {
     eval(parse(text=text, keep.source=FALSE), envir)
   }
+}
+
+
+#' Run code parsed from text.
+#'
+#' @param text Character strings for running.
+#' You can use \code{"{ }"} to insert any R object in the environment.
+#'
+#' @return No return value.
+#'
+#' @examples
+#' Run("a=1")
+#' a
+#'
+#' Run("a={a+1}")
+#' a
+#'
+#' @export
+Run=function(text) {
+  eval(parse(text=Glue(text)), envir=parent.frame())
 }
 
 
@@ -512,12 +595,12 @@ RANDBETWEEN=function(range, n=1, seed=NULL) {
 #' If multiple values were simultaneously matched, a warning message would be printed.
 #'
 #' @param data Main data.
-#' @param vars Character or character vector, specifying the variable(s) to be searched in \code{data}.
+#' @param vars Character (vector), specifying the variable(s) to be searched in \code{data}.
 #' @param data.ref Reference data containing both the reference variable(s) and the lookup variable(s).
-#' @param vars.ref Character or character vector (with the \strong{same length and order} as \code{vars}),
+#' @param vars.ref Character (vector), with the \strong{same length and order} as \code{vars},
 #' specifying the reference variable(s) to be matched in \code{data.ref}.
-#' @param vars.lookup Character or character vector, specifying the variable(s) to be looked up and returned from \code{data.ref}.
-#' @param return What to return. Default (\code{"new.data"}) is to return a \code{data.frame} or \code{data.table} with the lookup values added.
+#' @param vars.lookup Character (vector), specifying the variable(s) to be looked up and returned from \code{data.ref}.
+#' @param return What to return. Default (\code{"new.data"}) is to return a data frame with the lookup values added.
 #' You may also set it to \code{"new.var"} or \code{"new.value"}.
 #'
 #' @return New data object, new variable, or new value (see the parameter \code{return}).

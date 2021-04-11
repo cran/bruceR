@@ -2,9 +2,9 @@
 
 **BR**oadly **U**seful **C**onvenient and **E**fficient **R** functions that **BR**ing **U**sers **C**oncise and **E**legant **R** data analyses.
 
-The package includes easy-to-use functions for (1) basic use and analysis; (2) multivariate computation; (3) reliability and validity analysis; (4) multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison; and (5) advanced toolbox and tidy report of statistical models.
+This package includes easy-to-use functions for (1) basic R programming (e.g., set working directory to where the current file is, print strings with rich formats and colors); (2) multivariate computation (e.g., compute scale sums/means/... with reverse scoring); (3) reliability and factor analyses; (4) descriptive statistics and correlation analyses; (5) multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison; (6) tidy report of regression models (to Console and to Word); (7) mediation and moderation analyses; and (8) additional toolbox for statistics and graphics.
 
-[![GitHub-Version](https://img.shields.io/github/r-package/v/psychbruce/bruceR?label=GitHub&color=blue)](https://github.com/psychbruce/bruceR) [![Travis-Build-Status](https://travis-ci.com/psychbruce/bruceR.svg?branch=master)](https://travis-ci.com/psychbruce/bruceR) [![CRAN-Version](https://www.r-pkg.org/badges/version/bruceR?color=orange)](https://CRAN.R-project.org/package=bruceR) [![CRAN-Downloads](https://cranlogs.r-pkg.org/badges/grand-total/bruceR?color=red)](https://CRAN.R-project.org/package=bruceR) [![GitHub-Commits](https://img.shields.io/github/commit-activity/y/psychbruce/bruceR?logo=github&label=commits&style=social)](https://github.com/psychbruce/bruceR/commits) [![GitHub-Stars](https://img.shields.io/github/stars/psychbruce/bruceR?style=social)](https://github.com/psychbruce/bruceR/stargazers)
+[![CRAN-Version](https://www.r-pkg.org/badges/version/bruceR?color=red)](https://CRAN.R-project.org/package=bruceR) [![CRAN-Downloads](https://cranlogs.r-pkg.org/badges/grand-total/bruceR)](https://www.rdocumentation.org/packages/bruceR) [![GitHub-Version](https://img.shields.io/github/r-package/v/psychbruce/bruceR?label=GitHub&color=orange)](https://github.com/psychbruce/bruceR) [![Travis-Build-Status](https://travis-ci.com/psychbruce/bruceR.svg?branch=master)](https://travis-ci.com/psychbruce/bruceR) [![GitHub-Commits](https://img.shields.io/github/commit-activity/y/psychbruce/bruceR?logo=github&label=commits&style=social)](https://github.com/psychbruce/bruceR/commits) [![GitHub-Stars](https://img.shields.io/github/stars/psychbruce/bruceR?style=social)](https://github.com/psychbruce/bruceR/stargazers)
 
 <img src="https://s1.ax1x.com/2020/07/28/aAjUJg.jpg" width="120px" height="42px"/>
 
@@ -70,49 +70,67 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
 -   **[Plot]:**
 
     -   [`ggplot2`](https://cran.r-project.org/package=ggplot2): Data visualization.
+    -   [`ggtext`](https://cran.r-project.org/package=ggtext): Markdown/HTML rich text format for `ggplot2` (geoms and themes).
     -   [`cowplot`](https://cran.r-project.org/package=cowplot): Advanced toolbox for `ggplot2` (arrange multiple plots and add labels).
-    -   [`see`](https://cran.r-project.org/package=see): Advanced toolbox for `ggplot2` (extra geoms, scales, themes, and color palettes).
+    -   [`see`](https://cran.r-project.org/package=see): Advanced toolbox for `ggplot2` (geoms, scales, themes, and color palettes).
 
 ### Main Functions in `bruceR`
 
-1.  **Basic Use and Analysis**
+1.  **Basic R Programming**
 
     -   `set.wd()`
     -   `pkg_depend()`, `pkg_install_suggested()`
     -   `formatF()`, `formatN()`
-    -   `Print()`, `Glue()`
-    -   `Describe()`, `Freq()`, `Corr()`, `cor_diff()`
-    -   `LOOKUP()`, `RANDBETWEEN()`
-    -   `%notin%`, `%partin%`, `%allin%`, `%nonein%`, `%anyin%`
+    -   `Print()`, `Glue()`, `Run()`
+    -   `%^%`
+    -   `%notin%`
+    -   `%allin%`, `%anyin%`, `%nonein%`, `%partin%`
 
 2.  **Multivariate Computation**
 
-    -   `RECODE()`, `RESCALE()`
     -   `SUM()`, `MEAN()`, `STD()`, `MODE()`, `COUNT()`, `CONSEC()`
+    -   `RECODE()`, `RESCALE()`, `RANDBETWEEN()`
+    -   `LOOKUP()`
 
-3.  **Reliability and Validity Analysis**
+3.  **Reliability and Factor analyses**
 
     -   `Alpha()`
     -   `EFA()`
     -   `CFA()`
 
-4.  **Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison**
+4.  **Descriptive Statistics and Correlation Analyses**
+
+    -   `Describe()`
+    -   `Freq()`
+    -   `Corr()`
+    -   `cor_diff()`
+
+5.  **Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison**
 
     -   `MANOVA()`
     -   `EMMEANS()`
 
-5.  **Advanced Toolbox and Tidy Report of Statistical Models**
+6.  **Tidy Report of Regression Models**
 
-    -   `grand_mean_center()`, `group_mean_center()`
-    -   `regress()`, `GLM_summary()`, `HLM_summary()`
     -   `model_summary()`
+    -   `GLM_summary()`
+    -   `HLM_summary()`
+    -   `HLM_ICC_rWG()`
+    -   `regress()`
+
+7.  **Mediation and Moderation Analyses**
+
     -   `med_summary()`
+    -   `PROCESS()` (*coming soon...*)
+
+8.  **Additional Toolbox for Statistics and Graphics**
+
+    -   `grand_mean_center()`
+    -   `group_mean_center()`
     -   `ccf_plot()`
     -   `granger_test()`
-
-6.  **Theme for `ggplot2`**
-
     -   `theme_bruce()`
+    -   `show_colors()`
 
 ### Learn More From Help Pages
 
@@ -126,9 +144,11 @@ help(bruceR)
 
 ## See help pages of functions
 ## (use `?function` or `help(function)`)
+?set.wd
 ?Describe
+?Freq
 ?Corr
-?SUM
+?Alpha
 ?MEAN
 ?MANOVA
 ?EMMEANS

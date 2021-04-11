@@ -57,19 +57,19 @@ p.r=function(r, n) p.t(r/sqrt((1-r^2)/(n-2)), n-2)
 p.chi2=function(chi2, df) pchisq(chi2, df, lower.tail=FALSE)
 
 
-#' Transform \emph{p} value.
-#'
-#' @param p \emph{p} value.
-#' @param nsmall.p Number of decimal places of \emph{p} value. Default is \code{3}.
-#'
-#' @return A character string of transformed \emph{p} value.
-#'
-#' @examples
-#' p.trans(c(1, 0.1, 0.05, 0.01, 0.001, 0.0001, 0.0000001, 1e-50)) %>% data.table(p=.)
-#'
-#' @seealso \code{\link{p.trans2}}
-#'
-#' @export
+## Transform \emph{p} value.
+##
+## @param p \emph{p} value.
+## @param nsmall.p Number of decimal places of \emph{p} value. Default is \code{3}.
+##
+## @return A character string of transformed \emph{p} value.
+##
+## @examples
+## p.trans(c(1, 0.1, 0.05, 0.01, 0.001, 0.0001, 0.0000001, 1e-50)) %>% data.table(p=.)
+##
+## @seealso \code{\link{p.trans2}}
+##
+## @export
 p.trans=function(p, nsmall.p=3) {
   mapply(function(p, nsmall.p) {
     ifelse(is.na(p) | p > 1 | p < 0, "",
@@ -79,19 +79,19 @@ p.trans=function(p, nsmall.p=3) {
 }
 
 
-#' Transform \emph{p} value.
-#'
-#' @inheritParams p.trans
-#' @param p.min Minimum of \emph{p}. Default is \code{1e-99}.
-#'
-#' @return A character string of transformed \emph{p} value.
-#'
-#' @examples
-#' p.trans2(c(1, 0.1, 0.05, 0.01, 0.001, 0.0001, 0.0000001, 1e-50)) %>% data.table(p=.)
-#'
-#' @seealso \code{\link{p.trans}}
-#'
-#' @export
+## Transform \emph{p} value.
+##
+## @inheritParams p.trans
+## @param p.min Minimum of \emph{p}. Default is \code{1e-99}.
+##
+## @return A character string of transformed \emph{p} value.
+##
+## @examples
+## p.trans2(c(1, 0.1, 0.05, 0.01, 0.001, 0.0001, 0.0000001, 1e-50)) %>% data.table(p=.)
+##
+## @seealso \code{\link{p.trans}}
+##
+## @export
 p.trans2=function(p, nsmall.p=3, p.min=1e-99) {
   ifelse(is.na(p) | p > 1 | p < 0, "",
          ifelse(p < p.min, paste("<", p.min),
@@ -100,16 +100,16 @@ p.trans2=function(p, nsmall.p=3, p.min=1e-99) {
 }
 
 
-#' Transform \emph{p} value to significance code.
-#'
-#' @inheritParams p.trans
-#'
-#' @return A character string of significance code.
-#'
-#' @examples
-#' sig.trans(c(1, 0.09, 0.049, 0.009, 0.001, 0.0001, 1e-50)) %>% data.table(sig=.)
-#'
-#' @export
+## Transform \emph{p} value to significance code.
+##
+## @inheritParams p.trans
+##
+## @return A character string of significance code.
+##
+## @examples
+## sig.trans(c(1, 0.09, 0.049, 0.009, 0.001, 0.0001, 1e-50)) %>% data.table(sig=.)
+##
+## @export
 sig.trans=function(p) {
   ifelse(is.na(p) | p > 1 | p < 0, "",
          ifelse(p < .001, "***",
@@ -127,7 +127,7 @@ sig.trans=function(p) {
 #' @param data Data frame or numeric vector.
 #' @param nsmall Number of decimal places of output. Default is \code{2}.
 #' @param plot \code{TRUE} or \code{FALSE} (default).
-#' Visualize the descriptive statistics using \code{GGally::\link[GGally]{ggpairs}}.
+#' Visualize the descriptive statistics using \code{\link[GGally:ggpairs]{GGally::ggpairs()}}.
 #' @param all.as.numeric \code{TRUE} (default) or \code{FALSE}.
 #' Transform all variables into numeric (continuous).
 #' @param upper.triangle \code{TRUE} or \code{FALSE} (default).
@@ -167,7 +167,7 @@ sig.trans=function(p) {
 #' Describe(d[,.(age, gender, education)], plot=TRUE, all.as.numeric=FALSE)
 #' Describe(d[,.(age, gender, education, E, A, C, N, O)], plot=TRUE)
 #' }
-#' @seealso \link{Corr}
+#' @seealso \code{\link{Corr}}
 #'
 #' @import ggplot2
 #' @export
@@ -235,8 +235,10 @@ Describe=function(data, nsmall=2,
     if(is.null(save.file)) {
       print(p)
     } else {
-      ggsave(plot=p, filename=save.file, width=width, height=height, dpi=dpi)
-      path=ifelse(grepl(":", save.file), save.file, paste0(getwd(), '/', save.file))
+      cowplot::ggsave2(plot=p, filename=save.file,
+                       width=width, height=height, dpi=dpi)
+      file=stringr::str_split(save.file, "/", simplify=TRUE)
+      path=paste0(getwd(), '/', file[length(file)])
       Print("\n\n\n<<green \u2714>> Plot saved to <<blue '{path}'>>")
     }
   }
@@ -289,16 +291,20 @@ Freq=function(var, label=NULL, sort="", nsmall=1) {
 #' Correlation analysis.
 #'
 #' @inheritParams Describe
+#' @param data Data frame.
 #' @param method \code{"pearson"} (default), \code{"spearman"}, or \code{"kendall"}.
-#' @param p.adjust Adjustment of \emph{p} values for multiple tests: \code{"none", "fdr", "holm", "bonferroni", ...}
-#' For details, see \code{stats::\link[stats]{p.adjust}}.
+#' @param p.adjust Adjustment of \emph{p} values for multiple tests:
+#' \code{"none"}, \code{"fdr"}, \code{"holm"}, \code{"bonferroni"}, ...
+#' For details, see \code{\link[stats:p.adjust]{stats::p.adjust()}}.
 #' @param plot \code{TRUE} (default) or \code{FALSE}. Plot the correlation matrix.
 #' @param plot.range Range of correlation coefficients for plot. Default is \code{c(-1, 1)}.
 #' @param plot.palette Color gradient for plot. Default is \code{c("#B52127", "white", "#2171B5")}.
 #' You may also set it to, e.g., \code{c("red", "white", "blue")}.
 #' @param plot.color.levels Default is \code{201}.
 #'
-#' @return Invisibly return the correlation results obtained from \code{psych::corr.test}.
+#' @return
+#' Invisibly return the correlation results obtained from
+#' \code{\link[psych:corr.test]{psych::corr.test()}}.
 #'
 #' @examples
 #' Corr(airquality)
@@ -316,8 +322,9 @@ Freq=function(var, label=NULL, sort="", nsmall=1) {
 #' )]
 #' Corr(d[,.(age, gender, education, E, A, C, N, O)])
 #'
-#' @seealso \link{Describe}
+#' @seealso \code{\link{Describe}}
 #'
+#' @importFrom stats p.adjust
 #' @export
 Corr=function(data, method="pearson", nsmall=2,
               p.adjust="none", all.as.numeric=TRUE,
@@ -335,36 +342,60 @@ Corr=function(data, method="pearson", nsmall=2,
     }
   }
 
-  cor=cor0=psych::corr.test(data.new, method=method, adjust=p.adjust)
-  # print(cor, digits=nsmall, short=!CI)
+  cor=cor0=psych::corr.test(data.new, method=method,
+                            adjust=p.adjust,
+                            minlength=20)
 
-  Print("Correlation matrix ({capitalize(method)}'s <<italic r>>):")
-  cor$r[cor$r==1]=NA
-  print_table(cor$r, nsmalls=nsmall)
+  # Print("Correlation matrix ({capitalize(method)}'s <<italic r>>):")
+  # for(i in 1:nrow(cor$r)) cor$r[i,i]=NA
+  # print_table(cor$r, nsmalls=nsmall)
+  #
+  # Print("\n\n\n<<italic p>> values (2-tailed):")
+  # cor$p=gsub("=", " ", gsub(" ", "", p.trans2(cor$p)))
+  # for(i in 1:nrow(cor$p)) cor$p[i,i]=""
+  # print_table(cor$p)
+  # if(p.adjust!="none")
+  #   Print("<<blue <<italic p>> values above the diagonal are adjusted for multiple tests ({capitalize(p.adjust)} method).>>")
+  #
+  # if("matrix" %in% class(cor$n)) {
+  #   Print("\n\n\nSample size:")
+  #   print_table(cor$n, nsmalls=0)
+  # } else {
+  #   Print("\n\n\nSample size: <<italic N>> = {cor$n}")
+  # }
 
-  Print("\n\n\n<<italic p>>-values (2-tailed):")
-  cor$p=gsub("=", " ", gsub(" ", "", p.trans2(cor$p)))
-  for(i in 1:nrow(cor$p)) cor$p[i,i]=""
-  print_table(cor$p)
-  if(p.adjust!="none")
-    Print("<<blue <<italic p>>-values above the diagonal are adjusted for multiple tests ({capitalize(p.adjust)} method).>>")
-
-  if("matrix" %in% class(cor$n)) {
-    Print("\n\n\nSample size:")
-    print_table(cor$n, nsmalls=0)
+  if(plot) {
+    Print("\n\n\nCorrelation matrix is displayed in plot.")
+    if(p.adjust!="none")
+      Print("<<blue <<italic p>> values ABOVE the diagonal are adjusted using the \"{p.adjust}\" method.>>")
   } else {
-    Print("\n\n\nSample size: <<italic N>> = {cor$n}")
+    message("To see the correlation matrix, please set `plot=TRUE`!")
   }
 
-  Print("\n\n\n95% CI of <<italic r>>:")
-  names(cor$ci)=c("LLCI", "r", "ULCI", "pval")
-  cor$ci$`[95% CI of r]`=paste0(
-    "[", formatF(cor$ci$LLCI, nsmall), ", ",
-    formatF(cor$ci$ULCI, nsmall), "]")
-  print_table(cor$ci[c(2,5,4)], nsmalls=nsmall)
+  if("matrix" %in% class(cor$n))
+    Ns=cor$n[lower.tri(cor$n)]
+  else
+    Ns=cor$n
+
+  Print("\n\n\n{capitalize(method)}'s <<italic r>> and 95% confidence intervals:")
+  COR=cor$ci["r"]
+  if(p.adjust=="none") {
+    COR$`[95% CI]`=paste0(
+      "[", formatF(cor$ci$lower, nsmall), ", ",
+      formatF(cor$ci$upper, nsmall), "]")
+    COR$pval=cor$ci$p
+  } else {
+    Print("<<blue <<italic p>> values and 95% CIs are adjusted using the \"{p.adjust}\" method.>>")
+    COR$`[95% CI]`=paste0(
+      "[", formatF(cor$ci.adj$lower, nsmall), ", ",
+      formatF(cor$ci.adj$upper, nsmall), "]")
+    COR$pval=p.adjust(cor$ci$p, method=p.adjust)
+  }
+  COR$N=Ns
+  print_table(COR, nsmalls=c(nsmall, 0, 0, 0))
 
   if(length(vars.not.numeric)>0)
-      Print("\n\n\n<<yellow NOTE: `{paste(vars.not.numeric, collapse='`, `')}` transformed to numeric.>>")
+      Print("<<yellow NOTE: `{paste(vars.not.numeric, collapse='`, `')}` transformed to numeric.>>")
 
   cor=cor0
   if(plot) {
@@ -381,7 +412,8 @@ Corr=function(data, method="pearson", nsmall=2,
              main="Correlation Matrix")
     if(!is.null(save.file)) {
       grDevices::dev.off()
-      path=ifelse(grepl(":", save.file), save.file, paste0(getwd(), '/', save.file))
+      file=stringr::str_split(save.file, "/", simplify=TRUE)
+      path=paste0(getwd(), '/', file[length(file)])
       Print("\n\n\n<<green \u2714>> Plot saved to <<blue '{path}'>>")
     }
   }
@@ -406,7 +438,7 @@ cor_plot <- function (r, numbers = TRUE, colors = TRUE, n = 51, main = NULL,
   on.exit(graphics::par(oldpar))
   if (missing(MAR))
     # MAR <- 5
-    MAR <- 3.5
+    MAR <- 4
   if (!is.matrix(r) & (!is.data.frame(r))) {
     if ((length(class(r)) > 1) & (inherits(r, "psych"))) {
       switch(class(r)[2], omega = {

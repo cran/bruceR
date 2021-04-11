@@ -72,30 +72,30 @@ NULL
 #' Multi-factor ANOVA.
 #'
 #' @description
-#' Easily perform multi-factor ANOVA (between-subjects, within-subjects, and mixed design).
+#' Easily perform multi-factor ANOVA (between-subjects, within-subjects, and mixed designs),
+#' with or without covariates (ANCOVA).
 #'
-#' @details
-#' This function is based on and extends the \code{afex::aov_ez} function in the R package \code{afex}.
+#' This function is based on and extends the \code{\link[afex:aov_car]{afex::aov_ez()}} function.
 #' You only need to specify the data, dependent variable(s), and factors (between-subjects and/or within-subjects).
-#' Then, almost all the outputs you need will be displayed in an elegant manner, including effect sizes (partial \eqn{\eta^2}) and their confidence intervals (CIs).
+#' Almost all results you need will be displayed in an elegant manner, including effect sizes (partial \eqn{\eta^2}) and their confidence intervals (CIs).
 #' 90\% CIs for partial \eqn{\eta^2} are reported, following the suggestion by Steiger (2004).
 #'
 #' @param data Data frame. Both \strong{long-format} and \strong{wide-format} can be used.
 #' \itemize{
-#'   \item If you input \strong{long-format} data, please also set \strong{subID}.
-#'   \item If you input \strong{wide-format} data (i.e., one subject occupies one row, and repeated measures occupy multiple columns),
+#'   \item If using \strong{long-format} data, please also set \strong{subID}.
+#'   \item If using \strong{wide-format} data (i.e., one subject occupies one row, and repeated measures occupy multiple columns),
 #'   the function can \strong{\emph{automatically}} transform the data into \strong{long-format}.
 #' }
 #' @param subID Subject ID.
 #' \itemize{
-#'   \item If you input \strong{long-format} data, you should set the subject ID.
-#'   \item If you input \strong{wide-format} data, no need to set this parameter.
+#'   \item If using \strong{long-format} data, you should set the subject ID.
+#'   \item If using \strong{wide-format} data, no need to set this parameter.
 #' }
 #' @param dv Variable name of dependent variable.
 #' \itemize{
-#'   \item If you input \strong{long-format} data, then \code{dv} is the outcome variable.
-#'   \item If you input \strong{wide-format} data, then \code{dv} can only be used for complete between-subjects design.
-#'   For designs with any repeated measures, please use \code{dvs} and \code{dvs.pattern}.
+#'   \item If using \strong{long-format} data, then \code{dv} is the outcome variable.
+#'   \item If using \strong{wide-format} data, then \code{dv} can only be used for complete between-subjects design.
+#'   For designs with repeated measures, please use \code{dvs} and \code{dvs.pattern}.
 #' }
 #' @param dvs \strong{[only for "wide-format" data and designs with repeated measures]}
 #'
@@ -129,7 +129,7 @@ NULL
 #' }
 #' @param between Between-subjects factors. Character string (e.g., \code{"A"}) or vector (e.g., \code{c("A", "B")}). Default is \code{NULL}.
 #' @param within Within-subjects factors. Character string (e.g., \code{"A"}) or vector (e.g., \code{c("A", "B")}). Default is \code{NULL}.
-#' @param covariate Covariates (if necessary). Character string or vector. Default is \code{NULL}.
+#' @param covariate Covariates (if necessary). Character string (e.g., \code{"age"}) or vector (e.g., \code{c("gender", "age", "edu")}). Default is \code{NULL}.
 #' @param sph.correction \strong{[only effective for repeated measures with >= 3 levels]}
 #'
 #' Sphericity correction method to adjust the degrees of freedom (\emph{df}) when the sphericity assumption is violated. Default is \code{"none"}.
@@ -141,7 +141,8 @@ NULL
 #' (If all the variables in \code{between} and \code{within} are set to \code{observed}, then generalized \eqn{\eta^2} will be equal to \eqn{\eta^2}.)
 #' @param nsmall Number of decimal places of output. Default is 2.
 #'
-#' @return A result object returned by \code{afex::aov_ez}.
+#' @return
+#' A result object returned by \code{\link[afex:aov_car]{afex::aov_ez()}}.
 #'
 #' @examples
 #' \donttest{#### Between-Subjects Design ####
@@ -228,8 +229,8 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 
   ## Add Participant ID (if necessary)
   if(is.null(subID)) {
-    data$ID=1:nrow(data)
-    subID="ID"
+    data$bruceR.ID=1:nrow(data)
+    subID="bruceR.ID"
   }
   nsub=length(unique(data[[subID]]))
 
@@ -243,11 +244,10 @@ MANOVA=function(data, subID=NULL, dv=NULL,
       else
         dv.vars=dvs
       dv="bruceY"  # "Y" will generate an error when dvs are like "X1Y1"
-      eval(parse(
-        text="data=tidyr::pivot_longer(data, cols=dv.vars,
-                                       names_to=within,
-                                       names_pattern=dvs.pattern,
-                                       values_to=dv)"))
+      data=tidyr::pivot_longer(data, cols=dv.vars,
+                               names_to=within,
+                               names_pattern=dvs.pattern,
+                               values_to=dv)
       data=as.data.frame(data)
     }
   } else {
@@ -279,11 +279,12 @@ MANOVA=function(data, subID=NULL, dv=NULL,
                         between=between,
                         within=within,
                         covariate=covariate,
+                        type="III",
                         observed=which.observed,
                         anova_table=list(correction=sph.correction,
                                          es="ges"),
                         fun_aggregate=mean,
-                        include_aov=TRUE,  # see EMMEANS, default will be FALSE
+                        include_aov=FALSE,
                         factorize=FALSE,
                         print.formula=FALSE)
   })
@@ -355,21 +356,30 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' Simple-effect analysis and post-hoc multiple comparison.
 #'
 #' @description
-#' Easily perform (1) simple-effect and simple-simple-effect analyses, including both simple main effects and simple interaction effects,
-#' and (2) post-hoc multiple comparisons (e.g., pairwise, sequential, polynomial), with \emph{p}-value adjustment for factors with >= 3 levels
-#' (using methods such as Bonferroni, Tukey's HSD, and FDR).
+#' Easily perform (1) simple-effect (and simple-simple-effect) analyses,
+#' including both simple main effects and simple interaction effects,
+#' and (2) post-hoc multiple comparisons (e.g., pairwise, sequential, polynomial),
+#' with \emph{p} values adjusted for factors with >= 3 levels.
 #'
-#' @details
 #' This function is based on and extends the
-#' (1) \code{\link[emmeans]{joint_tests}},
-#' (2) \code{\link[emmeans]{emmeans}}, and
-#' (3) \code{\link[emmeans]{contrast}} functions in the R package \code{emmeans}.
+#' (1) \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}},
+#' (2) \code{\link[emmeans:emmeans]{emmeans::emmeans()}}, and
+#' (3) \code{\link[emmeans:contrast]{emmeans::contrast()}} functions.
 #' You only need to specify the model object, to-be-tested effect(s), and moderator(s).
-#' Then, almost all the outputs you need will be displayed in an elegant manner,
+#' Almost all results you need will be displayed in an elegant manner,
 #' including effect sizes (partial \eqn{\eta^2} and Cohen's \emph{d}) and their confidence intervals (CIs).
 #' 90\% CIs for partial \eqn{\eta^2} and 95\% CIs for Cohen's \emph{d} are reported.
 #'
-#' \strong{Statistical Details:}
+#' To compute Cohen's \emph{d} and its 95\% CI in pairwise comparisons,
+#' this function uses the pooled \emph{SD}:
+#' \strong{\code{SD_pooled = sqrt(MSE)}}, where \code{MSE} is of the effect term extracted from ANOVA table.
+#'
+#' \strong{\emph{Disclaimer}:}
+#' There is substantial disagreement on what is the appropriate pooled \emph{SD} to use in computing effect sizes.
+#' For alternative methods, see \code{\link[emmeans:eff_size]{emmeans::eff_size()}} and \code{\link[effectsize:t_to_r]{effectsize::t_to_d()}}.
+#' Users should \emph{not} take the default output as the only right results and are completely responsible for specifying \code{sd.pooled}.
+#'
+#' @section Statistical Details:
 #'
 #' Some may confuse the statistical terms "simple effects", "post-hoc tests", and "multiple comparisons".
 #' Such a confusion is not uncommon. Here, I explain what these terms actually refer to.
@@ -400,7 +410,6 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #'     \href{https://zhuanlan.zhihu.com/p/35011046}{Tutorial #3}.
 #'
 #'     Here, the R function \code{EMMEANS} can do the same thing as in SPSS and can do much better and easier (just see the section "Examples").
-#'     The outputs include tidy tables as well as the estimates for effect sizes (partial \eqn{\eta^2}) and their 90\% CIs.
 #'
 #'     To note, simple effects \emph{per se} do NOT need any form of \emph{p}-value adjustment, because what we test in simple-effect analyses are still "omnibus \emph{F}-tests".
 #'   }
@@ -422,7 +431,7 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #'
 #'     There are many ways to do multiple comparisons. All these methods are included in the current \code{EMMEANS} function.
 #'     If you are familiar with SPSS syntax, you may feel that the current R functions \code{MANOVA} and \code{EMMEANS} are a nice combination of the SPSS syntax \code{MANOVA} and \code{GLM + /EMMEANS}.
-#'     Yes, they are. More importantly, they outperform the SPSS syntax, either for its higher convenience or for its more fruitful outputs.
+#'     Yes, they are. More importantly, they outperform the SPSS syntax, either for its higher convenience or for its more fruitful results.
 #'
 #'     \itemize{
 #'       \item \code{"pairwise"} - Pairwise comparisons (default is "higher level - lower level")
@@ -433,35 +442,39 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #'   }
 #' }
 #'
-#' @param model A model fitted by \code{\link{MANOVA}} or \code{afex::aov_ez}.
-#' @param effect The effect(s) you want to test. If set to a character string (e.g., \code{"A"}), it will output the results of omnibus tests or simple main effects.
-#' If set to a character vector (e.g., \code{c("A", "B")}), it will also output the results of simple interaction effects.
+#' @param model A model object returned by \code{\link{MANOVA}}.
+#' @param effect The effect(s) you want to test.
+#' If set to a character string (e.g., \code{"A"}),
+#' it reports the results of omnibus test or simple main effect.
+#' If set to a character vector (e.g., \code{c("A", "B")}),
+#' it also reports the results of simple interaction effect.
 #' @param by Moderator variable(s). Default is \code{NULL}.
-#' @param contrast Contrast method for multiple comparisons. Default is \code{"pairwise"}.
+#' @param contrast Contrast method for multiple comparisons.
+#' Default is \code{"pairwise"}.
 #'
-#' Alternatives can be \code{"pairwise" ("revpairwise"), "seq" ("consec"), "poly", "eff"}.
-#' For details, see \code{emmeans::contrast-methods}.
-#' @param p.adjust Adjustment method (of \emph{p} values) for multiple comparisons. Default is \code{"bonferroni"}.
+#' Alternatives can be \code{"pairwise"} (\code{"revpairwise"}),
+#' \code{"seq"} (\code{"consec"}), \code{"poly"}, \code{"eff"}.
+#' For details, see \code{?emmeans::`contrast-methods`}.
+#' @param reverse The order of levels to be contrasted.
+#' Default is \code{TRUE} (higher level vs. lower level).
+#' @param p.adjust Adjustment method of \emph{p} values for multiple comparisons.
+#' Default is \code{"bonferroni"}.
 #' For polynomial contrasts, default is \code{"none"}.
 #'
-#' Alternatives can be \code{"none"; "fdr", "hochberg", "hommel", "holm"; "tukey", "mvt", "dunnettx", "sidak", "scheffe", "bonferroni"}.
-#' The latter six methods are recommended!
-#' For details, see \code{stats::p.adjust} and \code{emmeans::confint.emmGrid}.
-#' @param cohen.d Method to compute Cohen's \emph{d} in multiple comparisons.
-#' Default is \code{"accurate"}, which will give the most reasonable estimates of Cohen's \emph{d} and its 95\% CI.
-#' This method divides the raw means and CIs by the pooled \emph{SD} corresponding to the effect term
-#' (\strong{\code{SD_pooled = sqrt(MSE)}}, where \code{MSE} is extracted from the ANOVA table).
+#' Alternatives can be \code{"none"}, \code{"fdr"}, \code{"hochberg"},
+#' \code{"hommel"}, \code{"holm"}, \code{"tukey"}, \code{"mvt"},
+#' \code{"dunnettx"}, \code{"sidak"}, \code{"scheffe"}, \code{"bonferroni"}.
+#' For details, see \code{\link[stats:p.adjust]{stats::p.adjust()}} and
+#' \code{\link[emmeans:summary.emmGrid]{emmeans::summary()}}.
+#' @param sd.pooled By default, it uses \strong{\code{sqrt(MSE)}} to compute Cohen's \emph{d}.
+#' Users may also manually set it (e.g., the \emph{SD} of a reference group, or using \code{\link[effectsize:sd_pooled]{effectsize::sd_pooled()}}).
+#' @param spss Return results identical to SPSS.
+#' Default is \code{TRUE}, which uses the \code{lm} (rather than \code{aov}) object in \code{model}
+#' for \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}} and \code{\link[emmeans:emmeans]{emmeans::emmeans()}}.
+#' @param nsmall Number of decimal places of output. Default is \code{2}.
 #'
-#' One alternative can be \code{"eff_size"}, which uses the \code{\link[emmeans]{eff_size}} function in the \code{emmeans} package.
-#' Its point estimates of Cohen's \emph{d} replicate those by the \code{"accurate"} method.
-#' However, its CI estimates seem a little bit confusing.
-#' For details about this method, see \href{https://CRAN.R-project.org/package=emmeans}{Comparisons and contrasts}.
-#' @param nsmall Number of decimal places of output. Default is 2.
-#' @param sd.pooled By default, it will use \strong{\code{sqrt(MSE)}} to compute Cohen's \emph{d}.
-#' Yet, users can manually set the SD_pooled (e.g., the SD of a reference group).
-#' @param reverse The order of levels to be contrasted. Default is \code{TRUE} ("higher level vs. lower level").
-#'
-#' @return A result object returned by \code{afex::aov_ez} (the same as \link{MANOVA} for recursive use).
+#' @return
+#' The same object as returned by \code{\link{MANOVA}} (for recursive use).
 #'
 #' @examples
 #' \donttest{#### Between-Subjects Design ####
@@ -503,7 +516,7 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' MANOVA(data=within.2, dvs="A1B1:A2B3", dvs.pattern="A(.)B(.)",
 #'        within=c("A", "B")) %>%
 #'   EMMEANS("A", by="B") %>%
-#'   EMMEANS("B", by="A")
+#'   EMMEANS("B", by="A")  # singular error matrix
 #'
 #' within.3
 #' MANOVA(data=within.3, dvs="A1B1C1:A2B2C2", dvs.pattern="A(.)B(.)C(.)",
@@ -551,19 +564,18 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' @export
 EMMEANS=function(model, effect=NULL, by=NULL,
                  contrast="pairwise",
+                 reverse=TRUE,
                  p.adjust="bonferroni",
-                 cohen.d="accurate",
-                 nsmall=2,
                  sd.pooled=NULL,
-                 reverse=TRUE) {
+                 spss=TRUE,
+                 nsmall=2) {
   # model.raw=model
+  # if(spss) model$aov=NULL
 
   # IMPORTANT: If include 'aov', the 'emmeans' results of
   # within-subjects design will not be equal to those in SPSS!
   # So we do not include 'aov' object but instead use 'lm' and 'mlm'
   # objects to do the follow-up 'emmeans' analyses!
-  # if(!repair) model$aov=NULL
-  # repair.msg="NOTE: Repaired results are shown below.\nThe function works with the 'aov' object."
 
   # Bug: For within-sub 'effect' and between-sub 'by' in mixed design
   # if(!is.null(effect) & !is.null(model$within) & effect %anyin% model$within &
@@ -573,69 +585,51 @@ EMMEANS=function(model, effect=NULL, by=NULL,
 
   ## Simple Effect (omnibus)
   # see 'weights' in ?emmeans
-  sim=emmeans::joint_tests(model, by=by, weights="equal")
-  eta2=effectsize::F_to_eta2(sim$F.ratio, sim$df1, sim$df2)
-  sim$sig=sig.trans(sim$p.value)
-  sim$p.eta2=paste0(formatF(eta2$Eta2_partial, nsmall+1), " [",
-                    formatF(eta2$CI_low, nsmall+1), ", ",
-                    formatF(eta2$CI_high, nsmall+1), "]")
-  sim$F.ratio=formatF(sim$F.ratio, nsmall)
-  sim$p.value=p.trans(sim$p.value)
-  names(sim)[c(1,(length(by)+2):(length(by)+7))]=
-    c("Effect", "df1", "df2", "F", "p", " ", "\u03b7\u00b2p [90% CI]")
-  if(!is.null(by)) {
-    for(i in 1:length(by)) {
-      sim[, i+1]=paste0("(", names(sim)[i+1], " = ", sim[, i+1], ")")
-      names(sim)[i+1]=paste0("(By: ", names(sim)[i+1], ")")
+  try({
+    sim=NULL
+    suppressMessages({
+      sim=emmeans::joint_tests(object=model, by=by,
+                               weights="equal",
+                               model=ifelse(spss, "multivariate", "univariate"))
+    })
+    names(sim)[1]="Effect"
+    eta2=effectsize::F_to_eta2(sim$F.ratio, sim$df1, sim$df2)
+    sim$sig=sig.trans(sim$p.value)
+    sim$p.eta2=paste0(formatF(eta2$Eta2_partial, nsmall+1), " [",
+                      formatF(eta2$CI_low, nsmall+1), ", ",
+                      formatF(eta2$CI_high, nsmall+1), "]")
+    sim$df1=formatF(sim$df1, 0)
+    sim$df2=formatF(sim$df2, 0)
+    sim$F.ratio=formatF(sim$F.ratio, nsmall)
+    sim$p.value=p.trans(sim$p.value)
+    names(sim)[(length(by)+4):(length(by)+7)]=
+      c("F", "p", " ", "\u03b7\u00b2p [90% CI]")
+    if(!is.null(by)) {
+      for(i in 1:length(by)) {
+        sim[, i+1]=paste0("(", names(sim)[i+1], " = ", sim[, i+1], ")")
+        names(sim)[i+1]=paste0("(By: ", names(sim)[i+1], ")")
+      }
     }
-  }
+  }, silent=TRUE)
 
   effect.text=paste(effect, collapse='\" & \"')
   Print("<<yellow ------ EMMEANS Output (effect = \"{effect.text}\") ------>>")
   cat("\n")
   Print("<<underline {ifelse(is.null(by), 'Omnibus Test', 'Simple Effects')} of \"{effect.text}\":>>")
-  print_table(sim, nsmalls=2, row.names=FALSE)
+  if(is.null(sim) | "note" %in% names(sim))
+    message("Warning:
+    WITHIN CELLS error matrix is SINGULAR.
+    Some variables are LINEARLY DEPENDENT.
+    The simple effect could be misleading.")
+  else
+    print_table(sim, nsmalls=2, row.names=FALSE)
   cat("\n")
-  # tryCatch({
-  #   err=TRUE
-  #   suppressMessages({
-  #     sim=emmeans::joint_tests(model, by=by, weights="equal")
-  #   })
-  #   err=FALSE
-  # }, error=function(e) {
-  #   message(repair.msg)
-  # }, silent=TRUE)
-  # if(err) sim=emmeans::joint_tests(model.raw, by=by, weights="equal")
-  # if("note" %in% names(sim)) {
-  #   error=TRUE
-  #   message("\nWarning message:
-  #   Please check your data!
-  #   The WITHIN CELLS error matrix is SINGULAR.
-  #   Some variables are LINEARLY DEPENDENT.
-  #   So the tests below are misleading.
-  #   You may set 'repair = TRUE'.
-  #   ")
-  # } else {
-  #   error=FALSE
-  #   sim$sig=sig.trans(sim$p.value)
-  #   eta2=effectsize::F_to_eta2(sim$F.ratio, sim$df1, sim$df2)
-  #   sim$p.eta2=paste0(formatF(eta2$Eta2_partial, nsmall+1), " [",
-  #                     formatF(eta2$CI_low, nsmall+1), ", ",
-  #                     formatF(eta2$CI_high, nsmall+1), "]")
-  #   sim$F.ratio=formatF(sim$F.ratio, nsmall)
-  #   sim$p.value=p.trans(sim$p.value)
-  #   names(sim)[c(1,(length(by)+2):(length(by)+7))]=
-  #     c("Effect", "df1", "df2", "F", "p", " ", "\u03b7\u00b2p [90% CI]")
-  #   if(!is.null(by))
-  #     for(i in 1:length(by))
-  #       names(sim)[i+1]=paste("By: ", names(sim)[i+1])
-  #   print_table(sim, nsmalls=2, row.names=FALSE)
-  #   cat("\n")
-  # }
 
   ## Estimated Marginal Means (emmeans)
   suppressMessages({
-    emm0=emm=emmeans::emmeans(model, specs=effect, by=by, weights="equal")
+    emm0=emm=emmeans::emmeans(object=model, specs=effect, by=by,
+                              weights="equal",
+                              model=ifelse(spss, "multivariate", "univariate"))
   })
   emm=summary(emm)  # to a data.frame (class 'summary_emm')
   emm$emmean=formatF(emm$emmean, nsmall)
@@ -643,10 +637,11 @@ EMMEANS=function(model, effect=NULL, by=NULL,
   emm$CI=paste0("[",
                 formatF(emm$lower.CL, nsmall), ", ",
                 formatF(emm$upper.CL, nsmall), "]")
+  emm$df=NULL
   emm$lower.CL=NULL
   emm$upper.CL=NULL
-  names(emm)[(length(emm)-3):length(emm)]=
-    c("Mean", "S.E.", "df", "[95% CI of Mean]")
+  names(emm)[(length(emm)-2):length(emm)]=
+    c("Mean", "S.E.", "[95% CI of Mean]")
   attr(emm, "mesg")[which(grepl("^Confidence", attr(emm, "mesg")))]=
     "Estimated means use an equally weighted average."
 
@@ -674,33 +669,26 @@ EMMEANS=function(model, effect=NULL, by=NULL,
   con=summary(con)  # to a data.frame (class 'summary_emm')
   con$sig=sig.trans(con$p.value)
 
-  # Cohen's d: 2 methods
+  # Cohen's d
   rn=row.names(model$anova_table)
   term=c()
   for(i in rn) if(i %in% effect) term=c(term, i)
   term=paste(term, collapse=":")
-  if(is.null(sd.pooled)) {
-    if(cohen.d=="eff_size")
-      sd.pooled=stats::sigma(model$lm)
-    else
-      sd.pooled=sqrt(model$anova_table[term, "MSE"])
-  }
+  if(is.null(sd.pooled))
+    sd.pooled=sqrt(model$anova_table[term, "MSE"])
   if(contrast!="poly")
-    attr(con, "mesg")=c(Glue("SD_pooled for computing Cohen\u2019s d: {formatF(sd.pooled, 2)}"),
+    attr(con, "mesg")=c(Glue("SD_pooled for computing Cohen\u2019s d: {formatF(sd.pooled, nsmall)}"),
                         attr(con, "mesg"))
-  if(cohen.d=="eff_size") {
-    es=emmeans::eff_size(emm0, method=contrast,
-                         sigma=sd.pooled,
-                         edf=stats::df.residual(model$lm))
-    es=summary(es)
-    con$d=paste0(formatF(es$effect.size, nsmall), " [",
-                 formatF(es$lower.CL, nsmall), ", ",
-                 formatF(es$upper.CL, nsmall), "]")
-  } else {
-    con$d=paste0(formatF(con$estimate/sd.pooled, nsmall), " [",
-                 formatF(conCI$lower.CL/sd.pooled, nsmall), ", ",
-                 formatF(conCI$upper.CL/sd.pooled, nsmall), "]")
-  }
+  # es=emmeans::eff_size(emm0, method=contrast,
+  #                      sigma=stats::sigma(model$lm),
+  #                      edf=stats::df.residual(model$lm))
+  # es=summary(es)
+  # con$d=paste0(formatF(es$effect.size, nsmall), " [",
+  #              formatF(es$lower.CL, nsmall), ", ",
+  #              formatF(es$upper.CL, nsmall), "]")
+  con$d=paste0(formatF(con$estimate/sd.pooled, nsmall), " [",
+               formatF(conCI$lower.CL/sd.pooled, nsmall), ", ",
+               formatF(conCI$upper.CL/sd.pooled, nsmall), "]")
   con$estimate=formatF(con$estimate, nsmall)
   con$SE=paste0("(", formatF(con$SE, nsmall), ")")
   con$t.ratio=formatF(con$t.ratio, nsmall)

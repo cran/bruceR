@@ -9,69 +9,82 @@ EMMEANS(
   effect = NULL,
   by = NULL,
   contrast = "pairwise",
+  reverse = TRUE,
   p.adjust = "bonferroni",
-  cohen.d = "accurate",
-  nsmall = 2,
   sd.pooled = NULL,
-  reverse = TRUE
+  spss = TRUE,
+  nsmall = 2
 )
 }
 \arguments{
-\item{model}{A model fitted by \code{\link{MANOVA}} or \code{afex::aov_ez}.}
+\item{model}{A model object returned by \code{\link{MANOVA}}.}
 
-\item{effect}{The effect(s) you want to test. If set to a character string (e.g., \code{"A"}), it will output the results of omnibus tests or simple main effects.
-If set to a character vector (e.g., \code{c("A", "B")}), it will also output the results of simple interaction effects.}
+\item{effect}{The effect(s) you want to test.
+If set to a character string (e.g., \code{"A"}),
+it reports the results of omnibus test or simple main effect.
+If set to a character vector (e.g., \code{c("A", "B")}),
+it also reports the results of simple interaction effect.}
 
 \item{by}{Moderator variable(s). Default is \code{NULL}.}
 
-\item{contrast}{Contrast method for multiple comparisons. Default is \code{"pairwise"}.
+\item{contrast}{Contrast method for multiple comparisons.
+Default is \code{"pairwise"}.
 
-Alternatives can be \code{"pairwise" ("revpairwise"), "seq" ("consec"), "poly", "eff"}.
-For details, see \code{emmeans::contrast-methods}.}
+Alternatives can be \code{"pairwise"} (\code{"revpairwise"}),
+\code{"seq"} (\code{"consec"}), \code{"poly"}, \code{"eff"}.
+For details, see \code{?emmeans::`contrast-methods`}.}
 
-\item{p.adjust}{Adjustment method (of \emph{p} values) for multiple comparisons. Default is \code{"bonferroni"}.
+\item{reverse}{The order of levels to be contrasted.
+Default is \code{TRUE} (higher level vs. lower level).}
+
+\item{p.adjust}{Adjustment method of \emph{p} values for multiple comparisons.
+Default is \code{"bonferroni"}.
 For polynomial contrasts, default is \code{"none"}.
 
-Alternatives can be \code{"none"; "fdr", "hochberg", "hommel", "holm"; "tukey", "mvt", "dunnettx", "sidak", "scheffe", "bonferroni"}.
-The latter six methods are recommended!
-For details, see \code{stats::p.adjust} and \code{emmeans::confint.emmGrid}.}
+Alternatives can be \code{"none"}, \code{"fdr"}, \code{"hochberg"},
+\code{"hommel"}, \code{"holm"}, \code{"tukey"}, \code{"mvt"},
+\code{"dunnettx"}, \code{"sidak"}, \code{"scheffe"}, \code{"bonferroni"}.
+For details, see \code{\link[stats:p.adjust]{stats::p.adjust()}} and
+\code{\link[emmeans:summary.emmGrid]{emmeans::summary()}}.}
 
-\item{cohen.d}{Method to compute Cohen's \emph{d} in multiple comparisons.
-Default is \code{"accurate"}, which will give the most reasonable estimates of Cohen's \emph{d} and its 95\% CI.
-This method divides the raw means and CIs by the pooled \emph{SD} corresponding to the effect term
-(\strong{\code{SD_pooled = sqrt(MSE)}}, where \code{MSE} is extracted from the ANOVA table).
+\item{sd.pooled}{By default, it uses \strong{\code{sqrt(MSE)}} to compute Cohen's \emph{d}.
+Users may also manually set it (e.g., the \emph{SD} of a reference group, or using \code{\link[effectsize:sd_pooled]{effectsize::sd_pooled()}}).}
 
-One alternative can be \code{"eff_size"}, which uses the \code{\link[emmeans]{eff_size}} function in the \code{emmeans} package.
-Its point estimates of Cohen's \emph{d} replicate those by the \code{"accurate"} method.
-However, its CI estimates seem a little bit confusing.
-For details about this method, see \href{https://CRAN.R-project.org/package=emmeans}{Comparisons and contrasts}.}
+\item{spss}{Return results identical to SPSS.
+Default is \code{TRUE}, which uses the \code{lm} (rather than \code{aov}) object in \code{model}
+for \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}} and \code{\link[emmeans:emmeans]{emmeans::emmeans()}}.}
 
-\item{nsmall}{Number of decimal places of output. Default is 2.}
-
-\item{sd.pooled}{By default, it will use \strong{\code{sqrt(MSE)}} to compute Cohen's \emph{d}.
-Yet, users can manually set the SD_pooled (e.g., the SD of a reference group).}
-
-\item{reverse}{The order of levels to be contrasted. Default is \code{TRUE} ("higher level vs. lower level").}
+\item{nsmall}{Number of decimal places of output. Default is \code{2}.}
 }
 \value{
-A result object returned by \code{afex::aov_ez} (the same as \link{MANOVA} for recursive use).
+The same object as returned by \code{\link{MANOVA}} (for recursive use).
 }
 \description{
-Easily perform (1) simple-effect and simple-simple-effect analyses, including both simple main effects and simple interaction effects,
-and (2) post-hoc multiple comparisons (e.g., pairwise, sequential, polynomial), with \emph{p}-value adjustment for factors with >= 3 levels
-(using methods such as Bonferroni, Tukey's HSD, and FDR).
-}
-\details{
+Easily perform (1) simple-effect (and simple-simple-effect) analyses,
+including both simple main effects and simple interaction effects,
+and (2) post-hoc multiple comparisons (e.g., pairwise, sequential, polynomial),
+with \emph{p} values adjusted for factors with >= 3 levels.
+
 This function is based on and extends the
-(1) \code{\link[emmeans]{joint_tests}},
-(2) \code{\link[emmeans]{emmeans}}, and
-(3) \code{\link[emmeans]{contrast}} functions in the R package \code{emmeans}.
+(1) \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}},
+(2) \code{\link[emmeans:emmeans]{emmeans::emmeans()}}, and
+(3) \code{\link[emmeans:contrast]{emmeans::contrast()}} functions.
 You only need to specify the model object, to-be-tested effect(s), and moderator(s).
-Then, almost all the outputs you need will be displayed in an elegant manner,
+Almost all results you need will be displayed in an elegant manner,
 including effect sizes (partial \eqn{\eta^2} and Cohen's \emph{d}) and their confidence intervals (CIs).
 90\% CIs for partial \eqn{\eta^2} and 95\% CIs for Cohen's \emph{d} are reported.
 
-\strong{Statistical Details:}
+To compute Cohen's \emph{d} and its 95\% CI in pairwise comparisons,
+this function uses the pooled \emph{SD}:
+\strong{\code{SD_pooled = sqrt(MSE)}}, where \code{MSE} is of the effect term extracted from ANOVA table.
+
+\strong{\emph{Disclaimer}:}
+There is substantial disagreement on what is the appropriate pooled \emph{SD} to use in computing effect sizes.
+For alternative methods, see \code{\link[emmeans:eff_size]{emmeans::eff_size()}} and \code{\link[effectsize:t_to_r]{effectsize::t_to_d()}}.
+Users should \emph{not} take the default output as the only right results and are completely responsible for specifying \code{sd.pooled}.
+}
+\section{Statistical Details}{
+
 
 Some may confuse the statistical terms "simple effects", "post-hoc tests", and "multiple comparisons".
 Such a confusion is not uncommon. Here, I explain what these terms actually refer to.
@@ -102,7 +115,6 @@ Such a confusion is not uncommon. Here, I explain what these terms actually refe
     \href{https://zhuanlan.zhihu.com/p/35011046}{Tutorial #3}.
 
     Here, the R function \code{EMMEANS} can do the same thing as in SPSS and can do much better and easier (just see the section "Examples").
-    The outputs include tidy tables as well as the estimates for effect sizes (partial \eqn{\eta^2}) and their 90\% CIs.
 
     To note, simple effects \emph{per se} do NOT need any form of \emph{p}-value adjustment, because what we test in simple-effect analyses are still "omnibus \emph{F}-tests".
   }
@@ -124,7 +136,7 @@ Such a confusion is not uncommon. Here, I explain what these terms actually refe
 
     There are many ways to do multiple comparisons. All these methods are included in the current \code{EMMEANS} function.
     If you are familiar with SPSS syntax, you may feel that the current R functions \code{MANOVA} and \code{EMMEANS} are a nice combination of the SPSS syntax \code{MANOVA} and \code{GLM + /EMMEANS}.
-    Yes, they are. More importantly, they outperform the SPSS syntax, either for its higher convenience or for its more fruitful outputs.
+    Yes, they are. More importantly, they outperform the SPSS syntax, either for its higher convenience or for its more fruitful results.
 
     \itemize{
       \item \code{"pairwise"} - Pairwise comparisons (default is "higher level - lower level")
@@ -135,6 +147,7 @@ Such a confusion is not uncommon. Here, I explain what these terms actually refe
   }
 }
 }
+
 \examples{
 \donttest{#### Between-Subjects Design ####
 
@@ -175,7 +188,7 @@ within.2
 MANOVA(data=within.2, dvs="A1B1:A2B3", dvs.pattern="A(.)B(.)",
        within=c("A", "B")) \%>\%
   EMMEANS("A", by="B") \%>\%
-  EMMEANS("B", by="A")
+  EMMEANS("B", by="A")  # singular error matrix
 
 within.3
 MANOVA(data=within.3, dvs="A1B1C1:A2B2C2", dvs.pattern="A(.)B(.)C(.)",

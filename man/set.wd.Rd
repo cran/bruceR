@@ -4,38 +4,40 @@
 \alias{set.wd}
 \title{Set working directory to where the current file is.}
 \usage{
-set.wd(path = NULL, execute = TRUE, ask = FALSE)
+set.wd(path = NULL, directly = TRUE, ask = FALSE)
 }
 \arguments{
 \item{path}{\code{NULL} (default) or a specific path.
 Default is to extract the path of the currently opened file
-(can be any type, usually an R or Rmd file).}
+(usually .R or .Rmd) using the \code{rstudioapi::getSourceEditorContext} function.}
 
-\item{execute}{\code{TRUE} (default) or \code{FALSE}.
-Default is to send code \code{setwd("...")} to the R console AND execute it.}
+\item{directly}{\code{TRUE} (default) or \code{FALSE}.
+Default is to directly execute \code{setwd("...")} within the function (recommended).
+Otherwise, it will send code \code{setwd("...")} to the R console
+and then execute it (not recommended due to a delay of execution).}
 
 \item{ask}{\code{TRUE} or \code{FALSE} (default).
-If \code{TRUE}, then you can select a folder with the prompt of a dialog.}
+If \code{TRUE}, you can select a folder with the prompt of a dialog.}
 }
 \value{
-Invisibly return the path of the currently opened file.
+Invisibly return the path.
 }
 \description{
 Set working directory to the path of the currently opened file.
 You can use this function in both \strong{.R/.Rmd files and the R console}.
-\href{https://rstudio.com/products/rstudio/download/preview/}{RStudio}
-is required for running this function.
+\href{https://www.rstudio.com/products/rstudio/download/preview/}{RStudio}
+(version >= 1.2) is required for running this function.
 }
 \examples{
 \dontrun{
-# RStudio is required for running this function.
+# RStudio (version >= 1.2) is required for running this function.
 set.wd()  # set working directory to the path of the currently opened file
-set.wd("D:/")  # or any other path (use "/" rather than "\")
+set.wd("~/")  # set working directory to the home directory
 set.wd("../")  # set working directory to the parent directory
 set.wd(ask=TRUE)  # select a folder with the prompt of a dialog
 }
 
 }
 \seealso{
-\code{\link{setwd}}
+\code{\link[base:getwd]{setwd}}
 }

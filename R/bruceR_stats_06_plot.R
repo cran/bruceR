@@ -1,8 +1,26 @@
-#### Themes for ggplot2 ####
+#### Plot Toolbox ####
 
 
-#' A nice \code{ggplot2} theme for scientific publication.
+#' A nice \code{ggplot2} theme that enables Markdown/HTML rich text.
 #'
+#' @description
+#' A nice \code{ggplot2} theme for scientific publication.
+#' It uses \code{\link[ggtext:element_markdown]{ggtext::element_markdown()}}
+#' to render Markdown/HTML formatted rich text.
+#' You can use a combination of Markdown and/or HTML syntax
+#' (e.g., \code{"*y* = *x*<sup>2</sup>"}) in plot text or title,
+#' and this function draws text elements with rich text format.
+#'
+#' For more usage, see:
+#' \itemize{
+#'   \item \code{\link[ggtext:geom_richtext]{ggtext::geom_richtext()}}
+#'   \item \code{\link[ggtext:geom_textbox]{ggtext::geom_textbox()}}
+#'   \item \code{\link[ggtext:element_markdown]{ggtext::element_markdown()}}
+#'   \item \code{\link[ggtext:element_textbox]{ggtext::element_textbox()}}
+#' }
+#'
+#' @param markdown Use \code{element_markdown()} instead of \code{element_text()}. Default is \code{FALSE}.
+#' If set to \code{TRUE}, then you should also use \code{element_markdown()} in \code{theme()} (if any).
 #' @param base.size Basic font size. Default is 12.
 #' @param line.size Line width. Default is 0.5.
 #' @param border \code{TRUE}, \code{FALSE}, or \code{"black"} (default).
@@ -24,10 +42,10 @@
 #' @param font Text font. Only applicable to Windows system.
 #' @param grid.x \code{FALSE}, \code{""} (default), or a color (e.g., \code{"grey90"}) to set the color of panel grid (x).
 #' @param grid.y \code{FALSE}, \code{""} (default), or a color (e.g., \code{"grey90"}) to set the color of panel grid (y).
-#' @param line.x \code{TRUE} (default) or \code{FALSE}. Whether to draw the x-axis line.
-#' @param line.y \code{TRUE} (default) or \code{FALSE}. Whether to draw the y-axis line.
-#' @param tick.x \code{TRUE} (default) or \code{FALSE}. Whether to draw the x-axis ticks.
-#' @param tick.y \code{TRUE} (default) or \code{FALSE}. Whether to draw the y-axis ticks.
+#' @param line.x Draw the x-axis line. Default is \code{TRUE}.
+#' @param line.y Draw the y-axis line. Default is \code{TRUE}.
+#' @param tick.x Draw the x-axis ticks. Default is \code{TRUE}.
+#' @param tick.y Draw the y-axis ticks. Default is \code{TRUE}.
 #'
 #' @return A theme object that should be used for \code{ggplot2}.
 #'
@@ -39,8 +57,9 @@
 #' ggplot(data=d, aes(x=E, y=O)) +
 #'   geom_point(alpha=0.1) +
 #'   geom_smooth(method="loess") +
-#'   labs(x="Extraversion", y="Openness") +
-#'   theme_bruce()
+#'   labs(x="Extraversion<sub>Big 5</sub>",
+#'        y="Openness<sub>Big 5</sub>") +
+#'   theme_bruce(markdown=TRUE)
 #'
 #' ## Example 2 (2x2 ANOVA)
 #' d=data.frame(X1=factor(rep(1:3, each=2)),
@@ -54,12 +73,16 @@
 #'   scale_y_continuous(expand=expansion(add=0),
 #'                      limits=c(0,8), breaks=0:8) +
 #'   scale_fill_brewer(palette="Set1") +
-#'   labs(x="Independent Variable", y="Dependent Variable", title="Demo") +
-#'   theme_bruce(border="")
+#'   labs(x="Independent Variable (*X*)",  # italic X
+#'        y="Dependent Variable (*Y*)",  # italic Y
+#'        title="Demo Plot<sup>bruceR</sup>") +
+#'   theme_bruce(markdown=TRUE, border="")
 #'
 #' @import ggplot2
+#' @importFrom ggtext element_markdown
 #' @export
-theme_bruce=function(base.size=12, line.size=0.5,
+theme_bruce=function(markdown=FALSE,
+                     base.size=12, line.size=0.5,
                      border="black",
                      bg="white", panel.bg="white",
                      tag="bold", plot.title="bold", axis.title="plain",
@@ -68,6 +91,7 @@ theme_bruce=function(base.size=12, line.size=0.5,
                      grid.x="", grid.y="",
                      line.x=TRUE, line.y=TRUE,
                      tick.x=TRUE, tick.y=TRUE) {
+  if(markdown) element_text=element_markdown
   # font face:
   #     "plain", "italic", "bold", "bold.italic"
   # margin:
@@ -81,6 +105,10 @@ theme_bruce=function(base.size=12, line.size=0.5,
   if(!is.null(font)) grDevices::windowsFonts(FONT=grDevices::windowsFont(font))
   theme = theme_bw() +
     theme(
+      # text=element_markdown(),
+      # title=element_markdown(),
+      # legend.text=element_markdown(size=base.size-2),
+      # legend.title=element_markdown(size=base.size),
       panel.grid.minor=element_blank(),
       panel.grid.major.x=if(grid.x=="" | grid.x==FALSE) element_blank() else
         element_line(size=line.size, color=grid.x),
@@ -124,3 +152,48 @@ theme_bruce=function(base.size=12, line.size=0.5,
 
 # theme_stata=ggthemes::theme_stata(scheme="sj")
 # theme_stata=ggthemes::theme_stata(scheme="s1color")
+
+
+#' Show colors.
+#'
+#' @param colors Color names.
+#'
+#' e.g.,
+#' \itemize{
+#'   \item \code{"red"} (R base color names)
+#'   \item \code{"#FF0000"} (hex color names)
+#'   \item \code{see::social_colors()}
+#'   \item \code{viridis::viridis_pal()(10)}
+#'   \item \code{RColorBrewer::brewer.pal(name="Set1", n=9)}
+#'   \item \code{RColorBrewer::brewer.pal(name="Set2", n=8)}
+#'   \item \code{RColorBrewer::brewer.pal(name="Spectral", n=11)}
+#' }
+#'
+#' @return A \code{gg} object.
+#'
+#' @examples
+#' show_colors()  # default is to show see::social_colors()
+#' show_colors("blue")  # blue
+#' show_colors("#0000FF")  # blue (hex name)
+#' show_colors(RGB(0, 0, 255))  # blue (RGB)
+#' show_colors(see::pizza_colors())  # a specific palette
+#'
+#' @export
+show_colors=function(colors=see::social_colors()) {
+  colors.names=names(colors)
+  if(is.null(colors.names)) colors.names=colors
+  dc=data.frame(names=forcats::as_factor(colors.names),
+                colors=forcats::as_factor(colors))
+  ggplot(dc, aes(x=forcats::fct_rev(names), y=1,
+                 fill=forcats::fct_rev(colors))) +
+    geom_bar(stat="identity", width=1, show.legend=FALSE) +
+    scale_fill_manual(values=rev(as.character(dc$colors))) +
+    scale_x_discrete(position="top") +  # flipped y position = "right"
+    coord_flip(expand=FALSE) +
+    labs(x=NULL, y=NULL) +
+    theme_void() +
+    theme(axis.text.y=element_text(size=12, hjust=0,
+                                   margin=margin(0, 0, 0, 1, "lines")),
+          plot.margin=margin(0.05, 0.05, 0.05, 0.05, "npc"))
+}
+

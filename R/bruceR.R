@@ -33,7 +33,11 @@
 #' \strong{R}
 #' data analyses.
 #'
-#' Check updates on \url{https://github.com/psychbruce/bruceR}
+#' Install the latest \href{https://github.com/psychbruce/bruceR}{development version} by \code{devtools::install_github("psychbruce/bruceR")}
+#'
+#' Check updates in \href{https://github.com/psychbruce/bruceR/blob/master/NEWS.md}{Release Notes}.
+#'
+#' Report bugs in \href{https://github.com/psychbruce/bruceR/issues}{GitHub Issues}.
 #'
 #' Loading \code{bruceR} by \code{library(bruceR)} will also load these R packages for you:
 #'
@@ -58,106 +62,111 @@
 #' \strong{[Plot]:}
 #' \itemize{
 #'   \item \strong{\code{ggplot2}}: Data visualization.
+#'   \item \strong{\code{ggtext}}: Markdown/HTML rich text format for \code{ggplot2} (geoms and themes).
 #'   \item \strong{\code{cowplot}}: Advanced toolbox for \code{ggplot2} (arrange multiple plots and add labels).
-#'   \item \strong{\code{see}}: Advanced toolbox for \code{ggplot2} (extra geoms, scales, themes, and color palettes).
+#'   \item \strong{\code{see}}: Advanced toolbox for \code{ggplot2} (geoms, scales, themes, and color palettes).
 #' }
 #'
 #' @section Main Functions in \code{bruceR}:
 #'
 #' \describe{
-#'   \item{\strong{(1) Basic Use and Analysis}}{
-#'       \code{\link{Print}}  (print texts to console with rich formats and colors)
+#'   \item{\strong{(1) Basic R Programming}}{
+#'       \code{\link{set.wd}}
 #'
-#'       \code{\link{Describe}}  (descriptive statistics)
+#'       \code{\link{pkg_depend}},
+#'       \code{\link{pkg_install_suggested}}
 #'
-#'       \code{\link{Freq}}  (frequency statistics with histogram plot)
+#'       \code{\link{formatF}},
+#'       \code{\link{formatN}}
 #'
-#'       \code{\link{Corr}}  (correlation analysis with correlation-matrix plot)
+#'       \code{\link{Print}},
+#'       \code{\link{Glue}},
+#'       \code{\link{Run}}
 #'
-#'       \code{\link{p}}  (compute \emph{p}-values from statistics: \emph{z, t, F, r, chi2})
+#'       \code{\link{\%^\%}}
 #'
-#'       \code{\link{set.wd}}  (a simple extension of \code{\link{setwd}})
+#'       \code{\link{\%notin\%}}
 #'
-#'       \code{\link{pkg_depend}}  (check package dependencies)
-#'
-#'       \code{\link{pkg_install_suggested}}  (install suggested packages)
-#'
-#'       \code{\link{dtime}}  (compute time difference)
-#'
-#'       \code{\link{\%notin\%}}  (the reverse of \code{\%in\%}, return a logical vector specifying values not in a table)
-#'
-#'       \code{\link{\%allin\%}}  (return whether all Xs are in a vector)
-#'
-#'       \code{\link{\%anyin\%}}  (return whether any of Xs is in a vector)
-#'
-#'       \code{\link{\%nonein\%}}  (return whether none of Xs is in a vector)
-#'
-#'       \code{\link{\%partin\%}}  (use regular expression to judge whether a pattern exists in a vector)
-#'
-#'       \code{\link{RANDBETWEEN}}  (random sampling, like Excel's function \code{RANDBETWEEN})
-#'
-#'       \code{\link{LOOKUP}}  (search, match, and look up values, like Excel's functions \code{INDEX + MATCH})
+#'       \code{\link{\%allin\%}},
+#'       \code{\link{\%anyin\%}},
+#'       \code{\link{\%nonein\%}},
+#'       \code{\link{\%partin\%}}
 #'   }
 #'
 #'   \item{\strong{(2) Multivariate Computation}}{
-#'       \code{\link{RECODE}}  (recode a variable)
+#'       \code{\link{SUM}},
+#'       \code{\link{MEAN}},
+#'       \code{\link{STD}},
+#'       \code{\link{MODE}},
+#'       \code{\link{COUNT}},
+#'       \code{\link{CONSEC}}
 #'
-#'       \code{\link{RESCALE}}  (rescale a variable; e.g., from 5-point to 7-point scale)
+#'       \code{\link{RECODE}},
+#'       \code{\link{RESCALE}},
+#'       \code{\link{RANDBETWEEN}}
 #'
-#'       \code{\link{SUM}}  (compute multivariate sum)
-#'
-#'       \code{\link{MEAN}}  (compute multivariate mean)
-#'
-#'       \code{\link{STD}}  (compute multivariate standard deviation)
-#'
-#'       \code{\link{MODE}}  (compute multivariate mode)
-#'
-#'       \code{\link{COUNT}}  (count values across variables)
-#'
-#'       \code{\link{CONSEC}}  (count "consecutive identical digits" across variables)
+#'       \code{\link{LOOKUP}}
 #'   }
 #'
-#'   \item{\strong{(3) Reliability and Validity Analysis}}{
-#'       \code{\link{Alpha}}  (reliability analysis, Cronbach's \eqn{\alpha})
+#'   \item{\strong{(3) Reliability and Factor Analyses}}{
+#'       \code{\link{Alpha}}
 #'
-#'       \code{\link{EFA}}  (exploratory factor analysis)
+#'       \code{\link{EFA}}
 #'
-#'       \code{\link{CFA}}  (confirmatory factor analysis)
+#'       \code{\link{CFA}}
 #'   }
 #'
-#'   \item{\strong{(4) Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison}}{
-#'       \code{\link{MANOVA}}  (multi-factor between-subjects, within-subjects, and mixed design ANOVA)
+#'   \item{\strong{(4) Descriptive Statistics and Correlation Analyses}}{
+#'       \code{\link{Describe}}
 #'
-#'       \code{\link{EMMEANS}}  (simple-effect analysis and post-hoc multiple comparison)
+#'       \code{\link{Freq}}
+#'
+#'       \code{\link{Corr}}
+#'
+#'       \code{\link{cor_diff}}
 #'   }
 #'
-#'   \item{\strong{(5) Advanced Toolbox and Tidy Report of Statistical Models}}{
-#'       \code{\link{grand_mean_center}}  (center variable(s) on \strong{grand} mean(s))
+#'   \item{\strong{(5) Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison}}{
+#'       \code{\link{MANOVA}}
 #'
-#'       \code{\link{group_mean_center}}  (center variable(s) on \strong{group} mean(s))
-#'
-#'       \code{\link{regress}}  (fast perform OLS, logistic, poisson, and multilevel regression analyses)
-#'
-#'       \code{\link{GLM_summary}}  (advanced report of general/generalized linear models)
-#'
-#'       \code{\link{HLM_summary}}  (advanced report of multilevel/hierarchical linear models)
-#'
-#'       \code{\link{model_summary}}  (tidy report of regression models)
-#'
-#'       \code{\link{med_summary}}  (tidy report of mediation analyses based on the \code{mediation} package)
-#'
-#'       \code{\link{ccf_plot}}  (cross-correlation analysis with a \code{ggplot2} plot)
-#'
-#'       \code{\link{granger_test}}  (Granger causality test based on the \code{lmtest::\link[lmtest]{grangertest}} function)
+#'       \code{\link{EMMEANS}}
 #'   }
 #'
-#'   \item{\strong{(6) Theme for \code{ggplot2}}}{
-#'       \code{\link{theme_bruce}}  (a set of nice themes for scientific publication)
+#'   \item{\strong{(6) Tidy Report of Regression Models}}{
+#'       \code{\link{model_summary}}
+#'
+#'       \code{\link{GLM_summary}}
+#'
+#'       \code{\link{HLM_summary}}
+#'
+#'       \code{\link{HLM_ICC_rWG}}
+#'
+#'       \code{\link{regress}}
+#'   }
+#'
+#'   \item{\strong{(7) Mediation and Moderation Analyses}}{
+#'       \code{\link{med_summary}}
+#'
+#'       \code{PROCESS} (\emph{coming soon...})
+#'   }
+#'
+#'   \item{\strong{(8) Additional Toolbox for Statistics and Graphics}}{
+#'       \code{\link{grand_mean_center}}
+#'
+#'       \code{\link{group_mean_center}}
+#'
+#'       \code{\link{ccf_plot}}
+#'
+#'       \code{\link{granger_test}}
+#'
+#'       \code{\link{theme_bruce}}
+#'
+#'       \code{\link{show_colors}}
 #'   }
 #' }
 #'
 #' @note
-#' Please always use \href{https://rstudio.com/products/rstudio/download/preview/}{RStudio}
+#' Please always use \href{https://www.rstudio.com/products/rstudio/download/preview/}{RStudio}
 #' as an \href{https://en.wikipedia.org/wiki/Integrated_development_environment}{IDE} instead of using the raw R software.
 #'
 #' @author
@@ -183,7 +192,7 @@ NULL
       ## STAT ##
       "psych", "emmeans", "effectsize", "performance",
       ## PLOT ##
-      "ggplot2", "cowplot", "see")
+      "ggplot2", "ggtext", "cowplot", "see")
   })
 
   # {rep_char('=', 56)}
@@ -204,7 +213,7 @@ NULL
   <<bold <<blue Loaded R packages:>>>>
   <<green <<yellow [Data]:>> rio / dplyr / tidyr / stringr / forcats / data.table>>
   <<green <<yellow [Stat]:>> psych / emmeans / effectsize / performance>>
-  <<green <<yellow [Plot]:>> ggplot2 / cowplot / see>>
+  <<green <<yellow [Plot]:>> ggplot2 / ggtext / cowplot / see>>
 
   <<bold <<blue Frequently used functions in `bruceR`:>>>>
   <<cyan set.wd() / Describe() / Freq() / Corr() / Alpha() / MEAN()>>
