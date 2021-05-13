@@ -213,34 +213,38 @@ regress=function(formula, data, family=NULL, nsmall=3,
 #### Model Summary ####
 
 
-#' Tidy report of regression models (into R console, Word, or HTML).
+#' Tidy report of regression models (to R Console or MS Word).
 #'
+#' Tidy report of regression models (to R Console or MS Word).
+#' Most types of regression models are supported!
 #' This function is an extension (and combination) of
 #' \code{\link[texreg:screenreg]{texreg::screenreg()}},
 #' \code{\link[texreg:htmlreg]{texreg::htmlreg()}},
-#' \code{\link[MuMIn:std.coef]{MuMIn::std.coef()}}, and
-#' \code{\link[MuMIn:r.squaredGLMM]{MuMIn::r.squaredGLMM()}}.
+#' \code{\link[MuMIn:std.coef]{MuMIn::std.coef()}},
+#' \code{\link[MuMIn:r.squaredGLMM]{MuMIn::r.squaredGLMM()}},
+#' \code{\link[performance:r2_mcfadden]{performance::r2_mcfadden()}},
+#' \code{\link[performance:r2_nagelkerke]{performance::r2_nagelkerke()}}.
 #'
-#' @param model_list A single model or a list of models. The models should be of the same type.
+#' @param model_list A single model or a list of models (of the same type).
+#' Most types of regression models are supported!
 #' @param std_coef Standardized coefficients? Default is \code{FALSE}.
 #' Only applicable to linear models and linear mixed models.
 #' Not applicable to generalized linear (mixed) models.
 #' @param digits Number of decimal places of output. Default is \code{3}.
 #' @param nsmall The same as \code{digits}.
+#' @param file File name of MS Word (\code{.doc}).
 #' @param zero Display "0" before "."? Default is \code{TRUE}.
-#' @param modify_se Set custom values for standard errors.
+#' @param modify_se Replace standard errors.
 #' Useful if you need to replace raw SEs with robust SEs.
 #' New SEs should be provided as a list of numeric vectors.
 #' See usage in \code{\link[texreg:screenreg]{texreg::screenreg()}}.
-#' @param bold The p-value threshold below which the coefficient shall be formatted in a bold font.
-#' For example, \code{bold = 0.05} will cause all coefficients that are significant at the 95\% level to be formatted in bold.
-#' @param file File name of the Word or HTML document.
-#' The extension should be \code{.doc} or \code{.html}.
-#' @param ... Other parameters passed to the
+#' @param modify_head Replace model names.
+#' @param bold The \emph{p}-value threshold below which the coefficients will be formatted in bold.
+#' @param ... Other parameters passed to
 #' \code{\link[texreg:screenreg]{texreg::screenreg()}} or
-#' \code{\link[texreg:htmlreg]{texreg::htmlreg()}} function.
+#' \code{\link[texreg:htmlreg]{texreg::htmlreg()}}.
 #'
-#' @return Invisibly return the plain text of output.
+#' @return Invisibly return the output (character string).
 #'
 #' @examples
 #' \donttest{## Example 1: Linear Model
@@ -251,9 +255,7 @@ regress=function(formula, data, family=NULL, nsmall=3,
 #' model_summary(list(lm1, lm2))
 #' model_summary(list(lm1, lm2), std=TRUE, digits=2)
 #' model_summary(list(lm1, lm2), file="OLS Models.doc")
-#' model_summary(list(lm1, lm2), file="OLS Models.html")
 #' unlink("OLS Models.doc")  # delete file for test
-#' unlink("OLS Models.html")  # delete file for test
 #'
 #' ## Example 2: Generalized Linear Model
 #' glm1=glm(case ~ age + parity,
@@ -300,12 +302,18 @@ model_summary=function(model_list,
                        std_coef=FALSE,
                        digits=nsmall,
                        nsmall=3,
+                       file=NULL,
                        zero=ifelse(std_coef, FALSE, TRUE),
                        modify_se=NULL,
+                       modify_head=NULL,
                        bold=0,
-                       file=NULL,
                        ...) {
-  if(class(model_list)[1]!="list") model_list=list(model_list)
+  if(class(model_list)[1]=="varest") {
+    model_list=model_list$varresult
+    modify_head=names(model_list)
+  }
+  if(class(model_list)[1]!="list")
+    model_list=list(model_list)
   if(is.null(file)) {
     sumreg=texreg::screenreg
   } else {
@@ -314,11 +322,13 @@ model_summary=function(model_list,
 
   model_y=function(model) {
     if(any(class(model) %in% c("lmerMod", "lmerModLmerTest", "glmerMod")))
-      model@call[["formula"]][[2]]
+      y=model@call[["formula"]][[2]]
     else if(any(class(model) %in% c("lme")))
-      model$call[["fixed"]][[2]]
+      y=model$call[["fixed"]][[2]]
     else
-      model$call[["formula"]][[2]]
+      y=model$call[["formula"]][[2]]
+    if(is.null(y)) y=""
+    return(y)
   }
   model_std_coef=function(model) { MuMIn::std.coef(model, partial.sd=FALSE)[,1] }
   model_std_s.e.=function(model) { MuMIn::std.coef(model, partial.sd=FALSE)[,2] }
@@ -327,18 +337,21 @@ model_summary=function(model_list,
   model_R2mcfadden=function(model) { round(as.numeric( performance::r2_mcfadden(model)[1] ), digits) }
   model_R2nagelkerke=function(model) { round(as.numeric( performance::r2_nagelkerke(model) ), digits) }
 
-  new.model.names=NULL
-  try({
-    new.model.names=as.character(lapply(model_list, model_y))
-    if(length(model_list)>1)
-      new.model.names=paste(paste0("(", 1:length(model_list), ")"), new.model.names)
-    if(any(unlist(lapply(model_list, class)) %in% "nnet")) {
-      multinom.y=as.character(lapply(model_list, model_y))[1]
-      multinom.ref=model_list[[1]][["lab"]][1]
-      new.model.names=NULL
-    }
-  },
-  silent=T)
+  if(is.null(modify_head)) {
+    new.model.names=NULL
+    try({
+      if(any(unlist(lapply(model_list, class)) %in% "nnet")) {
+        multinom.y=as.character(lapply(model_list, model_y))[1]
+        multinom.ref=model_list[[1]][["lab"]][1]
+      } else {
+        new.model.names=paste(paste0("(", 1:length(model_list), ")"),
+                              as.character(lapply(model_list, model_y)))
+        new.model.names=stringr::str_trim(new.model.names)
+      }
+    }, silent=TRUE)
+  } else {
+    new.model.names=modify_head
+  }
 
   if(std_coef) {
     new.coef=lapply(model_list, model_std_coef)
@@ -399,46 +412,62 @@ model_summary=function(model_list,
       body.tag=TRUE,
       caption.above=TRUE,
       caption=NULL,
-      custom.note=ifelse(is.null(file), "* p < .05, ** p < .01, *** p < .001", ""),
+      custom.note="",
       include.loglik=FALSE,
       include.deviance=FALSE,
       beside=TRUE,  # for 'multinom' models
       ...)
-    if(is.null(file)) {
-      print(output)
-    } else {
-      output=stringr::str_replace_all(stringr::str_replace(
-        output, "utf-8", "gbk"), "<td>-", "<td>\u2013")
-      if(grepl(".doc$", file)) {
-        output=stringr::str_replace(
-          output, "<style>",
-          "<style>\nbody {font-size: 10.5pt; font-family: Times New Roman}")
-        output=stringr::str_replace(
-          output, "<body>",
-          paste0("<body>\n<b>Table X. Regression Models",
-                 ifelse(any(unlist(lapply(model_list, class)) %in% "nnet"),
-                        paste0(" (Reference Group: ", multinom.y, " = \u2018", multinom.ref, "\u2019)"),
-                        ""),
-                 ".</b>"))
-        output=stringr::str_replace(
-          output, "</body>",
-          paste0("<i>Note</i>. ",
-                 ifelse(std_coef, "Standardized ", "Unstandardized "),
-                 "regression coefficients are displayed, with standard errors in parentheses.<br/>",
-                 "* <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.</p>",
-                 "</body>"))
-      }
-      sink(file)
-      cat(output)
-      sink()
-      Print("<<green \u2714>> The table was written to <<blue '{paste0(getwd(), '/', file)}'>>")
-      cat("\n")
-    }
   })
 
-  if(is.null(file) & length(model_list)==1) {
+  if(is.null(file)) {
+    print(output)
+    Print("<<italic Note>>. * <<italic p>> < .05, ** <<italic p>> < .01, *** <<italic p>> < .001.")
     cat("\n")
-    print( performance::check_collinearity(model_list[[1]]) )
+    if(length(model_list)==1) {
+      try({
+        suppressWarnings({
+          check=performance::check_collinearity(model_list[[1]])
+        })
+        if(!is.null(check)) {
+          print(check)
+          cat("\n")
+        }
+      }, silent=TRUE)
+    }
+  } else {
+    file=stringr::str_replace(file, "\\.docx$", ".doc")
+    output=output %>%
+      stringr::str_replace_all("&nbsp;", "") %>%
+      stringr::str_replace_all("<td>-", "<td>\u2013") %>%
+      stringr::str_replace_all("<td>(?=\\.|\\d\\.)", "<td>&ensp;") %>%
+      stringr::str_replace_all("R<sup>2</sup>", "<i>R</i><sup>2</sup>") %>%
+      stringr::str_replace(
+        "<style>",
+        "<style>\nbody {font-size: 10.5pt; font-family: Times New Roman;}\np {margin: 0px;}\nth, td {height: 19px;}") %>%
+      stringr::str_replace(
+        "<body>",
+        paste0(
+          "<body>\n<p><b>Table X. Regression Models",
+          ifelse(any(unlist(lapply(model_list, class)) %in% "nnet"),
+                 paste0(" (Reference Group: ", multinom.y, " = \u2018", multinom.ref, "\u2019)"),
+                 ""),
+          ".</b></p>")) %>%
+      stringr::str_replace(
+        "</body>",
+        paste0(
+          "<p><i>Note</i>. ",
+          ifelse(std_coef, "Standardized ", "Unstandardized "),
+          "regression coefficients are displayed, with standard errors in parentheses.</p><p>",
+          "* <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.</p>",
+          "</body>"))
+    # sink(file)
+    # cat(output)
+    # sink()
+    f=file(file, "w", encoding="UTF-8")
+    cat(output, file=f)
+    close(f)
+    Print("<<green \u2714>> Table saved to <<blue '{paste0(getwd(), '/', file)}'>>")
+    cat("\n")
   }
 
   invisible(output)
@@ -866,7 +895,7 @@ HLM_ICC=function(model, nsmall=3) {
 #' Hierarchical Linear Model (HLM), aka. Multilevel Linear Model (MLM) or Linear Mixed Model (LMM), is more complex than General Linear Model (GLM; i.e., OLS regression).
 #' Predictor variables at different levels may have five types:
 #' \describe{
-#'   \item{1. Intercept}{The overall intercept (\eqn{\gamma_00})}
+#'   \item{1. Intercept}{The overall intercept (\eqn{\gamma_{00}})}
 #'   \item{2. L1fixed}{Level-1 predictor with \strong{fixed} slope}
 #'   \item{3. L1random-GROUP-L1VAR}{Level-1 predictor with \strong{random} slopes nested with a grouping/clustering variable}
 #'   \item{4. L2-GROUP}{Level-2 predictor (e.g., GDP per capita at city level), always with \strong{fixed} slope unless there is also a level-3 structure.
@@ -1198,18 +1227,18 @@ HLM_summary=function(model=NULL,
 #' \describe{
 #'   \item{* Note for the following formulas}{
 #'   \itemize{
-#'     \item \eqn{\sigma_u0^2}: between-group variance (i.e., tau00)
-#'     \item \eqn{\sigma_e^2}: within-group variance (i.e., residual variance)
+#'     \item \eqn{\sigma_{u0}^2}: between-group variance (i.e., tau00)
+#'     \item \eqn{\sigma_{e}^2}: within-group variance (i.e., residual variance)
 #'     \item \eqn{n_k}: group size of the k-th group
 #'     \item \eqn{K}: number of groups
 #'     \item \eqn{\sigma^2}: actual group variance of the k-th group
-#'     \item \eqn{\sigma_MJ^2}: mean value of actual group variance of the k-th group across all J items
-#'     \item \eqn{\sigma_EU^2}: expected random variance (i.e., the variance of uniform distribution)
+#'     \item \eqn{\sigma_{MJ}^2}: mean value of actual group variance of the k-th group across all J items
+#'     \item \eqn{\sigma_{EU}^2}: expected random variance (i.e., the variance of uniform distribution)
 #'     \item \eqn{J}: number of items
 #'   }
 #'   }
 #'   \item{\strong{ICC(1) (intra-class correlation, or non-independence of data)}}{
-#'     ICC(1) = var.u0 / (var.u0 + var.e) = \eqn{\sigma_u0^2 / (\sigma_u0^2 + \sigma_e^2)})
+#'     ICC(1) = var.u0 / (var.u0 + var.e) = \eqn{\sigma_{u0}^2 / (\sigma_{u0}^2 + \sigma_{e}^2)})
 #'
 #'     ICC(1) is the ICC we often compute and report in multilevel analysis
 #'     (usually in the Null Model, where only the random intercept of group is included).
@@ -1217,15 +1246,15 @@ HLM_summary=function(model=NULL,
 #'     or \strong{"the expectation of correlation coefficient between any two observations within any group"} (i.e., \emph{homogeneity} within groups).
 #'   }
 #'   \item{\strong{ICC(2) (reliability of group means)}}{
-#'     ICC(2) = mean(var.u0 / (var.u0 + var.e / n.k)) = \eqn{\Sigma[\sigma_u0^2 / (\sigma_u0^2 + \sigma_e^2 / n_k)] / K}
+#'     ICC(2) = mean(var.u0 / (var.u0 + var.e / n.k)) = \eqn{\Sigma[\sigma_{u0}^2 / (\sigma_{u0}^2 + \sigma_{e}^2 / n_k)] / K}
 #'
 #'     ICC(2) is a measure of \strong{"the representativeness of group-level aggregated means for within-group individual values"}
 #'     or \strong{"the degree to which an individual score can be considered a reliable assessment of a group-level construct"}.
 #'   }
 #'   \item{\strong{rWG/rWG(J) (within-group agreement for single-item/multi-item measures)}}{
-#'     rWG = \eqn{1 - \sigma^2 / \sigma_EU^2}
+#'     rWG = \eqn{1 - \sigma^2 / \sigma_{EU}^2}
 #'
-#'     rWG(J) = \eqn{1 - (\sigma_MJ^2 / \sigma_EU^2) / [J * (1 - \sigma_MJ^2 / \sigma_EU^2) + \sigma_MJ^2 / \sigma_EU^2]}
+#'     rWG(J) = \eqn{1 - (\sigma_{MJ}^2 / \sigma_{EU}^2) / [J * (1 - \sigma_{MJ}^2 / \sigma_{EU}^2) + \sigma_{MJ}^2 / \sigma_{EU}^2]}
 #'
 #'     rWG/rWG(J) is a measure of within-group agreement or consensus. Each group has an rWG/rWG(J).
 #'   }

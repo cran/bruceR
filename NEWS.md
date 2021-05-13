@@ -1,6 +1,27 @@
 **If you are viewing this file on CRAN, please check [latest news on GitHub](https://github.com/psychbruce/bruceR/blob/master/NEWS.md) where the formatting is also better.**
 
-# bruceR 0.6.2 (in development)
+# bruceR 0.6.4 (in development)
+
+### New Features
+
+-   Added Word output (.doc) in `print_table()` and other functions using `print_table()` inside: `Describe()`, `Freq()`, `Corr()`, `MANOVA()`, `med_summary()`, `granger_causality()`.
+
+### Minor Changes
+
+-   Added a disclaimer about Cohen's *d* in the output and documentation of `EMMEANS()`: There is considerable disagreement on how to compute Cohen's *d*. Users should not take the default output as the only right results and are completely responsible for setting the "sd.pooled".
+
+### Bug Fixes
+
+-   Fixed bugs in `model_summary()`: (1) Model names with `NULL`; (2) Multicollinearity check results with `NULL` or other problems; (3) UTF-8 encoding problem in WPS software (no such problem in Microsoft Word).
+
+# bruceR 0.6.3 (Apr 2021)
+
+### New Features
+
+-   New function `granger_causality()`: Granger causality test (multivariate) based on vector autoregression (VAR) model. This function is an advanced and more general version of the function `granger_test()` (bivariate).
+-   Added logo (designed by [\@Meijia Li](https://github.com/Stellapros))
+
+# bruceR 0.6.2 (Apr 2021)
 
 ### Major Changes
 

@@ -2,22 +2,24 @@
 % Please edit documentation in R/bruceR_stats_04_regress.R
 \name{model_summary}
 \alias{model_summary}
-\title{Tidy report of regression models (into R console, Word, or HTML).}
+\title{Tidy report of regression models (to R Console or MS Word).}
 \usage{
 model_summary(
   model_list,
   std_coef = FALSE,
   digits = nsmall,
   nsmall = 3,
+  file = NULL,
   zero = ifelse(std_coef, FALSE, TRUE),
   modify_se = NULL,
+  modify_head = NULL,
   bold = 0,
-  file = NULL,
   ...
 )
 }
 \arguments{
-\item{model_list}{A single model or a list of models. The models should be of the same type.}
+\item{model_list}{A single model or a list of models (of the same type).
+Most types of regression models are supported!}
 
 \item{std_coef}{Standardized coefficients? Default is \code{FALSE}.
 Only applicable to linear models and linear mixed models.
@@ -27,32 +29,36 @@ Not applicable to generalized linear (mixed) models.}
 
 \item{nsmall}{The same as \code{digits}.}
 
+\item{file}{File name of MS Word (\code{.doc}).}
+
 \item{zero}{Display "0" before "."? Default is \code{TRUE}.}
 
-\item{modify_se}{Set custom values for standard errors.
+\item{modify_se}{Replace standard errors.
 Useful if you need to replace raw SEs with robust SEs.
 New SEs should be provided as a list of numeric vectors.
 See usage in \code{\link[texreg:screenreg]{texreg::screenreg()}}.}
 
-\item{bold}{The p-value threshold below which the coefficient shall be formatted in a bold font.
-For example, \code{bold = 0.05} will cause all coefficients that are significant at the 95\% level to be formatted in bold.}
+\item{modify_head}{Replace model names.}
 
-\item{file}{File name of the Word or HTML document.
-The extension should be \code{.doc} or \code{.html}.}
+\item{bold}{The \emph{p}-value threshold below which the coefficients will be formatted in bold.}
 
-\item{...}{Other parameters passed to the
+\item{...}{Other parameters passed to
 \code{\link[texreg:screenreg]{texreg::screenreg()}} or
-\code{\link[texreg:htmlreg]{texreg::htmlreg()}} function.}
+\code{\link[texreg:htmlreg]{texreg::htmlreg()}}.}
 }
 \value{
-Invisibly return the plain text of output.
+Invisibly return the output (character string).
 }
 \description{
+Tidy report of regression models (to R Console or MS Word).
+Most types of regression models are supported!
 This function is an extension (and combination) of
 \code{\link[texreg:screenreg]{texreg::screenreg()}},
 \code{\link[texreg:htmlreg]{texreg::htmlreg()}},
-\code{\link[MuMIn:std.coef]{MuMIn::std.coef()}}, and
-\code{\link[MuMIn:r.squaredGLMM]{MuMIn::r.squaredGLMM()}}.
+\code{\link[MuMIn:std.coef]{MuMIn::std.coef()}},
+\code{\link[MuMIn:r.squaredGLMM]{MuMIn::r.squaredGLMM()}},
+\code{\link[performance:r2_mcfadden]{performance::r2_mcfadden()}},
+\code{\link[performance:r2_nagelkerke]{performance::r2_nagelkerke()}}.
 }
 \examples{
 \donttest{## Example 1: Linear Model
@@ -63,9 +69,7 @@ model_summary(lm2)
 model_summary(list(lm1, lm2))
 model_summary(list(lm1, lm2), std=TRUE, digits=2)
 model_summary(list(lm1, lm2), file="OLS Models.doc")
-model_summary(list(lm1, lm2), file="OLS Models.html")
 unlink("OLS Models.doc")  # delete file for test
-unlink("OLS Models.html")  # delete file for test
 
 ## Example 2: Generalized Linear Model
 glm1=glm(case ~ age + parity,
