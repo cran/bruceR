@@ -102,8 +102,7 @@
 #'       \code{\link{CONSEC}}
 #'
 #'       \code{\link{RECODE}},
-#'       \code{\link{RESCALE}},
-#'       \code{\link{RANDBETWEEN}}
+#'       \code{\link{RESCALE}}
 #'
 #'       \code{\link{LOOKUP}}
 #'   }
@@ -145,9 +144,11 @@
 #'   }
 #'
 #'   \item{\strong{(7) Mediation and Moderation Analyses}}{
-#'       \code{\link{med_summary}}
+#'       \code{\link{PROCESS}}
 #'
-#'       \code{PROCESS} (\emph{coming soon...})
+#'       \code{\link{lavaan_summary}}
+#'
+#'       \code{\link{med_summary}}
 #'   }
 #'
 #'   \item{\strong{(8) Additional Toolbox for Statistics and Graphics}}{
@@ -212,14 +213,18 @@ NULL
   {logo} bruceR: <<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions
   >>>>
 
-  <<bold <<blue Loaded R packages:>>>>
-  <<green <<yellow [Data]:>> rio / dplyr / tidyr / stringr / forcats / data.table>>
-  <<green <<yellow [Stat]:>> psych / emmeans / effectsize / performance>>
-  <<green <<yellow [Plot]:>> ggplot2 / ggtext / cowplot / see>>
+  <<bold <<blue Loaded other R packages:>>>>
+  <<green
+  <<yellow [Data]:>> rio / dplyr / tidyr / stringr / forcats / data.table
+  <<yellow [Stat]:>> psych / emmeans / effectsize / performance
+  <<yellow [Plot]:>> ggplot2 / ggtext / cowplot / see
+  >>
 
   <<bold <<blue Frequently used functions in `bruceR`:>>>>
-  <<cyan set.wd() / Describe() / Freq() / Corr() / Alpha() / MEAN()>>
-  <<cyan MANOVA() / EMMEANS() / model_summary() / theme_bruce()>>
+  <<cyan set.wd() / print_table() / model_summary()>>
+  <<cyan Describe() / Freq() / Corr() / Alpha()>>
+  <<cyan RECODE() / MEAN() / SUM() / LOOKUP()>>
+  <<cyan MANOVA() / EMMEANS() / PROCESS()>>
   \n
   ")
 }

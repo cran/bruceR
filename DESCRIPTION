@@ -1,7 +1,7 @@
 Package: bruceR
 Title: Broadly Useful Convenient and Efficient R Functions
-Version: 0.6.4
-Date: 2021-05-12
+Version: 0.7.0
+Date: 2021-05-25
 Authors@R: 
     c(person(given = "Han-Wu-Shuang",
              family = "Bao",
@@ -24,7 +24,7 @@ Description:
   simple-effect analysis, and post-hoc multiple comparison;
   (6) tidy report of regression models and other results
   (to R Console and MS Word);
-  (7) mediation and moderation analyses;
+  (7) mediation and moderation analyses (PROCESS);
   and (8) additional toolbox for statistics and graphics.
 License: GPL-3
 Encoding: UTF-8
@@ -39,6 +39,6 @@ Suggests: rstudioapi, rio, dplyr, tidyr, stringr, forcats, data.table,
         lmerTest, lmtest, vars, nnet, MASS, GGally
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2021-05-13 08:36:56 UTC; Bruce
+Packaged: 2021-05-28 10:09:03 UTC; Bruce
 Repository: CRAN
-Date/Publication: 2021-05-13 09:12:13 UTC
+Date/Publication: 2021-05-28 10:40:02 UTC

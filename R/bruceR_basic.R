@@ -33,7 +33,7 @@
 #' @return A vector of \code{TRUE} or \code{FALSE}.
 #'
 #' @examples
-#' data=data.table(ID=1:10, X=RANDBETWEEN(1:10, 10))
+#' data=data.table(ID=1:10, X=sample(1:10, 10))
 #' data
 #' data[ID %notin% c(1, 3, 5, 7, 9)]
 #'
@@ -290,6 +290,14 @@ pkg_install_suggested=function(by="bruceR") {
 #' Run examples to see what it can do.
 #'
 #' @details
+#' Possible formats/colors that can be used in \code{"<< >>"} include:
+#'
+#' (1) bold, italic, underline, reset, blurred, inverse, hidden, strikethrough;
+#'
+#' (2) black, white, silver, red, green, blue, yellow, cyan, magenta;
+#'
+#' (3) bgBlack, bgWhite, bgRed, bgGreen, bgBlue, bgYellow, bgCyan, bgMagenta.
+#'
 #' See more details in \code{\link[glue:glue]{glue::glue()}} and \code{\link[glue:glue]{glue::glue_col()}}.
 #'
 #' @param ... Character strings enclosed by \code{"{ }"} will be evaluated as R code.
@@ -312,8 +320,8 @@ pkg_install_suggested=function(by="bruceR") {
 #' @export
 Print=function(...) {
   tryCatch({
-    output=glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
-    output_color=glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
+    output=glue::glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
+    output_color=glue::glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
     print(output_color)
   }, error=function(e) {
     warning(e)
@@ -330,8 +338,8 @@ Print=function(...) {
 #' @importFrom crayon bgBlack bgWhite bgRed bgGreen bgBlue bgYellow bgCyan bgMagenta
 #' @export
 Glue=function(...) {
-  output=glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
-  output_color=glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
+  output=glue::glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
+  output_color=glue::glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
   return(output_color)
 }
 
@@ -352,21 +360,27 @@ sprintf_transformer=function(text, envir) {
 
 #' Run code parsed from text.
 #'
-#' @param text Character strings for running.
+#' @param ... Character string(s) to run.
 #' You can use \code{"{ }"} to insert any R object in the environment.
+#' @param silent Suppress error/warning messages. Default is \code{FALSE}.
 #'
-#' @return No return value.
+#' @return Invisibly return the running expression(s).
 #'
 #' @examples
-#' Run("a=1")
-#' a
-#'
-#' Run("a={a+1}")
-#' a
+#' Run("a=1", "b=2")
+#' Run("print({a+b})")
 #'
 #' @export
-Run=function(text) {
-  eval(parse(text=Glue(text)), envir=parent.frame())
+Run=function(..., silent=FALSE) {
+  text=glue::glue(..., .sep="\n", .envir=parent.frame())
+  if(silent) {
+    suppressWarnings({
+      eval(parse(text=text), envir=parent.frame())
+    })
+  } else {
+    eval(parse(text=text), envir=parent.frame())
+  }
+  invisible(text)
 }
 
 
@@ -411,6 +425,7 @@ capitalize=function(string) {
 #' @param title Title text, which will be inserted in <p></p> (HTML code).
 #' @param note Note text, which will be inserted in <p></p> (HTML code).
 #' @param append Other contents, which will be appended in the end (HTML code).
+#' @param line Lines looks like true line (\code{TRUE}) or \code{=== --- ===} (\code{FALSE}).
 #' @param file File name of MS Word (\code{.doc}).
 #' @param file.align.head,file.align.text Alignment of table head or table text:
 #' \code{"left"}, \code{"right"}, \code{"center"}.
@@ -438,6 +453,7 @@ print_table=function(x, nsmalls=3,
                      row.names=TRUE,
                      col.names=TRUE,
                      title="", note="", append="",
+                     line=TRUE,
                      file=NULL,
                      file.align.head="auto",
                      file.align.text="auto") {
@@ -445,9 +461,14 @@ print_table=function(x, nsmalls=3,
 
   # Good-looking tabs !!!
   # Print("\u2500\u2501\u2502\u2503\u2504\u2505\u2506\u2507\u2508\u2509")
-  linechar1="\u2501"  # top-and-down '=' [bug in some computers!]
-  linechar2="\u2500"  # in-table '-'
-  linechar1=linechar2
+  # linechar1="\u2501"  # top-and-down '=' [bug in some computers!]
+  # linechar2="\u2500"  # in-table '-'
+  if(line) {
+    linechar1=linechar2="\u2500"
+  } else {
+    linechar1="="
+    linechar2="-"
+  }
 
   if(class(x) %nonein% c("matrix", "data.frame", "data.table")) {
     coef.table=coef(summary(x))
@@ -464,7 +485,7 @@ print_table=function(x, nsmalls=3,
     } else {
       x[,j]=formatF(x[,j], nsmalls[j])
     }
-    if(grepl("S\\.E\\.|Std\\. Error|^se$", names(x)[j])) {
+    if(grepl("S\\.E\\.|Std\\. Error|^se$|^SE$|^BootSE$", names(x)[j])) {
       x[,j]=paste0("(", x[,j], ")")  # add ( ) to S.E.
       x[grepl("\\.", x[,j])==FALSE, j]=""  # remove ( ) from blank S.E.
       if(grepl("S\\.E\\.", names(x)[j])==FALSE) names(x)[j]="S.E."
@@ -537,10 +558,14 @@ print_table=function(x, nsmalls=3,
     x=cbind(rn=row.names(x), x)
     names(x)[1]=""
   }
-  html=df_to_html(x, title=title, note=note, append=append,
-                  file=file,
-                  align.head=file.align.head,
-                  align.text=file.align.text)
+  if(!is.null(file)) {
+    html=df_to_html(x, title=title, note=note, append=append,
+                    file=file,
+                    align.head=file.align.head,
+                    align.text=file.align.text)
+  } else {
+    html=NULL
+  }
 
   invisible(list(df=x, html=html))
 }
@@ -551,9 +576,13 @@ df_to_html=function(df, title="", note="", append="",
                     align.head="auto",
                     align.text="auto") {
   if(!is.null(file)) {
-    file=stringr::str_replace(file, "\\.docx$", ".doc")
-    if(stringr::str_detect(file, "\\.doc$")==FALSE)
-      file=paste0(file, ".doc")
+    if(file=="NOPRINT") {
+      file=NULL
+    } else {
+      file=stringr::str_replace(file, "\\.docx$", ".doc")
+      if(stringr::str_detect(file, "\\.doc$")==FALSE)
+        file=paste0(file, ".doc")
+    }
   }
 
   TITLE=title
@@ -576,7 +605,7 @@ df_to_html=function(df, title="", note="", append="",
   df=as.data.frame(df)
   for(j in 1:ncol(df)) {
     df[[j]]="<td align='" %^% align.text[j] %^% "'>" %^%
-      stringr::str_trim(stringr::str_replace_all(df[[j]], "^\\s*-", "\u2013")) %^% "</td>"
+      stringr::str_trim(stringr::str_replace_all(df[[j]], "^\\s*-{1}", "\u2013")) %^% "</td>"
   }
 
   THEAD="<tr> " %^%
@@ -659,7 +688,7 @@ table th, table td {padding-left: 5px; padding-right: 5px; height: 19px;}
 #' @examples
 #' formatN(1234)
 #'
-#' @seealso \code{\link{formatF}}
+#' @seealso \code{\link[base:format]{format}}, \code{\link{formatF}}
 #'
 #' @export
 formatN=function(x, mark=",") {
@@ -677,11 +706,18 @@ formatN=function(x, mark=",") {
 #' @examples
 #' formatF(pi, 20)
 #'
-#' @seealso \code{\link{formatN}}
+#' @seealso \code{\link[base:format]{format}}, \code{\link{formatN}}
 #'
 #' @export
 formatF=function(x, nsmall=3) {
-  format(x, digits=0, nsmall=nsmall, scientific=F)
+  # format(x, digits=0, nsmall=nsmall, scientific=FALSE)
+  if(inherits(x, "character")) {
+    xf=sprintf(paste0("%-", max(nchar(x)), "s"), x)  # left adjustment
+  } else {
+    x=sprintf(paste0("%.", nsmall, "f"), x)
+    xf=sprintf(paste0("%", max(nchar(x)), "s"), x)
+  }
+  return(xf)
 }
 
 
@@ -718,33 +754,13 @@ RGB=function(r, g, b, alpha) {
 #' @export
 dtime=function(t0, unit="secs", nsmall=0) {
   dt=difftime(Sys.time(), t0, units=unit)
-  format(dt, digits=nsmall)
+  format(dt, digits=1, nsmall=nsmall)
 }
 
 
 
 
 #### Excel-Style Functions ####
-
-
-#' Random sampling (like Excel's function \code{RANDBETWEEN}).
-#'
-#' @param range Numeric or character vector.
-#' @param n Sample size for sampling. Default is \code{1}.
-#' @param seed Random seed.
-#'
-#' @return Numeric or character vector (the same class as \code{range}).
-#'
-#' @examples
-#' RANDBETWEEN(1:10, n=1000) %>% Freq()
-#' RANDBETWEEN(LETTERS, n=1000) %>% Freq()
-#'
-#' @export
-RANDBETWEEN=function(range, n=1, seed=NULL) {
-  if(!is.null(seed)) set.seed(seed)
-  # floor(runif(n=n, min=bottom, max=up+1))
-  sample(range, n, replace=TRUE)
-}
 
 
 #' Search, match, and look up values (like Excel's functions \code{INDEX + MATCH}).
@@ -767,15 +783,15 @@ RANDBETWEEN=function(range, n=1, seed=NULL) {
 #' @return New data object, new variable, or new value (see the parameter \code{return}).
 #'
 #' @seealso
-#' \code{dplyr::left_join}
+#' \code{\link[dplyr:mutate-joins]{dplyr::left_join()}}
 #'
 #' \href{https://www.excel-university.com/xlookup/}{XLOOKUP: Excel University}
 #'
 #' @examples
 #' ref=data.table(City=rep(c("A", "B", "C"), each=5),
 #'                Year=rep(2013:2017, times=3),
-#'                GDP=RANDBETWEEN(1000:2000, n=15, seed=1),
-#'                PM2.5=RANDBETWEEN(10:300, n=15, seed=1))
+#'                GDP=sample(1000:2000, 15),
+#'                PM2.5=sample(10:300, 15))
 #' ref
 #'
 #' data=data.table(sub=1:5,
