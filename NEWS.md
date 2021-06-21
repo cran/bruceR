@@ -1,5 +1,17 @@
 **If you are viewing this file on CRAN, please check [latest news on GitHub](https://github.com/psychbruce/bruceR/blob/master/NEWS.md) where the formatting is also better.**
 
+# bruceR 0.7.2 (June 2021)
+
+### Minor Changes
+
+-   Added the `digits` parameter as the equivalent to the `nsmall` parameter for all relevant functions.
+-   Packages `mediation`, `interactions`, `MuMIn`, and `texreg` are now SUGGESTS rather than IMPORTS.
+
+### Bug Fixes
+
+-   Fixed a bug of value ordering for 3-way interaction (moderated moderation) in `PROCESS()`.
+-   Fixed a bug for Word output in `Corr()`.
+
 # bruceR 0.7.0 (May 2021)
 
 ### New Features
