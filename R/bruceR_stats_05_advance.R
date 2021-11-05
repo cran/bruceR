@@ -424,7 +424,6 @@ boot_ci=function(boot,
 #' New recommendations for testing indirect effects in mediational models:
 #' The need to report and test component paths.
 #' \emph{Journal of Personality and Social Psychology, 115}(6), 929-943.
-#' \doi{10.1037/pspa0000132}
 #'
 #' @examples
 #' \donttest{#### NOTE ####
@@ -1069,6 +1068,7 @@ PROCESS=function(data,
 #' @param seed Random seed for obtaining reproducible results. Default is \code{NULL}.
 #' @param digits,nsmall Number of decimal places of output. Default is \code{3}.
 #' @param print Print results. Default is \code{TRUE}.
+#' @param file File name of MS Word (\code{.doc}).
 #'
 #' @return
 #' Invisibly return a list of results:
@@ -1145,13 +1145,14 @@ lavaan_summary=function(lavaan,
                         nsim=100,
                         seed=NULL,
                         digits=3, nsmall=digits,
-                        print=TRUE) {
+                        print=TRUE,
+                        file=NULL) {
   if(length(ci)>1) ci="raw"
   FIT=lavaan::fitMeasures(lavaan)
   pe=lavaan::parameterEstimates(lavaan, standardized=TRUE)
-  pe.reg=pe[pe$op=="~", c("rhs", "lhs", "label", "est", "se", "std.all")]
+  pe.reg=pe[pe$op=="~", c("lhs", "rhs", "label", "est", "se", "std.all")]
   pe.eff=pe[pe$op==":=", c("label", "est", "std.all")]
-  REG=data.frame(Path=pe.reg$rhs %^% " => " %^% pe.reg$lhs,
+  REG=data.frame(Path=pe.reg$lhs %^% " <= " %^% pe.reg$rhs,
                  Tag=stringr::str_replace_all(
                    "(" %^% pe.reg$label %^% ")", "\\(\\)", ""),
                  Coef=pe.reg$est,
@@ -1216,6 +1217,31 @@ lavaan_summary=function(lavaan,
                   title="<<blue Model Terms (lavaan):>>")
       cat("\n")
     }
+  }
+
+  if(!is.null(file)) {
+    if(nrow(EFF)>0) {
+      EFF.html=paste0(
+        "<p><br/><br/></p>",
+        "<p><b>Table 2. Model Terms.</b></p>",
+        print_table(EFF, nsmalls=nsmall,
+                    file.align.text=c(
+                      "left", "right", "right", "right", "right", "left", "right", "right", "right"
+                    ),
+                    file="NOPRINT")$html$TABLE,
+        "<p><i>Note</i>. * <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.</p>")
+    } else {
+      EFF.html=""
+    }
+    print_table(
+      REG, nsmalls=nsmall, row.names=TRUE,
+      title="<b>Table 1. Model Paths.</b>",
+      note="<i>Note</i>. * <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.",
+      append=EFF.html,
+      file=file,
+      file.align.text=c(
+        "left", "left", "right", "right", "right", "right", "left", "right"
+      ))
   }
 
   invisible(list(fit=FIT, path=REG, effect=EFF))
@@ -1861,20 +1887,24 @@ ccf_plot=function(formula, data,
 #' using the \code{\link[lmtest:grangertest]{lmtest::grangertest()}} function.
 #'
 #' @details
-#' The Granger causality test examines whether
+#' Granger causality test examines whether
 #' the lagged values of a predictor
-#' have any incremental role in predicting an outcome
-#' if controlling for the lagged values of the outcome itself.
+#' have an incremental role in predicting (i.e., help to predict)
+#' an outcome when controlling for the lagged values of the outcome.
+#'
+#' Granger causality does not necessarily constitute a true causal effect.
 #'
 #' @inheritParams ccf_plot
 #' @param lags Time lags. Default is \code{1:5}.
-#' @param test.reverse Whether to test reverse causality. Default is \code{FALSE}.
+#' @param test.reverse Whether to test reverse causality. Default is \code{TRUE}.
+#' @param file File name of MS Word (\code{.doc}).
 #'
-#' @return No return value.
+#' @return A data frame of results.
 #'
 #' @examples
 #' granger_test(chicken ~ egg, data=lmtest::ChickEgg)
-#' granger_test(chicken ~ egg, data=lmtest::ChickEgg, lags=1:10, test.reverse=TRUE)
+#' granger_test(chicken ~ egg, data=lmtest::ChickEgg, lags=1:10, file="Granger.doc")
+#' unlink("Granger.doc")  # delete file for test
 #'
 #' @seealso
 #' \code{\link{ccf_plot}},
@@ -1883,7 +1913,13 @@ ccf_plot=function(formula, data,
 #' @importFrom stats as.formula na.omit
 #' @export
 granger_test=function(formula, data, lags=1:5,
-                      test.reverse=FALSE) {
+                      test.reverse=TRUE,
+                      file=NULL) {
+  res=data.frame(Lag=lags, D1="", D2="", D12="")
+  names(res)[2:4]=c("Hypothesized Direction",
+                    "Reverse Direction",
+                    "Hypothesized (vs. Reverse)")
+
   if(test.reverse) {
     formula.rev=as.formula(paste(formula[3], formula[1], formula[2]))
     formulas=list(formula, formula.rev)
@@ -1898,16 +1934,46 @@ granger_test=function(formula, data, lags=1:5,
   Print("<<blue {formula[2]} ~ {formula[2]}[1:Lags] + <<green {formula[3]}[1:Lags]>>>>")
 
   for(f in formulas) {
+    rev=FALSE
     if(test.reverse & f!=formulas[[1]]) {
+      rev=TRUE
       Print("\n\n\nReverse direction:")
       Print("<<blue {formula[3]} ~ {formula[3]}[1:Lags] + <<green {formula[2]}[1:Lags]>>>>")
     }
     for(lag in lags) {
       gt=lmtest::grangertest(formula=f, data=data, order=lag, na.action=na.omit)
-      result=bruceR::p(f=gt[2,"F"], df1=-gt[2,"Df"], df2=gt[1,"Res.Df"])
+      Fval=gt[2,"F"]
+      df1=-gt[2,"Df"]
+      df2=gt[1,"Res.Df"]
+      sig=stringr::str_trim(sig.trans(p.f(Fval, df1, df2)))
+      result=bruceR::p(f=Fval, df1=df1, df2=df2)
+      result.simple=formatF(Fval, 2) %^% ifelse(sig=="", "", "<sup>" %^% sig %^% "</sup>")
       Print("Lags = {lag}:\t{result}")
+      res[which(res$Lag==lag), ifelse(rev, 3, 2)]=p.plain(f=Fval, df1=df1, df2=df2)
+      res[which(res$Lag==lag), 4]=ifelse(
+        rev,
+        res[[which(res$Lag==lag), 4]] %^% " (vs. " %^% result.simple %^% ")",
+        result.simple)
     }
   }
+
+  if(!is.null(file)) {
+    cat("\n")
+    RES=res
+    RES[[2]]=stringr::str_replace(stringr::str_replace(
+      RES[[2]], "p", "<i>p</i>"), "F", "<i>F</i>")
+    RES[[3]]=stringr::str_replace(stringr::str_replace(
+      RES[[3]], "p", "<i>p</i>"), "F", "<i>F</i>")
+    if(test.reverse==FALSE) RES=RES[1:2]
+    print_table(RES, row.names=FALSE, digits=0,
+                file.align.head="left",
+                file.align.text="left",
+                title="<b>Table. Granger Causality Test (Bivariate).</b>",
+                note="<i>Note</i>. * <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.",
+                file=file)
+  }
+
+  invisible(res[1:3])
 }
 
 
@@ -1957,10 +2023,12 @@ vargranger=function(varmodel, var.y, var.x) {
 #' command in Stata (but here using an \emph{F} test).
 #'
 #' @details
-#' The Granger causality test (based on VAR model) examines whether
+#' Granger causality test (based on VAR model) examines whether
 #' the lagged values of a predictor (or predictors)
-#' have any incremental role in predicting an outcome
-#' if controlling for the lagged values of the outcome itself.
+#' help to predict an outcome when controlling for
+#' the lagged values of the outcome itself.
+#'
+#' Granger causality does not necessarily constitute a true causal effect.
 #'
 #' @param varmodel VAR model fitted using the \code{\link[vars:VAR]{vars::VAR()}} function.
 #' @param var.y,var.x [optional] Default is \code{NULL} (all variables).

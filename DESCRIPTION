@@ -1,7 +1,7 @@
 Package: bruceR
 Title: Broadly Useful Convenient and Efficient R Functions
-Version: 0.7.2
-Date: 2021-06-21
+Version: 0.7.3
+Date: 2021-11-05
 Authors@R: 
     c(person(given = "Han-Wu-Shuang",
              family = "Bao",
@@ -38,8 +38,8 @@ Suggests: rstudioapi, rio, dplyr, tidyr, stringr, forcats, data.table,
         car, psych, afex, emmeans, effectsize, mediation, interactions,
         lavaan, jtools, texreg, lme4, lmerTest, lmtest, vars, nnet,
         MuMIn, MASS, GGally
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 NeedsCompilation: no
-Packaged: 2021-06-21 16:34:30 UTC; Bruce
+Packaged: 2021-11-05 16:15:35 UTC; Bruce
 Repository: CRAN
-Date/Publication: 2021-06-21 17:00:02 UTC
+Date/Publication: 2021-11-05 17:40:01 UTC
