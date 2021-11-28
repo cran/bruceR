@@ -28,7 +28,7 @@ regress(
 
 \item{nsmall}{Number of decimal places of output. Default is 3.}
 
-\item{robust}{\strong{[only for \code{lm} and \code{glm}]}
+\item{robust}{\strong{[Only for \code{lm} and \code{glm}]}
 \code{FALSE} (default), \code{TRUE} (then the default is \code{"HC1"}),
 \code{"HC0"}, \code{"HC1"}, \code{"HC2"}, \code{"HC3"}, \code{"HC4"}, \code{"HC4m"}, or \code{"HC5"}.
 It will add a table with heteroskedasticity-robust standard errors (aka. Huber-White standard errors).
@@ -36,11 +36,11 @@ For details, see \code{?sandwich::vcovHC} and \code{?jtools::summ.lm}.
 
 *** \code{"HC1"} is the default of Stata, whereas \code{"HC3"} is the default suggested by the \code{sandwich} package.}
 
-\item{cluster}{\strong{[only for \code{lm} and \code{glm}]}
+\item{cluster}{\strong{[Only for \code{lm} and \code{glm}]}
 Cluster-robust standard errors are computed if cluster is set to the name of the input data's cluster variable or is a vector of clusters.
 If you specify \code{cluster}, you may also specify the type of \code{robust}. If you do not specify \code{robust}, \code{"HC1"} will be set as default.}
 
-\item{level2.predictors}{\strong{[only for \code{lmer}]} [optional] Default is \code{NULL}.
+\item{level2.predictors}{\strong{[Only for \code{lmer}]} [optional] Default is \code{NULL}.
 If you have predictors at level 2, besides putting them into the formula in the \code{lmer} function as usual,
 you may \strong{also} define here the level-2 grouping/clustering variables and corresponding level-2 predictor variables.
 
@@ -49,11 +49,11 @@ where \code{School} and \code{House} are two grouping variables,
 \code{W1 & W2} are school-level predictors,
 and there is no house-level predictor.
 
-*** If there is no level-2 predictor in the formula of \code{lmer}, just leave this parameter blank.}
+*** If there is no level-2 predictor in the formula of \code{lmer}, just leave this argument blank.}
 
-\item{vartypes}{\strong{[only for \code{lmer}]} Manually setting variable types. Needless in most situations.}
+\item{vartypes}{\strong{[Only for \code{lmer}]} Manually setting variable types. Needless in most situations.}
 
-\item{test.rand}{\strong{[only for \code{lmer}]} \code{TRUE} or \code{FALSE} (default).
+\item{test.rand}{\strong{[Only for \code{lmer}]} \code{TRUE} or \code{FALSE} (default).
 Test random effects (i.e., variance components) by using the likelihood-ratio test (LRT), which is asymptotically chi-square distributed. For large datasets, it is much time-consuming.}
 }
 \value{
@@ -63,23 +63,26 @@ No return value.
 Regression analysis.
 }
 \examples{
-\donttest{## lm
-regress(Temp ~ Month + Day + Wind + Solar.R, data=airquality, robust=TRUE)
+\dontrun{
 
-## glm
-regress(case ~ age + parity + education + spontaneous + induced,
-        data=infert, family=binomial, robust="HC1", cluster="stratum")
+  ## lm
+  regress(Temp ~ Month + Day + Wind + Solar.R, data=airquality, robust=TRUE)
 
-## lmer
-library(lmerTest)
-regress(Reaction ~ Days + (Days | Subject), data=sleepstudy)
-regress(Preference ~ Sweetness + Gender + Age + Frequency +
-          (1 | Consumer), data=carrots)
+  ## glm
+  regress(case ~ age + parity + education + spontaneous + induced,
+          data=infert, family=binomial, robust="HC1", cluster="stratum")
 
-## glmer
-library(lmerTest)
-data.glmm=MASS::bacteria
-regress(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
-regress(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
+  ## lmer
+  library(lmerTest)
+  regress(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+  regress(Preference ~ Sweetness + Gender + Age + Frequency +
+            (1 | Consumer), data=carrots)
+
+  ## glmer
+  library(lmerTest)
+  data.glmm=MASS::bacteria
+  regress(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
+  regress(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
 }
+
 }

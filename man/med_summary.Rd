@@ -2,7 +2,7 @@
 % Please edit documentation in R/bruceR_stats_05_advance.R
 \name{med_summary}
 \alias{med_summary}
-\title{Tidy report of mediation analysis (to R Console or MS Word).}
+\title{Tidy report of mediation analysis.}
 \usage{
 med_summary(model, digits = 3, nsmall = digits, file = NULL)
 }
@@ -21,7 +21,9 @@ Tidy report of mediation analysis,
 which is performed using the \code{\link[mediation]{mediation}} package.
 }
 \examples{
-\donttest{library(mediation)
+\dontrun{
+
+library(mediation)
 # ?mediation::mediate
 
 ## Example 1: OLS Regression
@@ -52,6 +54,7 @@ med.lmm=mediate(lmm.m, lmm.y,
                 sims=1000)
 med_summary(med.lmm)
 }
+
 }
 \seealso{
 \code{\link{PROCESS}}

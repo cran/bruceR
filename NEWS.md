@@ -1,12 +1,45 @@
 **If you are viewing this file on CRAN, please check [latest news on GitHub](https://github.com/psychbruce/bruceR/blob/master/NEWS.md) where the formatting is also better.**
 
+# bruceR 0.8.0 (Nov 2021)
+
+### New Features
+
+-   New function `TTEST()`: One-sample, independent-samples, and paired-samples *t*-test. Multiple dependent/independent variables can be tested simultaneously. It also tests the assumption of homogeneity of variance and allows users to determine whether variances are equal or not. Cohen's *d* and 95% CI are reported by default (see Details and Examples in its help page for an issue about the *inconsistency* in the results of 95% CI of Cohen's *d* between R packages). Bayes factor BF<sub>10</sub> is also supported. Key results can be saved in APA format to MS Word.
+-   New functions `import()` / `export()`: Import/export data from/to a file with the two tidy functions, relieving users of the burden of remembering lots of `read_xxx()` / `write_xxx()` functions. Many file formats are supported (especially .txt, .csv, .tsv, .psv, .xls, .xlsx, .sav, .dta, .rda, .rdata, and clipboard). Note that the two functions are inspired by `rio::import()` / `rio::export()` and have several modifications for more convenient use. Since this version, the package `rio` is no longer a strong dependency of `bruceR` and would not be loaded when loading `bruceR`.
+
+### Major Changes
+
+-   Improved `MANOVA()` and `EMMEANS()`:
+
+    -   Fixed several bugs.
+    -   Modified the help pages.
+    -   Improved output tables. Now all results are printed using `print_table()`.
+    -   Improved algorithm for estimating Cohen's *d*: Now it uses ***Root Mean Square Error*** **(RMSE) as the pooled *SD*** to estimate Cohen's *d*. Although there is disagreement on the estimation of pooled *SD*, `EMMEANS()` adopts this reasonable approach. If one uses `MANOVA()` and `EMMEANS()` to conduct the same *t*-test as using the `TTEST()` function, the results will be identical. Indeed, the estimation methods of Cohen's *d* in *t*-tests are acknowledged. In computing pooled *SD* in ANOVAs, it uses **(1)** the square root of *mean square error* (MSE) for between-subjects designs and **(2)** the square root of *mean variance of all paired differences of the residuals of repeated measures* for within-subjects and mixed designs. In both situations, it extracts the `lm` object from the returned value of `MANOVA()`. Then, it mainly uses the `sigma()` and `residuals()` functions, respectively, to do these estimates. For source code, see GitHub file: [bruceR_stats_03_manova.R](https://github.com/psychbruce/bruceR/blob/master/R/bruceR_stats_03_manova.R). Thus, the results of Cohen's *d* for designs with repeated measures are now different from those in `bruceR` old versions (\< 0.8.0), which indeed used an inappropriate method to compute pooled *SD* in such designs.
+    -   Added arguments (1) `ss.type` for `MANOVA()` to specify either Type-II or Type-III Sum of Square; (2) `aov.include` for `MANOVA()` and `model.type` for `EMMEANS()`, for details, see the help pages.
+    -   Added warning messages for wrong usage of these functions. If observations are not uniquely identified in user-defined long-format data, the function takes averages across those multiple observations for each case (thanks to Xiangying Zou for reporting an infrequent bug related to this issue).
+
+-   Improved `Alpha()`: Now it directly uses `psych::alpha()` and `psych::omega()`, rather than `jmv::reliability()`, to perform reliability analysis. The format of result output has been changed and improved.
+
+-   Improved `EFA()` (almost completely rewritten): Now it directly uses `psych::principal()` and `psych::fa()`, rather than `jmv::efa()`, to perform factor analysis (PCA or EFA). The format of result output has been changed and improved. MS Word output has been supported. A wrapper function `PCA()` has been added: `EFA(..., method="pca")`.
+
+-   Improved `CFA()` and `lavaan_summary()`: Now `CFA()` only uses the `lavaan::cfa()`, rather than `jmv:cfa()`, to build model, and then uses `lavaan_summary()` to present results. For `lavaan_summary()`, many bugs have been fixed, and the format of result table has been changed and improved. Both functions now support saving table to MS Word.
+
+-   Package dependencies: Much fewer strong dependencies, for faster and more robust installation. Removed `rio` and `jmv` from dependencies. No longer load `rio` and `psych` when `library(bruceR)`.
+
+### Minor Changes
+
+-   Added an alias `set_wd()` for `set.wd()`.
+-   Improved `print_table()`: Fixed an issue of incorrect length of Chinese character output in `print_table()`. Between-column blanks are now 2 spaces (rather than 1 space) for a clearer presentation of table columns.
+-   Modified onloading welcome messages.
+-   General bug-fixes and improvements.
+
 # bruceR 0.7.3 (Nov 2021)
 
 ### Minor Changes
 
 -   Added Word output for `lavaan_summary()` and `granger_test()`.
 
-# bruceR 0.7.2 (June 2021)
+# bruceR 0.7.2 (Jun 2021)
 
 ### Minor Changes
 
@@ -59,7 +92,7 @@
 
 ### Major Changes
 
--   Improved `set.wd()`: Now it uses `rstudioapi::getSourceEditorContext()` to extract file path (even effective when running in R console), which only requires RStudio version \>= 0.99.1111 and no longer has encoding problems (see release note in 0.6.1).
+-   Improved `set.wd()`: Now it uses `rstudioapi::getSourceEditorContext()` to extract file path (even effective when running in R console), which only requires RStudio version >= 0.99.1111 and no longer has encoding problems (see release note in 0.6.1).
 -   Improved `theme_bruce()`: Now it uses `ggtext::element_markdown()` to render Markdown/HTML rich text format, which can be used in plot text (e.g., titles).
 -   Improved `EMMEANS()`: Now its results are always identical to those in SPSS (by setting `model="multivariate"` in `emmeans::joint_tests()` and `emmeans::emmeans()`, which use the `lm` or `mlm` objects rather than the `aov` object to perform tests). For a few cases with singular error matrix (i.e., some variables are linearly dependent), the results of simple-effect *F* tests will not be reported, but estimated marginal means and pairwise comparisons are not affected and so are still reported. Note that the `EMMEANS` results in old versions of `bruceR` (version \< 0.6.0) were identical to SPSS, but version 0.6.0 deprecated the parameter `repair` and no longer set `model$aov=NULL`, which made the results not identical to SPSS (particularly for ANOVAs with repeated measures). In response to a user's feedback, now 0.6.2 has improved this function and makes its results accurate again.
 
@@ -82,7 +115,7 @@
 
 ### Major Changes
 
--   Improved `set.wd()`: Now it converts the extracted path string from "UTF-8" to "GBK" on Windows system to support paths including Chinese characters (otherwise, the path would become messy code and cause an error). Note that this problem does not exist on Mac OS. In addition, warning messages will be printed into the console if the user's RStudio version is lower than required (RStudio version \>= 1.4.843 is required for a complete implementation of this function).
+-   Improved `set.wd()`: Now it converts the extracted path string from "UTF-8" to "GBK" on Windows system to support paths including Chinese characters (otherwise, the path would become messy code and cause an error). Note that this problem does not exist on Mac OS. In addition, warning messages will be printed into the console if the user's RStudio version is lower than required (RStudio version >= 1.4.843 is required for a complete implementation of this function).
 -   Improved `Alpha()`: Now it adds a parameter `varrange` (to keep the same as `SUM()`, `MEAN()`, ...) and reports both Cronbach's α and McDonald's ω, with more detailed documentation.
 
 > Three ways to specify the variable list (implemented in the functions such as `SUM()`, `MEAN()`, `Alpha()`):

@@ -1,9 +1,6 @@
 #### Plot Toolbox ####
 
 
-# plots=see::plots
-
-
 #' A nice \code{ggplot2} theme that enables Markdown/HTML rich text.
 #'
 #' @description
@@ -54,7 +51,7 @@
 #'
 #' @examples
 #' ## Example 1 (bivariate correlation)
-#' d=as.data.table(bfi)
+#' d=as.data.table(psych::bfi)
 #' d[,":="(E=MEAN(d, "E", 1:5, rev=c(1,2), likert=1:6),
 #'         O=MEAN(d, "O", 1:5, rev=c(2,5), likert=1:6))]
 #' ggplot(data=d, aes(x=E, y=O)) +
@@ -81,8 +78,6 @@
 #'        title="Demo Plot<sup>bruceR</sup>") +
 #'   theme_bruce(markdown=TRUE, border="")
 #'
-#' @import ggplot2
-#' @importFrom ggtext element_markdown
 #' @export
 theme_bruce=function(markdown=FALSE,
                      base.size=12, line.size=0.5,
@@ -94,7 +89,7 @@ theme_bruce=function(markdown=FALSE,
                      grid.x="", grid.y="",
                      line.x=TRUE, line.y=TRUE,
                      tick.x=TRUE, tick.y=TRUE) {
-  if(markdown) element_text=element_markdown
+  if(markdown) element_text=ggtext::element_markdown
   # font face:
   #     "plain", "italic", "bold", "bold.italic"
   # margin:
@@ -121,21 +116,23 @@ theme_bruce=function(markdown=FALSE,
         element_rect(size=line.size+0.4, color=border, fill=NA),
       panel.background=element_rect(fill=panel.bg),
       axis.line=element_line(size=line.size, color="black"),  # lineend="square"
-      axis.title=element_text(face=axis.title, color="black", size=base.size+2),
+      axis.title=element_text(size=base.size+2, color="black", face=axis.title),
       axis.title.x=element_text(margin=margin(0.5, 0, 0.4, 0, "lines")),
       axis.title.y=element_text(margin=margin(0, 0.5, 0, 0.4, "lines")),
       axis.ticks=element_line(size=line.size, color="black", lineend="square"),
       axis.ticks.length=unit(0.3, "lines"),
-      axis.text=element_text(color="black", size=base.size),
+      axis.text=element_text(size=base.size, color="black"),
       axis.text.x=element_text(margin=margin(ifelse(tick.x, 0.5, 0.3), 0, 0, 0, "lines")),
       axis.text.y=element_text(margin=margin(0, ifelse(tick.y, 0.5, 0.3), 0, 0, "lines")),
-      plot.title=element_text(face=plot.title, size=base.size+2, hjust=title.pos,
+      strip.background=element_rect(color=NA),
+      strip.text=element_text(size=base.size-2),
+      plot.title=element_text(size=base.size+2, face=plot.title, hjust=title.pos,
                               margin=margin(0.2, 0, 0.6, 0, "lines")),
-      plot.subtitle=element_text(face=plot.title, size=base.size, hjust=subtitle.pos,
+      plot.subtitle=element_text(size=base.size, face=plot.title, hjust=subtitle.pos,
                                  margin=margin(0, 0, 0.6, 0, "lines")),
       plot.caption=element_text(size=base.size-2, hjust=caption.pos,
                                 margin=margin(0, 0, 0.1, 0, "lines")),
-      plot.tag=element_text(face=tag, size=base.size+2),
+      plot.tag=element_text(size=base.size+2, face=tag),
       plot.tag.position=c(0.005, 0.985),
       plot.background=element_rect(color=bg, fill=bg),
       plot.margin=margin(0.02, 0.02, 0.02, 0.02, "npc")

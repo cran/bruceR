@@ -2,16 +2,16 @@
 % Please edit documentation in R/bruceR_stats_01_basic.R
 \name{Freq}
 \alias{Freq}
-\title{Frequency statistics (to R Console or MS Word).}
+\title{Frequency statistics.}
 \usage{
 Freq(var, label = NULL, sort = "", digits = 1, nsmall = digits, file = NULL)
 }
 \arguments{
-\item{var}{Vector or variable.}
+\item{var}{Variable (or a vector of values).}
 
-\item{label}{[optional] A vector re-defining the labels of values.}
+\item{label}{[Optional] A vector re-defining the labels of values.}
 
-\item{sort}{\code{""} (default, sorted by raw order), \code{"-"} (decreasing), or \code{"+"} (increasing).}
+\item{sort}{\code{""} (default, sorted by the order of variable values/labels), \code{"-"} (decreasing by N), or \code{"+"} (increasing by N).}
 
 \item{digits, nsmall}{Number of decimal places of output. Default is \code{1}.}
 
@@ -21,11 +21,12 @@ Freq(var, label = NULL, sort = "", digits = 1, nsmall = digits, file = NULL)
 A data frame of frequency statistics.
 }
 \description{
-Frequency statistics (to R Console or MS Word).
+Frequency statistics.
 }
 \examples{
-Freq(bfi$education)
-Freq(bfi$gender, label=c("Male", "Female"))
-Freq(bfi$age)
+data=psych::bfi
+Freq(data$education)
+Freq(data$gender, label=c("Male", "Female"))
+Freq(data$age)
 
 }

@@ -1,7 +1,6 @@
 #### PROCESS Macro (GLM and HLM) ####
 
 
-#' @importFrom stats terms drop1 anova update df.residual
 interaction_F_test=function(model, data=NULL, data.name="data") {
   Run("{data.name}=data")
   df2=df.residual(model)
@@ -13,7 +12,7 @@ interaction_F_test=function(model, data=NULL, data.name="data") {
     dp1=drop1(model, scope=interms.form, test="F")
     dp1=dp1[!is.na(dp1$Df), c("Df", "F value", "Pr(>F)")]
     aov=anova(update(model, interms.drop), model)
-    if(df2!=aov[2, "Res.Df"]) warning("Error!")
+    if(df2!=aov[2, "Res.Df"]) warning("Error!", call.=TRUE)
     aov.table=data.frame(
       `F`=c(dp1[[2]], aov[2, "F"]),
       df1=c(dp1[[1]], aov[2, "Df"]),
@@ -34,7 +33,6 @@ interaction_F_test=function(model, data=NULL, data.name="data") {
 }
 
 
-#' @importFrom stats terms drop1 anova update
 interaction_Chi2_test=function(model, data=NULL, data.name="data") {
   Run("{data.name}=data")
   interms=attr(terms(model), "term.labels")
@@ -197,9 +195,9 @@ lav_med_modeler=function(y, x,
   else
     covs.all=""
   if("m" %in% cov.path)
-    fm=stringr::str_replace(fm, "~", "~" %^% covs.all)
+    fm=str_replace(fm, "~", "~" %^% covs.all)
   if("y" %in% cov.path)
-    fy=stringr::str_replace(fy, "~", "~" %^% covs.all)
+    fy=str_replace(fy, "~", "~" %^% covs.all)
   model=paste(paste(fm, collapse="\n"),
               fy, pars,
               sep="\n")
@@ -211,7 +209,6 @@ lav_med_modeler=function(y, x,
 # edit(boot::boot.ci)
 # edit(boot:::perc.ci)
 # edit(boot:::bca.ci)
-#' @importFrom stats qnorm quantile
 boot_ci=function(boot,
                  type=c("boot", "bc.boot", "bca.boot", "mcmc"),
                  true=NULL,
@@ -268,7 +265,7 @@ boot_ci=function(boot,
 #' for \strong{(generalized) linear or linear mixed models}.
 #'
 #' Specifically, the \strong{\code{\link[bruceR:PROCESS]{bruceR::PROCESS()}}} function
-#' first builds regression models according to the data, variable names, and a few other parameters
+#' first builds regression models according to the data, variable names, and a few other arguments
 #' that users input (with \strong{no need to} specify the PROCESS model number and \strong{no need to} manually mean-center the variables).
 #' The function can automatically judge the model number/type and also automatically conduct mean-centering before model building.
 #'
@@ -322,7 +319,7 @@ boot_ci=function(boot,
 #' * Order matters when \code{mod.type="3-way"}
 #' (PROCESS Models 3, 5.3, 11, 12, 18, 19, 72, and 73).
 #'
-#' ** Do not set this parameter when \code{med.type="serial"}
+#' ** Do not set this argument when \code{med.type="serial"}
 #' (PROCESS Model 6).
 #' @param covs Variable name(s) of covariate(s) (i.e., control variables).
 #' Use \code{c()} to combine multiple covariates.
@@ -332,18 +329,18 @@ boot_ci=function(boot,
 #' @param hlm.re.m,hlm.re.y HLM (multilevel) random effect term of M model and Y model.
 #' By default, it converts \code{clusters} to \code{\link[lme4:lme4-package]{lme4}} syntax of random intercepts:
 #' e.g., \code{"(1 | School_ID)"} or \code{"(1 | Sub) + (1 | Item)"}.
-#' You can set these parameters to include more complex terms (e.g., random slopes).
-#' In most cases, no need to set these parameters.
+#' You can set these arguments to include more complex terms (e.g., random slopes).
+#' In most cases, no need to set these arguments.
 #' @param hlm.type HLM (multilevel) mediation type (levels of "X-M-Y"):
 #' \code{"1-1-1"} (default),
 #' \code{"2-1-1"} (indeed the same as \code{"1-1-1"} in a mixed model),
 #' or \code{"2-2-1"} (currently \emph{not fully supported}, as limited by the \code{\link[mediation:mediate]{mediation}} package).
-#' In most cases, no need to set this parameter.
+#' In most cases, no need to set this argument.
 #' @param med.type Type of mediator:
 #' \code{"parallel"} (default) or \code{"serial"}
 #' (only relevant to PROCESS Model 6).
 #' Partial matches of \code{"p"} or \code{"s"} also work.
-#' In most cases, no need to set this parameter.
+#' In most cases, no need to set this argument.
 #' @param mod.type Type of moderator:
 #' \code{"2-way"} (default) or \code{"3-way"}
 #' (relevant to PROCESS Models 3, 5.3, 11, 12, 18, 19, 72, and 73).
@@ -379,11 +376,11 @@ boot_ci=function(boot,
 #' @param seed Random seed for obtaining reproducible results.
 #' Default is \code{NULL}.
 #' You may set to any number you prefer
-#' (e.g., \code{seed=5201314}, just an uncountable number).
+#' (e.g., \code{seed=1234}, just an uncountable number).
 #'
 #' * Note that all mediation models include random processes
 #' (i.e., bootstrap resampling or Monte Carlo simulation).
-#' To get exactly the same results between runs, you have to set a random seed.
+#' To get exactly the same results between runs, you need to set a random seed.
 #' However, even if you set the same seed number, it is unlikely to
 #' get exactly the same results across different R packages
 #' (e.g., \code{\link[lavaan:lavaan-class]{lavaan}} vs. \code{\link[mediation:mediate]{mediation}})
@@ -426,7 +423,9 @@ boot_ci=function(boot,
 #' \emph{Journal of Personality and Social Psychology, 115}(6), 929-943.
 #'
 #' @examples
-#' \donttest{#### NOTE ####
+#' \dontrun{
+#'
+#' #### NOTE ####
 #' ## In the following examples, I set nsim=100 to save time.
 #' ## In formal analyses, nsim=1000 (or larger) is suggested!
 #'
@@ -521,7 +520,6 @@ boot_ci=function(boot,
 #' ## https://github.com/psychbruce/bruceR
 #' }
 #'
-#' @importFrom stats confint
 #' @export
 PROCESS=function(data,
                  y="",
@@ -547,20 +545,20 @@ PROCESS=function(data,
                  nsmall=digits,
                  file=NULL) {
   ## Default Setting
-  warning.y.class="\n\"y\" should be a numeric variable or a factor variable with only 2 levels."
-  warning.x.class="\n\"x\" should be a numeric variable or a factor variable with only 2 levels."
-  warning.m.class="\n\"meds\" should be numeric variable(s) or factor variable(s) with only 2 levels."
-  warning.mod.path="\nPlease also specify \"mod.path\":\n    \"all\" or any combination of c(\"x-y\", \"x-m\", \"m-y\")"
-  if(x=="" | y=="") stop("\n\nPlease specify both \"x\" and \"y\".")
+  warning.y.class="\"y\" should be a numeric variable or a factor variable with only 2 levels."
+  warning.x.class="\"x\" should be a numeric variable or a factor variable with only 2 levels."
+  warning.m.class="\"meds\" should be numeric variable(s) or factor variable(s) with only 2 levels."
+  warning.mod.path="Please also specify \"mod.path\":\n    \"all\" or any combination of c(\"x-y\", \"x-m\", \"m-y\")"
+  if(x=="" | y=="") stop("Please specify both \"x\" and \"y\".", call.=TRUE)
   if(length(meds)>0 & length(mods)>0 & length(mod.path)>3)
-    stop(warning.mod.path)
+    stop(warning.mod.path, call.=TRUE)
   if("all" %in% mod.path)
     mod.path=c("x-y", "x-m", "m-y")
   if("both" %in% cov.path)
     cov.path=c("y", "m")
   if(length(mods)>0) mod1=mods[1] else mod1=NULL
   if(length(mods)>1) mod2=mods[2] else mod2=NULL
-  if(length(mods)>2) stop("\nThe number of moderators (\"mods\") should be no more than 2.")
+  if(length(mods)>2) stop("The number of moderators (\"mods\") should be no more than 2.", call.=TRUE)
   if(length(med.type)>1) med.type="parallel"  # default
   if(length(mod.type)>1) mod.type="2-way"     # default
   if(grepl("p", med.type)) med.type="parallel"
@@ -568,9 +566,9 @@ PROCESS=function(data,
   if(grepl("2", mod.type)) mod.type="2-way"
   if(grepl("3", mod.type)) mod.type="3-way"
   if(grepl("p|s", med.type)==FALSE)
-    stop("\n\"med.type\" should be \"parallel\" or \"serial\".")
+    stop("\"med.type\" should be \"parallel\" or \"serial\".", call.=TRUE)
   if(grepl("2|3", mod.type)==FALSE)
-    stop("\n\"mod.type\" should be \"2-way\" or \"3-way\".")
+    stop("\"mod.type\" should be \"2-way\" or \"3-way\".", call.=TRUE)
   if(length(meds)>0) {
     if(length(mods)>0 & "m-y" %in% mod.path) {
       if(mod.type=="2-way")
@@ -591,12 +589,12 @@ PROCESS=function(data,
   if(grepl("bca", ci)) ci="bca.boot"
   if(grepl("m", ci)) ci="mcmc"
   if(ci %notin% c("boot", "bc.boot", "bca.boot", "mcmc"))
-    stop("\nPlease choose \"boot\", \"bc.boot\", \"bca.boot\", or \"mcmc\" for ci.")
+    stop("Please choose \"boot\", \"bc.boot\", \"bca.boot\", or \"mcmc\" for ci.", call.=TRUE)
   nsim.type=ifelse(grepl("boot", ci), "Bootstrap", "Monte Carlo")
   if(length(clusters)>0) HLM=TRUE else HLM=FALSE
   if(length(hlm.type)>1) hlm.type="1-1-1"  # default; same as "2-1-1"
   if(hlm.type %notin% c("1-1-1", "2-1-1", "2-2-1"))
-    stop("\n\"hlm.type\" should be \"1-1-1\", \"2-1-1\", or \"2-2-1\".")
+    stop("\"hlm.type\" should be \"1-1-1\", \"2-1-1\", or \"2-2-1\".", call.=TRUE)
   if(HLM) {
     if(hlm.re.m=="")  # default: random intercept
       hlm.re.m=paste("(1 | " %^% clusters %^% ")", collapse=" + ")
@@ -617,7 +615,7 @@ PROCESS=function(data,
       data.v[[y]]=as.numeric(as.factor(data.v[[y]]))-1  # 0, 1
       Y01=TRUE
     } else {
-      stop(warning.y.class)
+      stop(warning.y.class, call.=TRUE)
     }
   } else {
     Y01=FALSE
@@ -629,7 +627,7 @@ PROCESS=function(data,
         data.v[[med]]=as.numeric(as.factor(data.v[[med]]))-1  # 0, 1
         M01=c(M01, TRUE)
       } else {
-        stop(warning.m.class)
+        stop(warning.m.class, call.=TRUE)
       }
     } else {
       M01=c(M01, FALSE)
@@ -641,13 +639,13 @@ PROCESS=function(data,
       data.v[[x]]=as.numeric(as.factor(data.v[[x]]))-1  # 0, 1
       x.trans.info=" (recoded: " %^% paste(x.levels, 0:1, sep="=", collapse=", ") %^% ")"
     } else {
-      stop(warning.x.class)
+      stop(warning.x.class, call.=TRUE)
     }
   } else {
     x.trans.info=""
   }
   if(HLM & length(meds)>0 & hlm.type=="2-2-1") {
-    if(length(clusters)>1) stop("\nThe number of clusters should be 1.")
+    if(length(clusters)>1) stop("The number of clusters should be 1.", call.=TRUE)
     dt=data.v[c(x, meds, mods, covs, clusters)]
     Run("dt1=dplyr::summarise(dplyr::group_by(dt, {clusters}), dplyr::across(where(is.numeric), mean))",
         "dt2=dplyr::summarise(dplyr::group_by(dt, {clusters}), dplyr::across(where(is.factor), mean))",
@@ -657,16 +655,19 @@ PROCESS=function(data,
   }
   if(std) {
     # caution !!!
-    data.v=data.c=data.c.NOmed=grand_mean_center(data.v, vars=c(y, x, meds, mods, covs), std=std)
+    if(Y01)
+      data.v=data.c=data.c.NOmed=grand_mean_center(data.v, vars=c(x, meds, mods, covs), std=TRUE)
+    else
+      data.v=data.c=data.c.NOmed=grand_mean_center(data.v, vars=c(y, x, meds, mods, covs), std=TRUE)
   } else {
-    data.c.NOmed=grand_mean_center(data.v, vars=c(x, mods, covs), std=std)
-    data.c=grand_mean_center(data.v, vars=c(x, meds, mods, covs), std=std)
+    data.c.NOmed=grand_mean_center(data.v, vars=c(x, mods, covs), std=FALSE)
+    data.c=grand_mean_center(data.v, vars=c(x, meds, mods, covs), std=FALSE)
   }
   nmis=nrow(data)-nrow(data.v)
 
   ## File Opening
   # if(!is.null(file)) {
-  #   file=stringr::str_replace(file, "\\.docx$", ".doc")
+  #   file=str_replace(file, "\\.docx$", ".doc")
   #   FILE=file(file, "a", encoding="UTF-8")
   # }
 
@@ -676,7 +677,7 @@ PROCESS=function(data,
     # (moderated) moderation
     fm=c()
     if(length(mods)==0) {
-      stop("\n\nPlease specify \"meds\" (mediators) and/or \"mods\" (moderators).")
+      stop("Please specify \"meds\" (mediators) and/or \"mods\" (moderators).", call.=TRUE)
     } else if(length(mods)==1) {
       pid=1
       ptype="Simple Moderation"
@@ -784,7 +785,7 @@ PROCESS=function(data,
       }
     }
     if(pid<0)
-      stop(warning.mod.path)
+      stop(warning.mod.path, call.=TRUE)
     if(pid %in% 7)
       fy=Glue("{y} ~ {x} + {mod1}") %^% meds.all
     if(pid %in% c(9, 11))
@@ -798,9 +799,9 @@ PROCESS=function(data,
     # serial mediation
     if(length(mods)==0) {
       if(length(meds)>4)
-        stop("\nPROCESS() does not support serial mediation with more than 4 mediators.")
+        stop("PROCESS() does not support serial mediation with more than 4 mediators.", call.=TRUE)
       if(any(M01))
-        stop("\nPROCESS() does not support serial mediation with dichotomous mediators.")
+        stop("PROCESS() does not support serial mediation with dichotomous mediators.", call.=TRUE)
       pid=6
       ptype=Glue("Serial Multiple Mediation ({length(meds)} meds)")
       fy=Glue("{y} ~ {x}") %^% meds.all
@@ -809,14 +810,14 @@ PROCESS=function(data,
         fm[mi]=fm[mi] %^% " + " %^% paste(meds[1:(mi-1)], collapse=" + ")
       }
     } else {
-      stop("\nPROCESS() does not support serial mediation with moderators.\nPlease remove the \"mods\" parameter from your code.")
+      stop("PROCESS() does not support serial mediation with moderators.\nPlease remove the \"mods\" argument from your code.", call.=TRUE)
     }
   }
   if("m" %in% cov.path)
-    fm=stringr::str_replace(fm, "~", "~" %^% covs.all)
+    fm=str_replace(fm, "~", "~" %^% covs.all)
   if("y" %in% cov.path) {
-    fy=stringr::str_replace(fy, "~", "~" %^% covs.all)
-    ft=stringr::str_replace(ft, "~", "~" %^% covs.all)  # y ~ [covs] + x
+    fy=str_replace(fy, "~", "~" %^% covs.all)
+    ft=str_replace(ft, "~", "~" %^% covs.all)  # y ~ [covs] + x
   }
   if(HLM) {
     if(hlm.type!="2-2-1")
@@ -930,7 +931,7 @@ PROCESS=function(data,
 
   ## PROCESS Model Building
   if(HLM & hlm.type=="2-2-1")
-    stop("\nAs limited by the \"mediation\" package, the estimate of \"2-2-1\" multilevel mediation is not supported currently.")
+    stop("As limited by the \"mediation\" package, the estimate of \"2-2-1\" multilevel mediation is not supported currently.", call.=TRUE)
   RES=list()
   run.process.mod.xy=function(eff.tag="") {
     text=Glue("
@@ -1039,6 +1040,16 @@ PROCESS=function(data,
   #   cat("\n")
   # }
 
+  if(length(meds)>0)
+    Print("
+    <<italic Note>>. The results based on bootstrapping or other random processes
+    are <<italic unlikely>> identical to other statistical software (e.g., SPSS).
+    To make results reproducible, you need to set a <<bold seed>> (any number).
+    Please see the help page for details: <<bold help(PROCESS)>>
+    Ignore this note if you have already set a seed. :)
+    \n
+    ")
+
   invisible(list(
     process.id=pid,
     process.type=ptype,
@@ -1052,34 +1063,37 @@ PROCESS=function(data,
 #' Tidy report of lavaan model.
 #'
 #' @param lavaan Model object fitted by \code{\link[lavaan:lavaan-class]{lavaan}}.
-#' @param ci Method for estimating the standard error (SE) and
-#' 95\% confidence interval (CI) of user-defined parameter(s).
+#' @param ci Method for estimating standard error (SE) and
+#' 95\% confidence interval (CI).
+#'
 #' Default is \code{"raw"} (the standard approach of \code{lavaan}).
-#' Other options include:
+#' Other options:
 #' \describe{
 #'   \item{\code{"boot"}}{Percentile Bootstrap}
 #'   \item{\code{"bc.boot"}}{Bias-Corrected Percentile Bootstrap}
 #'   \item{\code{"bca.boot"}}{Bias-Corrected and Accelerated (BCa) Percentile Bootstrap}
 #' }
 #' @param nsim Number of simulation samples (bootstrap resampling)
-#' for estimating SE and 95\% CI of user-defined parameter(s).
-#' Default is \code{100} for running examples faster.
-#' In formal analyses, however, \strong{\code{nsim=1000} (or larger)} is strongly suggested!
+#' for estimating SE and 95\% CI.
+#' In formal analyses, \strong{\code{nsim=1000} (or larger)} is strongly suggested.
 #' @param seed Random seed for obtaining reproducible results. Default is \code{NULL}.
 #' @param digits,nsmall Number of decimal places of output. Default is \code{3}.
 #' @param print Print results. Default is \code{TRUE}.
+#' @param covariance Print (co)variances. Default is \code{FALSE}.
 #' @param file File name of MS Word (\code{.doc}).
 #'
 #' @return
 #' Invisibly return a list of results:
 #' \describe{
-#'   \item{\code{fit}}{Fit measures.}
-#'   \item{\code{path}}{Path coefficients.}
-#'   \item{\code{effect}}{Used-defined effect estimates.}
+#'   \item{\code{fit}}{Model fit indices.}
+#'   \item{\code{measure}}{Latent variable measures.}
+#'   \item{\code{regression}}{Regression paths.}
+#'   \item{\code{covariance}}{Variances and/or covariances.}
+#'   \item{\code{effect}}{Defined effect estimates.}
 #' }
 #'
 #' @seealso
-#' \code{\link{PROCESS}}
+#' \code{\link{PROCESS}}, \code{\link{CFA}}
 #'
 #' @examples
 #' ## Simple Mediation:
@@ -1146,55 +1160,97 @@ lavaan_summary=function(lavaan,
                         seed=NULL,
                         digits=3, nsmall=digits,
                         print=TRUE,
+                        covariance=FALSE,
                         file=NULL) {
-  if(length(ci)>1) ci="raw"
   FIT=lavaan::fitMeasures(lavaan)
-  pe=lavaan::parameterEstimates(lavaan, standardized=TRUE)
-  pe.reg=pe[pe$op=="~", c("lhs", "rhs", "label", "est", "se", "std.all")]
-  pe.eff=pe[pe$op==":=", c("label", "est", "std.all")]
-  REG=data.frame(Path=pe.reg$lhs %^% " <= " %^% pe.reg$rhs,
-                 Tag=stringr::str_replace_all(
-                   "(" %^% pe.reg$label %^% ")", "\\(\\)", ""),
-                 Coef=pe.reg$est,
-                 S.E.=pe.reg$se)
-  REG$z=REG$Coef/REG$S.E.
-  REG$pval=p.z(REG$z)
-  REG$Beta=pe.reg$std.all
-  row.names(REG)=REG[[1]]
-  REG[[1]]=NULL
-  if(ci!="raw" & nrow(pe.eff)>0) {
+
+  try({
+    pe.error=TRUE
+    pe=lavaan::parameterEstimates(lavaan, standardized=TRUE)
+    pe.error=FALSE
+  }, silent=TRUE)
+  if(pe.error) {
+    pe=lavaan::parameterEstimates(lavaan, standardized=FALSE)
+    pe$std.all=NA
+  }
+  if("label" %notin% names(pe)) pe$label=""
+
+  if(length(ci)>1) ci="raw"
+  CI=switch(
+    ci,
+    "raw"="Raw (Standard)",
+    "boot"="Percentile Bootstrap",
+    "bc.boot"="Bias-Corrected Percentile Bootstrap",
+    "bca.boot"="Bias-Corrected and Accelerated (BCa) Percentile Bootstrap")
+  if(ci!="raw") {
     set.seed(seed)
     lv.boot=lavaan::bootstrapLavaan(
       lavaan, type="nonparametric",
       FUN=function(...) { lavaan::coef(..., type="user") },
       R=nsim)
-    lv.boot=as.data.frame(lv.boot)[pe.eff$label]
-    EFF=as.data.frame(pe.eff[1])
-    EFF$Effect=pe.eff$est
-    EFF$BootSE=apply(lv.boot, 2, sd)
-    EFF$z=EFF$Effect/EFF$BootSE
-    EFF$pval=p.z(EFF$z)
-    EFF=cbind(EFF, t(apply(lv.boot, 2, boot_ci, type=ci)), pe.eff[3])
-    names(EFF)[c(1, 6, 7, 8)]=c(" ", "BootLLCI", "BootULCI", "Beta")
-  } else if(nrow(pe.eff)>0) {
-    EFF=pe[pe$op==":=",
-           c("label", "est", "se", "z", "pvalue",
-             "ci.lower", "ci.upper", "std.all")]
-    EFF$pvalue=p.z(EFF$z)
-    EFF=as.data.frame(EFF)
-    names(EFF)=c(" ", "Effect", "S.E.", "z", "pval", "LLCI", "ULCI", "Beta")
-  } else {
-    EFF=data.frame()
+    lv.boot=as.data.frame(lv.boot)
+    pe$se=apply(lv.boot, 2, sd)
+    bootci=apply(lv.boot, 2, boot_ci, type=ci)
+    pe$ci.lower=bootci[1,]
+    pe$ci.upper=bootci[2,]
+  }
+
+  extract_lavaan_table=function(lav.df, op, ci.raw) {
+    RES=data.frame(Estimate=lav.df$est,
+                   S.E.=lav.df$se)
+    RES$z=RES$Estimate/RES$S.E.
+    RES$pval=p.z(RES$z)
+    if(ci.raw) {
+      RES$LLCI=lav.df$ci.lower
+      RES$ULCI=lav.df$ci.upper
+    } else {
+      RES$BootLLCI=lav.df$ci.lower
+      RES$BootULCI=lav.df$ci.upper
+    }
+    RES$Beta=lav.df$std.all
+    if(nrow(RES)>0) {
+      if(op==":=") {
+        row.names(RES)=paste(" ", lav.df$label)
+      } else {
+        row.names(RES)=paste(
+          " ", lav.df$lhs, op, lav.df$rhs,
+          str_replace_all("(" %^% lav.df$label %^% ")", "\\(\\)", ""))
+      }
+    }
+    return(RES)
+  }
+
+  MES=extract_lavaan_table(pe[pe$op=="=~",], "=~", ci=="raw")
+  REG=extract_lavaan_table(pe[pe$op=="~",], "<-", ci=="raw")
+  COV=extract_lavaan_table(pe[pe$op=="~~",], "~~", ci=="raw")
+  EFF=extract_lavaan_table(pe[pe$op==":=",], ":=", ci=="raw")
+
+  ALL=data.frame()
+  if(ci=="raw")
+    NUL=data.frame(Estimate=NA, S.E.=NA, z=NA, pval=NA, LLCI=NA, ULCI=NA, Beta=NA)
+  else
+    NUL=data.frame(Estimate=NA, S.E.=NA, z=NA, pval=NA, BootLLCI=NA, BootULCI=NA, Beta=NA)
+  if(nrow(MES)>0) {
+    row.names(NUL)="Latent Variables:"
+    ALL=rbind(ALL, NUL, MES)
+  }
+  if(nrow(REG)>0) {
+    row.names(NUL)="Regression Paths:"
+    ALL=rbind(ALL, NUL, REG)
+  }
+  if(nrow(COV)>0 & covariance) {
+    row.names(NUL)="(Co)variances:"
+    ALL=rbind(ALL, NUL, COV)
   }
   if(nrow(EFF)>0) {
-    row.names(EFF)=EFF[[1]]
-    EFF[[1]]=NULL
+    row.names(NUL)="Defined Effects:"
+    ALL=rbind(ALL, NUL, EFF)
   }
 
   if(print) {
     cat("\n")
     Print("
-    <<cyan Fit Measures:>>
+    <<cyan Fit Measures (lavaan):>>
     {p(chi2=FIT['chisq'], df=FIT['df'], n=FIT['ntotal'], nsmall=nsmall)}
     \u03c7\u00b2/<<italic df>> = {FIT['chisq']/FIT['df']:.{nsmall}}{ifelse(FIT['df']==0, ' <<red (saturated model)>>', '')}
     AIC = {FIT['aic']:.{nsmall}} <<white (Akaike Information Criterion)>>
@@ -1209,42 +1265,28 @@ lavaan_summary=function(lavaan,
     SRMR = {FIT['srmr']:.{nsmall}} <<white (Standardized Root Mean Square Residual)>>
     ")
     cat("\n")
-    print_table(REG, row.names=TRUE, nsmalls=nsmall,
-                title="<<blue Model Paths (lavaan):>>")
+    print_table(ALL, row.names=TRUE, nsmalls=nsmall,
+                title="<<cyan Model Estimates (lavaan):>>",
+                note=Glue("<<italic Note>>. {CI} Confidence Interval (CI) and SE."))
     cat("\n")
-    if(nrow(EFF)>0) {
-      print_table(EFF, row.names=TRUE, nsmalls=nsmall,
-                  title="<<blue Model Terms (lavaan):>>")
-      cat("\n")
-    }
   }
 
   if(!is.null(file)) {
-    if(nrow(EFF)>0) {
-      EFF.html=paste0(
-        "<p><br/><br/></p>",
-        "<p><b>Table 2. Model Terms.</b></p>",
-        print_table(EFF, nsmalls=nsmall,
-                    file.align.text=c(
-                      "left", "right", "right", "right", "right", "left", "right", "right", "right"
-                    ),
-                    file="NOPRINT")$html$TABLE,
-        "<p><i>Note</i>. * <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.</p>")
-    } else {
-      EFF.html=""
-    }
     print_table(
-      REG, nsmalls=nsmall, row.names=TRUE,
-      title="<b>Table 1. Model Paths.</b>",
+      ALL, nsmalls=nsmall, row.names=TRUE,
+      title="<b>Table. Model Estimates.</b>",
       note="<i>Note</i>. * <i>p</i> < .05. ** <i>p</i> < .01. *** <i>p</i> < .001.",
-      append=EFF.html,
       file=file,
       file.align.text=c(
-        "left", "left", "right", "right", "right", "right", "left", "right"
+        "left", "right", "right", "right", "right", "left", "right", "right", "right"
       ))
   }
 
-  invisible(list(fit=FIT, path=REG, effect=EFF))
+  invisible(list(fit=FIT,
+                 measure=MES,
+                 regression=REG,
+                 covariance=COV,
+                 effect=EFF))
 }
 
 
@@ -1256,12 +1298,12 @@ process_lav=function(data, y, x, meds, covs, clusters,
                      file=NULL,
                      print=TRUE) {
   if(length(clusters)>=1)
-    stop("\nMultilevel serial mediation is not supported currently.")
+    stop("Multilevel serial mediation is not supported currently.", call.=TRUE)
 
   if(length(clusters)==0)
     clusters=NULL
   if(length(clusters)>1)
-    stop("\nAs limited by the \"lavaan\" package, only one cluster is allowed.")
+    stop("As limited by the \"lavaan\" package, only one cluster is allowed.", call.=TRUE)
 
   CI=switch(
     ci,
@@ -1310,7 +1352,7 @@ process_lav=function(data, y, x, meds, covs, clusters,
       <<blue <<underline LAVAAN Syntax:>>>>\n<<italic {model}>>"),
       note=Glue("
       {CI} Confidence Interval
-      <<white (SEs and CIs are estimated based on {nsim} Bootstrap samples.)>>"))
+      <<white (SE and CI are estimated based on {nsim} Bootstrap samples.)>>"))
     cat("\n")
   }
 
@@ -1445,7 +1487,7 @@ process_med=function(model.m,
       <<blue <<underline Indirect Path:>> \"{x}\" (X) ==> \"{medi}\" (M) ==> \"{y}\" (Y)>>{eff.tag}"),
       note=Glue("
       {CI} Confidence Interval
-      <<white ({ifelse(boot, 'SEs', 'Effects, SEs,')} and CIs are estimated based on {nsim} {ifelse(boot, 'Bootstrap samples', 'Monte Carlo samples')}.)>>"))
+      <<white ({ifelse(boot, 'SE', 'Effect, SE,')} and CI are estimated based on {nsim} {ifelse(boot, 'Bootstrap samples', 'Monte Carlo samples')}.)>>"))
     cat("\n")
   }
 
@@ -1490,7 +1532,7 @@ process_mod=function(model0,
 
   # MOD=coefficients(summary(model))
   # MOD=as.data.frame(MOD)[which(grepl(":", row.names(MOD))),]
-  # row.names(MOD)=stringr::str_replace_all(row.names(MOD), ":", " x ")
+  # row.names(MOD)=str_replace_all(row.names(MOD), ":", " x ")
   MOD=interaction_test(model, data=data.c, data.name="data.c")
   if(nrow(MOD)==2)
     if(row.names(MOD)[2]=="(All Interactions)")
@@ -1504,25 +1546,25 @@ process_mod=function(model0,
     names(mod2.val)=NULL
     if(!inherits(res, "data.frame"))
       res=as.data.frame(res) %>%
-        dplyr::mutate(dplyr::across(c(-1), as.numeric))
+        mutate(across(c(-1), as.numeric))
     names(res)[2:3]=c("Effect", "S.E.")
     names(res)[4:5]=c("LLCI", "ULCI")
-    names(res)[6]=stringr::str_sub(names(res)[6], 1, 1)
+    names(res)[6]=str_sub(names(res)[6], 1, 1)
     names(res)[7]="pval"
     if(is.null(mod2)) {
       res0=res=cbind(data.frame(Mod1=mod1.vals), res[-1])
       if(c("- 1 SD", "Mean", "+ 1 SD") %allin% names(mod1.vals))
-        res[[1]]=stringr::str_trim(formatF(res[[1]], nsmall)) %^%
+        res[[1]]=str_trim(formatF(res[[1]], nsmall)) %^%
           c(" (- SD)", " (Mean)", " (+ SD)")
       names(res0)[1]=mod1
       names(res)[1]="\"" %^% mod1 %^% "\""
     } else {
       res0=res=cbind(data.frame(Mod2=mod2.val), res)
       if(c("- 1 SD", "Mean", "+ 1 SD") %allin% names(mod2.vals))
-        res[[1]]=stringr::str_trim(formatF(res[[1]], nsmall)) %^%
+        res[[1]]=str_trim(formatF(res[[1]], nsmall)) %^%
           c(" (- SD)", " (Mean)", " (+ SD)")[i]
       if(c("- 1 SD", "Mean", "+ 1 SD") %allin% names(mod1.vals))
-        res[[2]]=stringr::str_trim(formatF(res[[2]], nsmall)) %^%
+        res[[2]]=str_trim(formatF(res[[2]], nsmall)) %^%
           c(" (- SD)", " (Mean)", " (+ SD)")
       names(res0)[1]=mod2
       names(res0)[2]=mod1
@@ -1536,11 +1578,11 @@ process_mod=function(model0,
   RES$`[95% CI]`=paste0("[",
                         formatF(RES[["LLCI"]], nsmall), ", ",
                         formatF(RES[["ULCI"]], nsmall), "]")
-  RES[[1]]=format(stringr::str_trim(formatF(RES[[1]], nsmall)),
+  RES[[1]]=format(str_trim(formatF(RES[[1]], nsmall)),
                   width=nchar(names(RES)[1]))
   names(RES)[1]=format(names(RES)[1], width=max(nchar(RES[[1]])))
   if(!is.null(mod2)) {
-    RES[[2]]=format(stringr::str_trim(formatF(RES[[2]], nsmall)),
+    RES[[2]]=format(str_trim(formatF(RES[[2]], nsmall)),
                     width=nchar(names(RES)[2]))
     names(RES)[2]=format(names(RES)[2], width=max(nchar(RES[[2]])))
   }
@@ -1646,7 +1688,7 @@ process_mod=function(model0,
 #### Indirect Effect: Model-Based (using the "mediation" package) ####
 
 
-#' Tidy report of mediation analysis (to R Console or MS Word).
+#' Tidy report of mediation analysis.
 #'
 #' @description
 #' Tidy report of mediation analysis,
@@ -1664,7 +1706,9 @@ process_mod=function(model0,
 #' \code{\link{PROCESS}}
 #'
 #' @examples
-#' \donttest{library(mediation)
+#' \dontrun{
+#'
+#' library(mediation)
 #' # ?mediation::mediate
 #'
 #' ## Example 1: OLS Regression
@@ -1695,7 +1739,7 @@ process_mod=function(model0,
 #'                 sims=1000)
 #' med_summary(med.lmm)
 #' }
-#' @importFrom stats model.frame
+#'
 #' @export
 med_summary=function(model, digits=3, nsmall=digits, file=NULL) {
   # for raw function, see:
@@ -1757,7 +1801,7 @@ med_summary=function(model, digits=3, nsmall=digits, file=NULL) {
     smat.new=smat
     smat.new.names=names(smat.new)
     smat.new.names[5]="<i>p</i>"
-    smat.new[[6]]=stringr::str_replace_all(smat.new[[6]], "-", "\u2013")
+    smat.new[[6]]=str_replace_all(smat.new[[6]], "-", "\u2013")
     print_table(
       smat.new[c(1, 2, 6, 5)], nsmalls=nsmall,
       col.names=c(smat.new.names[c(1, 2, 6, 5)], " "),
@@ -1834,8 +1878,6 @@ med_summary=function(model, digits=3, nsmall=digits, file=NULL) {
 #'
 #' @seealso \code{\link{granger_test}}
 #'
-#' @import ggplot2
-#' @importFrom stats qt
 #' @export
 ccf_plot=function(formula, data,
                   lag.max=30, sig.level=0.05,
@@ -1904,13 +1946,12 @@ ccf_plot=function(formula, data,
 #' @examples
 #' granger_test(chicken ~ egg, data=lmtest::ChickEgg)
 #' granger_test(chicken ~ egg, data=lmtest::ChickEgg, lags=1:10, file="Granger.doc")
-#' unlink("Granger.doc")  # delete file for test
+#' unlink("Granger.doc")  # delete file for code check
 #'
 #' @seealso
 #' \code{\link{ccf_plot}},
 #' \code{\link{granger_causality}}
 #'
-#' @importFrom stats as.formula na.omit
 #' @export
 granger_test=function(formula, data, lags=1:5,
                       test.reverse=TRUE,
@@ -1927,25 +1968,30 @@ granger_test=function(formula, data, lags=1:5,
     formulas=list(formula)
   }
 
-  cat("\n")
-  Print("<<yellow ====== Granger Causality Test (Bivariate) ======>>")
+  Print("
+  \n
+  <<cyan Granger Causality Test (Bivariate)>>
 
-  Print("\n\n\nHypothesized direction:")
-  Print("<<blue {formula[2]} ~ {formula[2]}[1:Lags] + <<green {formula[3]}[1:Lags]>>>>")
+  Hypothesized direction:
+  <<blue {formula[2]} ~ {formula[2]}[1:Lags] + <<green {formula[3]}[1:Lags]>>>>
+  ")
 
   for(f in formulas) {
     rev=FALSE
     if(test.reverse & f!=formulas[[1]]) {
       rev=TRUE
-      Print("\n\n\nReverse direction:")
-      Print("<<blue {formula[3]} ~ {formula[3]}[1:Lags] + <<green {formula[2]}[1:Lags]>>>>")
+      Print("
+      \n
+      Reverse direction:
+      <<blue {formula[3]} ~ {formula[3]}[1:Lags] + <<green {formula[2]}[1:Lags]>>>>
+      ")
     }
     for(lag in lags) {
       gt=lmtest::grangertest(formula=f, data=data, order=lag, na.action=na.omit)
       Fval=gt[2,"F"]
       df1=-gt[2,"Df"]
       df2=gt[1,"Res.Df"]
-      sig=stringr::str_trim(sig.trans(p.f(Fval, df1, df2)))
+      sig=str_trim(sig.trans(p.f(Fval, df1, df2)))
       result=bruceR::p(f=Fval, df1=df1, df2=df2)
       result.simple=formatF(Fval, 2) %^% ifelse(sig=="", "", "<sup>" %^% sig %^% "</sup>")
       Print("Lags = {lag}:\t{result}")
@@ -1957,12 +2003,12 @@ granger_test=function(formula, data, lags=1:5,
     }
   }
 
+  cat("\n")
   if(!is.null(file)) {
-    cat("\n")
     RES=res
-    RES[[2]]=stringr::str_replace(stringr::str_replace(
+    RES[[2]]=str_replace(str_replace(
       RES[[2]], "p", "<i>p</i>"), "F", "<i>F</i>")
-    RES[[3]]=stringr::str_replace(stringr::str_replace(
+    RES[[3]]=str_replace(str_replace(
       RES[[3]], "p", "<i>p</i>"), "F", "<i>F</i>")
     if(test.reverse==FALSE) RES=RES[1:2]
     print_table(RES, row.names=FALSE, digits=0,
@@ -1977,7 +2023,6 @@ granger_test=function(formula, data, lags=1:5,
 }
 
 
-#' @importFrom stats lm anova update as.formula
 vargranger=function(varmodel, var.y, var.x) {
   vms=varmodel[["varresult"]]
   vars=names(vms)
@@ -2048,13 +2093,14 @@ vargranger=function(varmodel, var.y, var.x) {
 #'
 #' @examples
 #' \dontrun{
-#' # "vars" package should be installed and loaded.
-#' library(vars)
-#' data(Canada)
-#' VARselect(Canada)
-#' vm=VAR(Canada, p=3)
-#' model_summary(vm)
-#' granger_causality(vm)
+#'
+#'   # R package "vars" should be installed
+#'   library(vars)
+#'   data(Canada)
+#'   VARselect(Canada)
+#'   vm=VAR(Canada, p=3)
+#'   model_summary(vm)
+#'   granger_causality(vm)
 #' }
 #'
 #' @export
@@ -2078,7 +2124,7 @@ granger_causality=function(varmodel, var.y=NULL, var.x=NULL,
         Excluded=unique(c(
           var.x,
           paste(
-            stringr::str_subset(var.x, "\\|", negate=TRUE),
+            str_subset(var.x, "\\|", negate=TRUE),
             collapse="|")
         )))
     res$Equation=as.character(res$Equation)
@@ -2138,9 +2184,10 @@ granger_causality=function(varmodel, var.y=NULL, var.x=NULL,
 
   cat("\n")
   Print("
-  <<yellow ====== Granger Causality Test (Multivariate) ======>>
+  <<cyan Granger Causality Test (Multivariate)>>
 
-  {paste(test.text, collapse=' and ')} based on VAR({varmodel$p}) model:")
+  {paste(test.text, collapse=' and ')} based on VAR({varmodel$p}) model:
+  ")
   print_table(result[c(12:13, test.which)],
               nsmalls=0,
               row.names=FALSE)
@@ -2148,8 +2195,8 @@ granger_causality=function(varmodel, var.y=NULL, var.x=NULL,
 
   if(!is.null(file)) {
     result[[12]]=result[[12]] %>%
-      stringr::str_replace_all("<=", "\u2190") %>%
-      stringr::str_replace_all("^-+$", "")
+      str_replace_all("<=", "\u2190") %>%
+      str_replace_all("^-+$", "")
     print_table(
       result[c(12, test.which)],
       nsmalls=0,

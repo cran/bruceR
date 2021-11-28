@@ -17,7 +17,7 @@ HLM_summary(
 \arguments{
 \item{model}{A model fitted by \code{lmer} or \code{glmer} function using the \code{lmerTest} package.}
 
-\item{level2.predictors}{\strong{[only for \code{lmer}]} [optional] Default is \code{NULL}.
+\item{level2.predictors}{\strong{[Only for \code{lmer}]} [optional] Default is \code{NULL}.
 If you have predictors at level 2, besides putting them into the formula in the \code{lmer} function as usual,
 you may \strong{also} define here the level-2 grouping/clustering variables and corresponding level-2 predictor variables.
 
@@ -26,17 +26,17 @@ where \code{School} and \code{House} are two grouping variables,
 \code{W1 & W2} are school-level predictors,
 and there is no house-level predictor.
 
-*** If there is no level-2 predictor in the formula of \code{lmer}, just leave this parameter blank.}
+*** If there is no level-2 predictor in the formula of \code{lmer}, just leave this argument blank.}
 
-\item{vartypes}{\strong{[only for \code{lmer}]} Manually setting variable types. Needless in most situations.}
+\item{vartypes}{\strong{[Only for \code{lmer}]} Manually setting variable types. Needless in most situations.}
 
-\item{test.rand}{\strong{[only for \code{lmer}]} \code{TRUE} or \code{FALSE} (default).
+\item{test.rand}{\strong{[Only for \code{lmer}]} \code{TRUE} or \code{FALSE} (default).
 Test random effects (i.e., variance components) by using the likelihood-ratio test (LRT), which is asymptotically chi-square distributed. For large datasets, it is much time-consuming.}
 
 \item{digits, nsmall}{Number of decimal places of output. Default is 3.
 But for some statistics (e.g., \emph{R}^2, ICC), to provide more precise information, we fix the decimal places to 5.}
 
-\item{...}{Other optional parameters. You may re-define \code{formula}, \code{data}, or \code{family}.}
+\item{...}{Other arguments. You may re-define \code{formula}, \code{data}, or \code{family}.}
 }
 \value{
 No return value.

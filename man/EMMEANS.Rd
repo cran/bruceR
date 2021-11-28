@@ -12,15 +12,15 @@ EMMEANS(
   reverse = TRUE,
   p.adjust = "bonferroni",
   sd.pooled = NULL,
-  spss = TRUE,
+  model.type = "multivariate",
   digits = 2,
   nsmall = digits
 )
 }
 \arguments{
-\item{model}{A model object returned by \code{\link{MANOVA}}.}
+\item{model}{The model object returned by \code{\link{MANOVA}}.}
 
-\item{effect}{The effect(s) you want to test.
+\item{effect}{Effect(s) you want to test.
 If set to a character string (e.g., \code{"A"}),
 it reports the results of omnibus test or simple main effect.
 If set to a character vector (e.g., \code{c("A", "B")}),
@@ -48,39 +48,57 @@ Alternatives can be \code{"none"}, \code{"fdr"}, \code{"hochberg"},
 For details, see \code{\link[stats:p.adjust]{stats::p.adjust()}} and
 \code{\link[emmeans:summary.emmGrid]{emmeans::summary()}}.}
 
-\item{sd.pooled}{By default, it uses \strong{\code{sqrt(MSE)}} to compute Cohen's \emph{d}.
-Users may also manually set it (e.g., the \emph{SD} of a reference group, or using \code{\link[effectsize:sd_pooled]{effectsize::sd_pooled()}}).}
+\item{sd.pooled}{By default, it uses \strong{\code{sqrt(MSE)}} (root mean square error, RMSE)
+as the pooled \emph{SD} to compute Cohen's \emph{d}.
+Users may specify this argument as the \emph{SD} of a reference group,
+or use \code{\link[effectsize:sd_pooled]{effectsize::sd_pooled()}} to obtain a pooled \emph{SD}.
+For an issue about the computation method of Cohen's \emph{d}, see \emph{Disclaimer} above.}
 
-\item{spss}{Return results identical to SPSS.
-Default is \code{TRUE}, which uses the \code{lm} (rather than \code{aov}) object in \code{model}
-for \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}} and \code{\link[emmeans:emmeans]{emmeans::emmeans()}}.}
+\item{model.type}{\code{"multivariate"} returns the results of pairwise comparisons identical to SPSS,
+which uses the \code{lm} (rather than \code{aov}) object of the \code{model}
+for \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}} and \code{\link[emmeans:emmeans]{emmeans::emmeans()}}.
+
+\code{"univariate"} requires also specifying \code{aov.include=TRUE} in \code{\link{MANOVA}}
+(not recommended by the \code{afex} package; for details, see \code{\link[afex:aov_car]{afex::aov_ez()}}).}
 
 \item{digits, nsmall}{Number of decimal places of output. Default is \code{2}.}
 }
 \value{
-The same object as returned by \code{\link{MANOVA}} (for recursive use).
+The same model object as returned by
+\code{\link{MANOVA}} (for recursive use),
+along with a list of \code{EMMEANS} tables:
+\code{sim} (simple effects),
+\code{emm} (estimated marginal means),
+\code{con} (contrasts).
+Each \code{EMMEANS} appends one list to the returned object.
 }
 \description{
-Easily perform (1) simple-effect (and simple-simple-effect) analyses,
+Perform (1) simple-effect (and simple-simple-effect) analyses,
 including both simple main effects and simple interaction effects,
 and (2) post-hoc multiple comparisons (e.g., pairwise, sequential, polynomial),
 with \emph{p} values adjusted for factors with >= 3 levels.
 
-This function is based on and extends the
+This function is based on and extends
 (1) \code{\link[emmeans:joint_tests]{emmeans::joint_tests()}},
 (2) \code{\link[emmeans:emmeans]{emmeans::emmeans()}}, and
-(3) \code{\link[emmeans:contrast]{emmeans::contrast()}} functions.
+(3) \code{\link[emmeans:contrast]{emmeans::contrast()}}.
 You only need to specify the model object, to-be-tested effect(s), and moderator(s).
-Almost all results you need will be displayed in an elegant manner,
+Almost all results you need will be displayed together,
 including effect sizes (partial \eqn{\eta^2} and Cohen's \emph{d}) and their confidence intervals (CIs).
 90\% CIs for partial \eqn{\eta^2} and 95\% CIs for Cohen's \emph{d} are reported.
 
-To compute Cohen's \emph{d} and its 95\% CI in pairwise comparisons,
-this function uses the pooled \emph{SD}:
-\strong{\code{SD_pooled = sqrt(MSE)}}, where \code{MSE} is of the effect term extracted from ANOVA table.
+By default, the \emph{root mean square error} (RMSE) is used to compute the pooled \emph{SD} for Cohen's \emph{d}.
+Specifically, it uses:
+\enumerate{
+  \item the square root of \emph{mean square error} (MSE) for between-subjects designs;
+  \item the square root of \emph{mean variance of all paired differences of the residuals of repeated measures} for within-subjects and mixed designs.
+}
+In both situations, it extracts the \code{lm} object from the returned value of \code{MANOVA()}.
+Then, it mainly uses \code{sigma()} and \code{residuals()}, respectively, to do these estimates.
+For source code, please see the file \code{bruceR_stats_03_manova.R} on the \href{https://github.com/psychbruce/bruceR}{GitHub Repository}.
 
 \strong{\emph{Disclaimer}:}
-There is substantial disagreement on what is the appropriate pooled \emph{SD} to use in computing effect sizes.
+There is substantial disagreement on the appropriate pooled \emph{SD} to use in computing the effect size.
 For alternative methods, see \code{\link[emmeans:eff_size]{emmeans::eff_size()}} and \code{\link[effectsize:t_to_r]{effectsize::t_to_d()}}.
 Users should \emph{not} take the default output as the only right results and are completely responsible for specifying \code{sd.pooled}.
 }
@@ -88,7 +106,7 @@ Users should \emph{not} take the default output as the only right results and ar
 
 
 Some may confuse the statistical terms "simple effects", "post-hoc tests", and "multiple comparisons".
-Such a confusion is not uncommon. Here, I explain what these terms actually refer to.
+Such a confusion is not uncommon. Here I explain what these terms actually refer to.
 \describe{
   \item{\strong{1. Simple Effect}}{
     When we speak of "simple effect", we are referring to ...
@@ -99,46 +117,32 @@ Such a confusion is not uncommon. Here, I explain what these terms actually refe
     }
     When the interaction effect in ANOVA is significant,
     we should then perform a "simple-effect analysis".
-    In ANOVA, we call it "simple-effect analysis";
-    in regression, we also call it "simple-slope analysis".
+    In regression, we call this "simple-slope analysis".
     They are identical in statistical principles.
-    Nonetheless, the situations in ANOVA can be a bit more complex because we sometimes have a three-factors design.
 
-    In a regular two-factors design, we only test \strong{"simple main effects"}.
-    That is, on the different levels of a factor "B", the main effects of "A" would be different.
-    However, in a three-factors (or more) design, we may also test \strong{"simple interaction effects"} and \strong{"simple simple effects"}.
-    That is, on the different combinations of levels of factors "B" and "C", the main effects of "A" would be different.
+    In a two-factors design, we only test \strong{"simple main effect"}.
+    That is, at different levels of a factor "B", the main effects of "A" would be different.
+    However, in a three-factors (or more) design, we may also test \strong{"simple interaction effect"} and \strong{"simple simple effect"}.
+    That is, at different combinations of levels of factors "B" and "C", the main effects of "A" would be different.
 
-    In SPSS, we usually use the \code{MANOVA} and/or the \code{GLM + /EMMEANS} syntax to perform such analyses.
-    Tutorials (in Chinese) for the SPSS syntax can be found in:
-    \href{https://zhuanlan.zhihu.com/p/30037168}{Tutorial #1},
-    \href{https://zhuanlan.zhihu.com/p/31863288}{Tutorial #2}, and
-    \href{https://zhuanlan.zhihu.com/p/35011046}{Tutorial #3}.
-
-    Here, the R function \code{EMMEANS} can do the same thing as in SPSS and can do much better and easier (just see the section "Examples").
-
-    To note, simple effects \emph{per se} do NOT need any form of \emph{p}-value adjustment, because what we test in simple-effect analyses are still "omnibus \emph{F}-tests".
+    To note, simple effects \emph{per se} never require \emph{p}-value adjustment, because what we test in simple-effect analyses are still "omnibus \emph{F}-tests".
   }
   \item{\strong{2. Post-Hoc Test}}{
     The term "post-hoc" means that the tests are performed after ANOVA. Given this, some may (wrongly) regard simple-effect analyses also as a kind of post-hoc tests.
-    However, these two terms should be distinguished. In many situations and softwares,
+    However, these two terms should be distinguished. In many situations,
     "post-hoc tests" only refer to \strong{"post-hoc comparisons"} using \emph{t}-tests and some \emph{p}-value adjustment techniques.
     We need post-hoc comparisons \strong{only when there are factors with 3 or more levels}.
-    For example, we can perform the post-hoc comparisons of mean values (1) across multiple levels of one factor in a pairwise way or (2) particularly between the two conditions "A1B1" and "A2B2".
 
     Post-hoc tests are totally \strong{independent of} whether there is a significant interaction effect. \strong{It only deals with factors with multiple levels.}
     In most cases, we use pairwise comparisons to do post-hoc tests. See the next part for details.
   }
   \item{\strong{3. Multiple Comparison}}{
-    As mentioned above, multiple comparisons are post-hoc tests by its nature but do NOT have any relationship with simple-effect analyses.
-    In other words, "(post-hoc) multiple comparisons" are \strong{independent of} "interaction effects" and "simple effects".
-    What's more, when the simple main effect is of a factor with 3 or more levels, we also need to do multiple comparisons (e.g., pairwise comparisons) \emph{within} the simple-effect analysis.
-    In this situation (i.e., >= 3 levels), we need \emph{p}-value adjustment methods such as Bonferroni, Tukey's HSD (honest significant difference), FDR (false discovery rate), and so forth.
+    As mentioned above, multiple comparisons are indeed post-hoc tests but have no relationship with simple-effect analyses.
+    Post-hoc multiple comparisons are \strong{independent of} interaction effects and simple effects.
+    Furthermore, if a simple main effect contains 3 or more levels, we also need to do multiple comparisons \emph{within} the simple-effect analysis.
+    In this situation, we also need \emph{p}-value adjustment with methods such as Bonferroni, Tukey's HSD (honest significant difference), FDR (false discovery rate), and so forth.
 
-    There are many ways to do multiple comparisons. All these methods are included in the current \code{EMMEANS} function.
-    If you are familiar with SPSS syntax, you may feel that the current R functions \code{MANOVA} and \code{EMMEANS} are a nice combination of the SPSS syntax \code{MANOVA} and \code{GLM + /EMMEANS}.
-    Yes, they are. More importantly, they outperform the SPSS syntax, either for its higher convenience or for its more fruitful results.
-
+    Options for multiple comparison:
     \itemize{
       \item \code{"pairwise"} - Pairwise comparisons (default is "higher level - lower level")
       \item \code{"seq"} or \code{"consec"} - Consecutive (sequential) comparisons
@@ -153,46 +157,50 @@ Such a confusion is not uncommon. Here, I explain what these terms actually refe
 \donttest{#### Between-Subjects Design ####
 
 between.1
-MANOVA(data=between.1, dv="SCORE", between="A") \%>\%
+MANOVA(between.1, dv="SCORE", between="A") \%>\%
   EMMEANS("A")
-MANOVA(data=between.1, dv="SCORE", between="A") \%>\%
+MANOVA(between.1, dv="SCORE", between="A") \%>\%
   EMMEANS("A", p.adjust="tukey")
-MANOVA(data=between.1, dv="SCORE", between="A") \%>\%
+MANOVA(between.1, dv="SCORE", between="A") \%>\%
   EMMEANS("A", contrast="seq")
-MANOVA(data=between.1, dv="SCORE", between="A") \%>\%
+MANOVA(between.1, dv="SCORE", between="A") \%>\%
   EMMEANS("A", contrast="poly")
 
 between.2
-MANOVA(data=between.2, dv="SCORE", between=c("A", "B")) \%>\%
+MANOVA(between.2, dv="SCORE", between=c("A", "B")) \%>\%
   EMMEANS("A") \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS("B") \%>\%
   EMMEANS("B", by="A")
 
 between.3
-MANOVA(data=between.3, dv="SCORE", between=c("A", "B", "C")) \%>\%
+MANOVA(between.3, dv="SCORE", between=c("A", "B", "C")) \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS(c("A", "B"), by="C") \%>\%
   EMMEANS("A", by=c("B", "C"))
-## just to name a few
-## you can test many other combinations of effects
+## just to name a few here
+## you may test other combinations
 
 
 #### Within-Subjects Design ####
 
 within.1
-MANOVA(data=within.1, dvs="A1:A4", dvs.pattern="A(.)",
+MANOVA(within.1, dvs="A1:A4", dvs.pattern="A(.)",
        within="A") \%>\%
   EMMEANS("A")
 
 within.2
-MANOVA(data=within.2, dvs="A1B1:A2B3", dvs.pattern="A(.)B(.)",
+MANOVA(within.2, dvs="A1B1:A2B3", dvs.pattern="A(.)B(.)",
        within=c("A", "B")) \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS("B", by="A")  # singular error matrix
+# :::::::::::::::::::::::::::::::::::::::
+# This would produce a WARNING because of
+# the linear dependence of A2B2 and A2B3.
+# see: Corr(within.2[c("A2B2", "A2B3")])
 
 within.3
-MANOVA(data=within.3, dvs="A1B1C1:A2B2C2", dvs.pattern="A(.)B(.)C(.)",
+MANOVA(within.3, dvs="A1B1C1:A2B2C2", dvs.pattern="A(.)B(.)C(.)",
        within=c("A", "B", "C")) \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS(c("A", "B"), by="C") \%>\%
@@ -202,20 +210,20 @@ MANOVA(data=within.3, dvs="A1B1C1:A2B2C2", dvs.pattern="A(.)B(.)C(.)",
 #### Mixed Design ####
 
 mixed.2_1b1w
-MANOVA(data=mixed.2_1b1w, dvs="B1:B3", dvs.pattern="B(.)",
+MANOVA(mixed.2_1b1w, dvs="B1:B3", dvs.pattern="B(.)",
        between="A", within="B", sph.correction="GG") \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS("B", by="A")
 
 mixed.3_1b2w
-MANOVA(data=mixed.3_1b2w, dvs="B1C1:B2C2", dvs.pattern="B(.)C(.)",
+MANOVA(mixed.3_1b2w, dvs="B1C1:B2C2", dvs.pattern="B(.)C(.)",
        between="A", within=c("B", "C")) \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS(c("A", "B"), by="C") \%>\%
   EMMEANS("A", by=c("B", "C"))
 
 mixed.3_2b1w
-MANOVA(data=mixed.3_2b1w, dvs="B1:B2", dvs.pattern="B(.)",
+MANOVA(mixed.3_2b1w, dvs="B1:B2", dvs.pattern="B(.)",
        between=c("A", "C"), within="B") \%>\%
   EMMEANS("A", by="B") \%>\%
   EMMEANS("A", by="C") \%>\%
@@ -227,12 +235,12 @@ MANOVA(data=mixed.3_2b1w, dvs="B1:B2", dvs.pattern="B(.)",
 air=airquality
 air$Day.1or2=ifelse(air$Day \%\% 2 == 1, 1, 2) \%>\%
   factor(levels=1:2, labels=c("odd", "even"))
-MANOVA(data=air, dv="Temp", between=c("Month", "Day.1or2"),
+MANOVA(air, dv="Temp", between=c("Month", "Day.1or2"),
        covariate=c("Solar.R", "Wind")) \%>\%
   EMMEANS("Month", contrast="seq") \%>\%
   EMMEANS("Month", by="Day.1or2", contrast="poly")
 }
 }
 \seealso{
-\code{\link{MANOVA}}, \code{\link{bruceR-demodata}}
+\code{\link{TTEST}}, \code{\link{MANOVA}}, \code{\link{bruceR-demodata}}
 }

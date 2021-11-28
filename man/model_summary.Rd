@@ -2,24 +2,24 @@
 % Please edit documentation in R/bruceR_stats_04_regress.R
 \name{model_summary}
 \alias{model_summary}
-\title{Tidy report of regression models (to R Console or MS Word).}
+\title{Tidy report of regression models.}
 \usage{
 model_summary(
-  model_list,
+  model.list,
   std = FALSE,
   digits = 3,
   nsmall = digits,
   file = NULL,
   zero = ifelse(std, FALSE, TRUE),
-  modify_se = NULL,
-  modify_head = NULL,
+  modify.se = NULL,
+  modify.head = NULL,
   line = TRUE,
   bold = 0,
   ...
 )
 }
 \arguments{
-\item{model_list}{A single model or a list of (various types of) models.
+\item{model.list}{A single model or a list of (various types of) models.
 Most types of regression models are supported!}
 
 \item{std}{Standardized coefficients? Default is \code{FALSE}.
@@ -32,19 +32,19 @@ Not applicable to generalized linear (mixed) models.}
 
 \item{zero}{Display "0" before "."? Default is \code{TRUE}.}
 
-\item{modify_se}{Replace standard errors.
+\item{modify.se}{Replace standard errors.
 Useful if you need to replace raw SEs with robust SEs.
 New SEs should be provided as a list of numeric vectors.
 See usage in \code{\link[texreg:screenreg]{texreg::screenreg()}}.}
 
-\item{modify_head}{Replace model names.}
+\item{modify.head}{Replace model names.}
 
 \item{line}{Lines look like true line (\code{TRUE}) or \code{=== --- ===} (\code{FALSE}).
 Only relevant to R Console output.}
 
 \item{bold}{The \emph{p}-value threshold below which the coefficients will be formatted in bold.}
 
-\item{...}{Other parameters passed to
+\item{...}{Other arguments passed to
 \code{\link[texreg:screenreg]{texreg::screenreg()}} or
 \code{\link[texreg:htmlreg]{texreg::htmlreg()}}.}
 }
@@ -52,8 +52,8 @@ Only relevant to R Console output.}
 Invisibly return the output (character string).
 }
 \description{
-Tidy report of regression models (to R Console or MS Word).
-Most types of regression models are supported!
+Tidy report of regression models.
+Most types of models are supported.
 This function is an extension (and combination) of
 \code{\link[texreg:screenreg]{texreg::screenreg()}},
 \code{\link[texreg:htmlreg]{texreg::htmlreg()}},
@@ -63,55 +63,58 @@ This function is an extension (and combination) of
 \code{\link[performance:r2_nagelkerke]{performance::r2_nagelkerke()}}.
 }
 \examples{
-\donttest{#### Example 1: Linear Model ####
-lm1=lm(Temp ~ Month + Day, data=airquality)
-lm2=lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
-model_summary(lm1)
-model_summary(lm2)
-model_summary(list(lm1, lm2))
-model_summary(list(lm1, lm2), std=TRUE, digits=2)
-model_summary(list(lm1, lm2), file="OLS Models.doc")
-unlink("OLS Models.doc")  # delete file for test
+\dontrun{
 
-#### Example 2: Generalized Linear Model ####
-glm1=glm(case ~ age + parity,
-         data=infert, family=binomial)
-glm2=glm(case ~ age + parity + education + spontaneous + induced,
-         data=infert, family=binomial)
-model_summary(list(glm1, glm2))  # "std" is not applicable to glm
-model_summary(list(glm1, glm2), file="GLM Models.doc")
-unlink("GLM Models.doc")  # delete file for test
+  #### Example 1: Linear Model ####
+  lm1=lm(Temp ~ Month + Day, data=airquality)
+  lm2=lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
+  model_summary(lm1)
+  model_summary(lm2)
+  model_summary(list(lm1, lm2))
+  model_summary(list(lm1, lm2), std=TRUE, digits=2)
+  model_summary(list(lm1, lm2), file="OLS Models.doc")
+  unlink("OLS Models.doc")  # delete file for code check
 
-#### Example 3: Linear Mixed Model ####
-library(lmerTest)
-hlm1=lmer(Reaction ~ (1 | Subject), data=sleepstudy)
-hlm2=lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
-hlm3=lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
-model_summary(list(hlm1, hlm2, hlm3))
-model_summary(list(hlm1, hlm2, hlm3), std=TRUE)
-model_summary(list(hlm1, hlm2, hlm3), file="HLM Models.doc")
-unlink("HLM Models.doc")  # delete file for test
+  #### Example 2: Generalized Linear Model ####
+  glm1=glm(case ~ age + parity,
+           data=infert, family=binomial)
+  glm2=glm(case ~ age + parity + education + spontaneous + induced,
+           data=infert, family=binomial)
+  model_summary(list(glm1, glm2))  # "std" is not applicable to glm
+  model_summary(list(glm1, glm2), file="GLM Models.doc")
+  unlink("GLM Models.doc")  # delete file for code check
 
-#### Example 4: Generalized Linear Mixed Model ####
-library(lmerTest)
-data.glmm=MASS::bacteria
-glmm1=glmer(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
-glmm2=glmer(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
-model_summary(list(glmm1, glmm2))  # "std" is not applicable to glmm
-model_summary(list(glmm1, glmm2), file="GLMM Models.doc")
-unlink("GLMM Models.doc")  # delete file for test
+  #### Example 3: Linear Mixed Model ####
+  library(lmerTest)
+  hlm1=lmer(Reaction ~ (1 | Subject), data=sleepstudy)
+  hlm2=lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
+  hlm3=lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+  model_summary(list(hlm1, hlm2, hlm3))
+  model_summary(list(hlm1, hlm2, hlm3), std=TRUE)
+  model_summary(list(hlm1, hlm2, hlm3), file="HLM Models.doc")
+  unlink("HLM Models.doc")  # delete file for code check
 
-#### Example 5: Multinomial Logistic Model ####
-library(nnet)
-d=airquality
-d$Month=as.factor(d$Month)  # Factor levels: 5, 6, 7, 8, 9
-mn1=multinom(Month ~ Temp, data=d, Hess=TRUE)
-mn2=multinom(Month ~ Temp + Wind + Ozone, data=d, Hess=TRUE)
-model_summary(mn1)
-model_summary(mn2)
-model_summary(mn2, file="Multinomial Logistic Model.doc")
-unlink("Multinomial Logistic Model.doc")  # delete file for test
+  #### Example 4: Generalized Linear Mixed Model ####
+  library(lmerTest)
+  data.glmm=MASS::bacteria
+  glmm1=glmer(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
+  glmm2=glmer(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
+  model_summary(list(glmm1, glmm2))  # "std" is not applicable to glmm
+  model_summary(list(glmm1, glmm2), file="GLMM Models.doc")
+  unlink("GLMM Models.doc")  # delete file for code check
+
+  #### Example 5: Multinomial Logistic Model ####
+  library(nnet)
+  d=airquality
+  d$Month=as.factor(d$Month)  # Factor levels: 5, 6, 7, 8, 9
+  mn1=multinom(Month ~ Temp, data=d, Hess=TRUE)
+  mn2=multinom(Month ~ Temp + Wind + Ozone, data=d, Hess=TRUE)
+  model_summary(mn1)
+  model_summary(mn2)
+  model_summary(mn2, file="Multinomial Logistic Model.doc")
+  unlink("Multinomial Logistic Model.doc")  # delete file for code check
 }
+
 }
 \seealso{
 \code{\link{PROCESS}}

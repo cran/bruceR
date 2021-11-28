@@ -28,15 +28,14 @@ formula_paste=function(formula) {
 #' formula_expand(y ~ a*b*c)
 #' formula_expand("y ~ a*b*c")
 #'
-#' @importFrom stats terms.formula as.formula
 #' @export
 formula_expand=function(formula, as.char=FALSE) {
   inter_expand=function(inter) paste(attr(terms.formula(as.formula(paste("~", inter))), "term.labels"), collapse=" + ")
   f=as.character(as.formula(formula))
   fx=f[3]
-  fx.R=stringr::str_extract_all(fx, "\\([^\\)]+\\)", simplify=T)
-  if(length(fx.R)>0) for(i in 1:length(fx.R)) if(grepl("\\*", fx.R[i])) fx.R[i]=paste0("(", inter_expand(stringr::str_remove_all(fx.R[i], "\\(|\\|.*")), " ", stringr::str_extract(fx.R[i], "\\|.*"))
-  fx.F=stringr::str_remove_all(fx, "[\\+ ]*\\([^\\)]+\\)[\\+ ]*")
+  fx.R=str_extract_all(fx, "\\([^\\)]+\\)", simplify=T)
+  if(length(fx.R)>0) for(i in 1:length(fx.R)) if(grepl("\\*", fx.R[i])) fx.R[i]=paste0("(", inter_expand(str_remove_all(fx.R[i], "\\(|\\|.*")), " ", str_extract(fx.R[i], "\\|.*"))
+  fx.F=str_remove_all(fx, "[\\+ ]*\\([^\\)]+\\)[\\+ ]*")
   fx.F=ifelse(fx.F=="", "", inter_expand(fx.F))
   fx=paste(fx.F, paste(fx.R, collapse=" + "), sep=ifelse(length(fx.R)==0 | fx.F=="", "", " + "))
   f=as.formula(paste(f[2], f[1], fx))
@@ -68,7 +67,7 @@ find=function(vars, list) {
 #' @param data Data object.
 #' @param vars Variable(s) to be centered.
 #' @param std Standardized or not. Default is \code{FALSE}.
-#' @param add_suffix The suffix of the centered variable(s).
+#' @param add.suffix The suffix of the centered variable(s).
 #' Default is \code{""}. You may set it to \code{"_c"}, \code{"_center"}, etc.
 #'
 #' @return A new data object containing the centered variable(s).
@@ -79,31 +78,31 @@ find=function(vars, list) {
 #' d.c=grand_mean_center(d, "a")
 #' d.c
 #'
-#' d.c=grand_mean_center(d, c("a", "b"), add_suffix="_center")
+#' d.c=grand_mean_center(d, c("a", "b"), add.suffix="_center")
 #' d.c
 #'
 #' @seealso \code{\link{group_mean_center}}
 #'
 #' @export
 grand_mean_center=function(data, vars=names(data),
-                           std=FALSE, add_suffix="") {
-  data_c=as.data.frame(data)
+                           std=FALSE, add.suffix="") {
+  data.c=as.data.frame(data)
   for(var in vars)
-    if(inherits(data_c[[var]], c("numeric", "integer", "double", "logical")))
-      data_c[paste0(var, add_suffix)]=as.numeric(scale(data_c[var], center=TRUE, scale=std))
+    if(inherits(data.c[[var]], c("numeric", "integer", "double", "logical")))
+      data.c[paste0(var, add.suffix)]=as.numeric(scale(data.c[var], center=TRUE, scale=std))
   if(data.table::is.data.table(data))
-    data_c=data.table::as.data.table(data_c)
-  return(data_c)
+    data.c=data.table::as.data.table(data.c)
+  return(data.c)
 }
 
-#' Group-mean centering
+#' Group-mean centering.
 #'
 #' Compute group-mean centered variables.
 #' Usually used for HLM level-1 predictors.
 #'
 #' @inheritParams grand_mean_center
 #' @param by Grouping variable.
-#' @param add_group_mean The suffix of the variable name(s) of group means.
+#' @param add.group.mean The suffix of the variable name(s) of group means.
 #' Default is \code{"_mean"} (see Examples).
 #'
 #' @return A new data object containing the centered variable(s).
@@ -114,7 +113,7 @@ grand_mean_center=function(data, vars=names(data),
 #' d.c=group_mean_center(d, "x", by="g")
 #' d.c
 #'
-#' d.c=group_mean_center(d, "x", by="g", add_suffix="_c")
+#' d.c=group_mean_center(d, "x", by="g", add.suffix="_c")
 #' d.c
 #'
 #' @seealso \code{\link{grand_mean_center}}
@@ -122,22 +121,22 @@ grand_mean_center=function(data, vars=names(data),
 #' @export
 group_mean_center=function(data, vars=setdiff(names(data), by), by,
                            std=FALSE,
-                           add_suffix="",
-                           add_group_mean="_mean") {
-  data_c=as.data.frame(data)
-  grouplist=sort(unique(data_c[[by]]))
+                           add.suffix="",
+                           add.group.mean="_mean") {
+  data.c=as.data.frame(data)
+  grouplist=sort(unique(data.c[[by]]))
   for(var in vars) {
     for(group in grouplist) {
-      if(inherits(data_c[[var]], c("numeric", "integer", "double", "logical"))) {
-        dvar=data_c[which(data_c[by]==group), var]
-        data_c[which(data_c[by]==group), paste0(var, add_group_mean)]=mean(dvar, na.rm=TRUE)
-        data_c[which(data_c[by]==group), paste0(var, add_suffix)]=as.numeric(scale(dvar, center=TRUE, scale=std))
+      if(inherits(data.c[[var]], c("numeric", "integer", "double", "logical"))) {
+        dvar=data.c[which(data.c[by]==group), var]
+        data.c[which(data.c[by]==group), paste0(var, add.group.mean)]=mean(dvar, na.rm=TRUE)
+        data.c[which(data.c[by]==group), paste0(var, add.suffix)]=as.numeric(scale(dvar, center=TRUE, scale=std))
       }
     }
   }
   if(data.table::is.data.table(data))
-    data_c=data.table::as.data.table(data_c)
-  return(data_c)
+    data.c=data.table::as.data.table(data.c)
+  return(data.c)
 }
 
 
@@ -152,32 +151,35 @@ group_mean_center=function(data, vars=setdiff(names(data), by), by,
 #' @return No return value.
 #'
 #' @examples
-#' \donttest{## lm
-#' regress(Temp ~ Month + Day + Wind + Solar.R, data=airquality, robust=TRUE)
+#' \dontrun{
 #'
-#' ## glm
-#' regress(case ~ age + parity + education + spontaneous + induced,
-#'         data=infert, family=binomial, robust="HC1", cluster="stratum")
+#'   ## lm
+#'   regress(Temp ~ Month + Day + Wind + Solar.R, data=airquality, robust=TRUE)
 #'
-#' ## lmer
-#' library(lmerTest)
-#' regress(Reaction ~ Days + (Days | Subject), data=sleepstudy)
-#' regress(Preference ~ Sweetness + Gender + Age + Frequency +
-#'           (1 | Consumer), data=carrots)
+#'   ## glm
+#'   regress(case ~ age + parity + education + spontaneous + induced,
+#'           data=infert, family=binomial, robust="HC1", cluster="stratum")
 #'
-#' ## glmer
-#' library(lmerTest)
-#' data.glmm=MASS::bacteria
-#' regress(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
-#' regress(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
+#'   ## lmer
+#'   library(lmerTest)
+#'   regress(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+#'   regress(Preference ~ Sweetness + Gender + Age + Frequency +
+#'             (1 | Consumer), data=carrots)
+#'
+#'   ## glmer
+#'   library(lmerTest)
+#'   data.glmm=MASS::bacteria
+#'   regress(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
+#'   regress(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
 #' }
+#'
 #' @export
 regress=function(formula, data, family=NULL,
                  digits=3, nsmall=digits,
                  robust=FALSE, cluster=NULL,
                  level2.predictors="", vartypes=NULL,
                  test.rand=FALSE) {
-  call=sys.call()[-1]  # get function call (parameter list)
+  call=sys.call()[-1]  # get function call (argument list)
   if(!is.null(family))
     family.text=ifelse(!is.null(call$family),
                        deparse(call$family),
@@ -222,10 +224,10 @@ regress=function(formula, data, family=NULL,
 #### Model Summary ####
 
 
-#' Tidy report of regression models (to R Console or MS Word).
+#' Tidy report of regression models.
 #'
-#' Tidy report of regression models (to R Console or MS Word).
-#' Most types of regression models are supported!
+#' Tidy report of regression models.
+#' Most types of models are supported.
 #' This function is an extension (and combination) of
 #' \code{\link[texreg:screenreg]{texreg::screenreg()}},
 #' \code{\link[texreg:htmlreg]{texreg::htmlreg()}},
@@ -234,7 +236,7 @@ regress=function(formula, data, family=NULL,
 #' \code{\link[performance:r2_mcfadden]{performance::r2_mcfadden()}},
 #' \code{\link[performance:r2_nagelkerke]{performance::r2_nagelkerke()}}.
 #'
-#' @param model_list A single model or a list of (various types of) models.
+#' @param model.list A single model or a list of (various types of) models.
 #' Most types of regression models are supported!
 #' @param std Standardized coefficients? Default is \code{FALSE}.
 #' Only applicable to linear models and linear mixed models.
@@ -242,15 +244,15 @@ regress=function(formula, data, family=NULL,
 #' @param digits,nsmall Number of decimal places of output. Default is \code{3}.
 #' @param file File name of MS Word (\code{.doc}).
 #' @param zero Display "0" before "."? Default is \code{TRUE}.
-#' @param modify_se Replace standard errors.
+#' @param modify.se Replace standard errors.
 #' Useful if you need to replace raw SEs with robust SEs.
 #' New SEs should be provided as a list of numeric vectors.
 #' See usage in \code{\link[texreg:screenreg]{texreg::screenreg()}}.
-#' @param modify_head Replace model names.
+#' @param modify.head Replace model names.
 #' @param line Lines look like true line (\code{TRUE}) or \code{=== --- ===} (\code{FALSE}).
 #' Only relevant to R Console output.
 #' @param bold The \emph{p}-value threshold below which the coefficients will be formatted in bold.
-#' @param ... Other parameters passed to
+#' @param ... Other arguments passed to
 #' \code{\link[texreg:screenreg]{texreg::screenreg()}} or
 #' \code{\link[texreg:htmlreg]{texreg::htmlreg()}}.
 #'
@@ -270,73 +272,76 @@ regress=function(formula, data, family=NULL,
 #' \code{\link{print_table}}
 #'
 #' @examples
-#' \donttest{#### Example 1: Linear Model ####
-#' lm1=lm(Temp ~ Month + Day, data=airquality)
-#' lm2=lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
-#' model_summary(lm1)
-#' model_summary(lm2)
-#' model_summary(list(lm1, lm2))
-#' model_summary(list(lm1, lm2), std=TRUE, digits=2)
-#' model_summary(list(lm1, lm2), file="OLS Models.doc")
-#' unlink("OLS Models.doc")  # delete file for test
+#' \dontrun{
 #'
-#' #### Example 2: Generalized Linear Model ####
-#' glm1=glm(case ~ age + parity,
-#'          data=infert, family=binomial)
-#' glm2=glm(case ~ age + parity + education + spontaneous + induced,
-#'          data=infert, family=binomial)
-#' model_summary(list(glm1, glm2))  # "std" is not applicable to glm
-#' model_summary(list(glm1, glm2), file="GLM Models.doc")
-#' unlink("GLM Models.doc")  # delete file for test
+#'   #### Example 1: Linear Model ####
+#'   lm1=lm(Temp ~ Month + Day, data=airquality)
+#'   lm2=lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
+#'   model_summary(lm1)
+#'   model_summary(lm2)
+#'   model_summary(list(lm1, lm2))
+#'   model_summary(list(lm1, lm2), std=TRUE, digits=2)
+#'   model_summary(list(lm1, lm2), file="OLS Models.doc")
+#'   unlink("OLS Models.doc")  # delete file for code check
 #'
-#' #### Example 3: Linear Mixed Model ####
-#' library(lmerTest)
-#' hlm1=lmer(Reaction ~ (1 | Subject), data=sleepstudy)
-#' hlm2=lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
-#' hlm3=lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
-#' model_summary(list(hlm1, hlm2, hlm3))
-#' model_summary(list(hlm1, hlm2, hlm3), std=TRUE)
-#' model_summary(list(hlm1, hlm2, hlm3), file="HLM Models.doc")
-#' unlink("HLM Models.doc")  # delete file for test
+#'   #### Example 2: Generalized Linear Model ####
+#'   glm1=glm(case ~ age + parity,
+#'            data=infert, family=binomial)
+#'   glm2=glm(case ~ age + parity + education + spontaneous + induced,
+#'            data=infert, family=binomial)
+#'   model_summary(list(glm1, glm2))  # "std" is not applicable to glm
+#'   model_summary(list(glm1, glm2), file="GLM Models.doc")
+#'   unlink("GLM Models.doc")  # delete file for code check
 #'
-#' #### Example 4: Generalized Linear Mixed Model ####
-#' library(lmerTest)
-#' data.glmm=MASS::bacteria
-#' glmm1=glmer(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
-#' glmm2=glmer(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
-#' model_summary(list(glmm1, glmm2))  # "std" is not applicable to glmm
-#' model_summary(list(glmm1, glmm2), file="GLMM Models.doc")
-#' unlink("GLMM Models.doc")  # delete file for test
+#'   #### Example 3: Linear Mixed Model ####
+#'   library(lmerTest)
+#'   hlm1=lmer(Reaction ~ (1 | Subject), data=sleepstudy)
+#'   hlm2=lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
+#'   hlm3=lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+#'   model_summary(list(hlm1, hlm2, hlm3))
+#'   model_summary(list(hlm1, hlm2, hlm3), std=TRUE)
+#'   model_summary(list(hlm1, hlm2, hlm3), file="HLM Models.doc")
+#'   unlink("HLM Models.doc")  # delete file for code check
 #'
-#' #### Example 5: Multinomial Logistic Model ####
-#' library(nnet)
-#' d=airquality
-#' d$Month=as.factor(d$Month)  # Factor levels: 5, 6, 7, 8, 9
-#' mn1=multinom(Month ~ Temp, data=d, Hess=TRUE)
-#' mn2=multinom(Month ~ Temp + Wind + Ozone, data=d, Hess=TRUE)
-#' model_summary(mn1)
-#' model_summary(mn2)
-#' model_summary(mn2, file="Multinomial Logistic Model.doc")
-#' unlink("Multinomial Logistic Model.doc")  # delete file for test
+#'   #### Example 4: Generalized Linear Mixed Model ####
+#'   library(lmerTest)
+#'   data.glmm=MASS::bacteria
+#'   glmm1=glmer(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
+#'   glmm2=glmer(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
+#'   model_summary(list(glmm1, glmm2))  # "std" is not applicable to glmm
+#'   model_summary(list(glmm1, glmm2), file="GLMM Models.doc")
+#'   unlink("GLMM Models.doc")  # delete file for code check
+#'
+#'   #### Example 5: Multinomial Logistic Model ####
+#'   library(nnet)
+#'   d=airquality
+#'   d$Month=as.factor(d$Month)  # Factor levels: 5, 6, 7, 8, 9
+#'   mn1=multinom(Month ~ Temp, data=d, Hess=TRUE)
+#'   mn2=multinom(Month ~ Temp + Wind + Ozone, data=d, Hess=TRUE)
+#'   model_summary(mn1)
+#'   model_summary(mn2)
+#'   model_summary(mn2, file="Multinomial Logistic Model.doc")
+#'   unlink("Multinomial Logistic Model.doc")  # delete file for code check
 #' }
+#'
 #' @export
-model_summary=function(model_list,
+model_summary=function(model.list,
                        std=FALSE,
                        digits=3,
                        nsmall=digits,
                        file=NULL,
                        zero=ifelse(std, FALSE, TRUE),
-                       modify_se=NULL,
-                       modify_head=NULL,
+                       modify.se=NULL,
+                       modify.head=NULL,
                        line=TRUE,
                        bold=0,
                        ...) {
-  if(inherits(model_list, "varest")) {
-    model_list=model_list$varresult
-    modify_head=names(model_list)
+  if(inherits(model.list, "varest")) {
+    model.list=model.list$varresult
+    modify.head=names(model.list)
   }
-  if(inherits(model_list, "list")==FALSE)
-    model_list=list(model_list)
+  if(inherits(model.list, "list")==FALSE)
+    model.list=list(model.list)
   if(is.null(file)) {
     sumreg=texreg::screenreg
   } else {
@@ -384,25 +389,25 @@ model_summary=function(model_list,
       NA)
   }
 
-  if(is.null(modify_head)) {
+  if(is.null(modify.head)) {
     new.model.names=NULL
     try({
-      if(any(unlist(lapply(model_list, inherits, "nnet")))) {
-        multinom.y=as.character(lapply(model_list, model_y))[1]
-        multinom.ref=model_list[[1]][["lab"]][1]
+      if(any(unlist(lapply(model.list, inherits, "nnet")))) {
+        multinom.y=as.character(lapply(model.list, model_y))[1]
+        multinom.ref=model.list[[1]][["lab"]][1]
       } else {
-        new.model.names=paste(paste0("(", 1:length(model_list), ")"),
-                              as.character(lapply(model_list, model_y)))
-        new.model.names=stringr::str_trim(new.model.names)
+        new.model.names=paste(paste0("(", 1:length(model.list), ")"),
+                              as.character(lapply(model.list, model_y)))
+        new.model.names=str_trim(new.model.names)
       }
     }, silent=TRUE)
   } else {
-    new.model.names=modify_head
+    new.model.names=modify.head
   }
 
   if(std) {
-    new.coef=lapply(model_list, model_std_coef)
-    new.s.e.=lapply(model_list, model_std_s.e.)
+    new.coef=lapply(model.list, model_std_coef)
+    new.s.e.=lapply(model.list, model_std_s.e.)
     omit="Intercept"
   } else {
     new.coef=0
@@ -410,24 +415,24 @@ model_summary=function(model_list,
     omit=NULL
   }
 
-  if(!is.null(modify_se)) new.s.e.=modify_se
+  if(!is.null(modify.se)) new.s.e.=modify.se
 
   suppressWarnings({
     new.R2.all=list()
-    if(any(unlist(lapply(model_list, inherits, c("lme", "lmerMod", "lmerModLmerTest", "glmerMod"))))) {
+    if(any(unlist(lapply(model.list, inherits, c("lme", "lmerMod", "lmerModLmerTest", "glmerMod"))))) {
       try({
         new.R2=list(
-          R2m=as.numeric(lapply(model_list, model_R2m)),
-          R2c=as.numeric(lapply(model_list, model_R2c))
+          R2m=as.numeric(lapply(model.list, model_R2m)),
+          R2c=as.numeric(lapply(model.list, model_R2c))
         )
         names(new.R2)=c("Marginal R^2", "Conditional R^2")
         new.R2.all=c(new.R2.all, new.R2)
       }, silent=TRUE)
     }
-    if(any(unlist(lapply(model_list, inherits, "glm")))) {
+    if(any(unlist(lapply(model.list, inherits, "glm")))) {
       new.R2=list(
-        R2mcfadden=as.numeric(lapply(model_list, model_R2mcfadden)),
-        R2nagelkerke=as.numeric(lapply(model_list, model_R2nagelkerke))
+        R2mcfadden=as.numeric(lapply(model.list, model_R2mcfadden)),
+        R2nagelkerke=as.numeric(lapply(model.list, model_R2nagelkerke))
       )
       names(new.R2)=c("McFadden's R^2", "Nagelkerke's R^2")
       new.R2.all=c(new.R2.all, new.R2)
@@ -436,7 +441,7 @@ model_summary=function(model_list,
       new.R2.all=NULL
 
     output=sumreg(
-      model_list, file=NULL,
+      model.list, file=NULL,
       leading.zero=zero, digits=nsmall, bold=bold,
       custom.model.names=new.model.names,
       override.coef=new.coef,
@@ -461,17 +466,19 @@ model_summary=function(model_list,
   if(is.null(file)) {
     if(line) {
       output=output %>%
-        stringr::str_replace_all(
+        str_replace_all(
           "[-=]{3,}",
-          rep_char("\u2500", stringr::str_count(output, "=")/2))
+          rep_char("\u2500", str_count(output, "=")/2))
     }
+    cat("\n")
+    Print("<<cyan Model Summary>>")
     cat(output)
     Print("<<italic Note>>. * <<italic p>> < .05, ** <<italic p>> < .01, *** <<italic p>> < .001.")
     cat("\n")
-    if(length(model_list)==1) {
+    if(length(model.list)==1) {
       try({
         suppressWarnings({
-          check=performance::check_collinearity(model_list[[1]])
+          check=performance::check_collinearity(model.list[[1]])
         })
         if(!is.null(check)) {
           print(check)
@@ -480,25 +487,25 @@ model_summary=function(model_list,
       }, silent=TRUE)
     }
   } else {
-    file=stringr::str_replace(file, "\\.docx$", ".doc")
+    file=str_replace(file, "\\.docx$", ".doc")
     output=output %>%
-      stringr::str_replace_all("&nbsp;", "") %>%
-      stringr::str_replace_all("'", "\u2019") %>%
-      stringr::str_replace_all("<td>-", "<td>\u2013") %>%
-      stringr::str_replace_all("<td>(?=\\.|\\d\\.)", "<td>&ensp;") %>%
-      stringr::str_replace_all("R\\^2|R<sup>2</sup>", "<i>R</i><sup>2</sup>") %>%
-      stringr::str_replace(
+      str_replace_all("&nbsp;", "") %>%
+      str_replace_all("'", "\u2019") %>%
+      str_replace_all("<td>-", "<td>\u2013") %>%
+      str_replace_all("<td>(?=\\.|\\d\\.)", "<td>&ensp;") %>%
+      str_replace_all("R\\^2|R<sup>2</sup>", "<i>R</i><sup>2</sup>") %>%
+      str_replace(
         "<style>",
         "<style>\nbody {font-size: 10.5pt; font-family: Times New Roman;}\np {margin: 0px;}\nth, td {height: 19px;}") %>%
-      stringr::str_replace(
+      str_replace(
         "<body>",
         paste0(
           "<body>\n<p><b>Table X. Regression Models",
-          ifelse(any(unlist(lapply(model_list, class)) %in% "nnet"),
+          ifelse(any(unlist(lapply(model.list, class)) %in% "nnet"),
                  paste0(" (Reference Group: ", multinom.y, " = \u2018", multinom.ref, "\u2019)"),
                  ""),
           ".</b></p>")) %>%
-      stringr::str_replace(
+      str_replace(
         "</body>",
         paste0(
           "<p><i>Note</i>. ",
@@ -528,18 +535,18 @@ model_summary=function(model_list,
 #' Tidy report of GLM (\code{lm} and \code{glm} models).
 #'
 #' @param model A model fitted by \code{lm} or \code{glm} function.
-#' @param robust \strong{[only for \code{lm} and \code{glm}]}
+#' @param robust \strong{[Only for \code{lm} and \code{glm}]}
 #' \code{FALSE} (default), \code{TRUE} (then the default is \code{"HC1"}),
 #' \code{"HC0"}, \code{"HC1"}, \code{"HC2"}, \code{"HC3"}, \code{"HC4"}, \code{"HC4m"}, or \code{"HC5"}.
 #' It will add a table with heteroskedasticity-robust standard errors (aka. Huber-White standard errors).
 #' For details, see \code{?sandwich::vcovHC} and \code{?jtools::summ.lm}.
 #'
 #' *** \code{"HC1"} is the default of Stata, whereas \code{"HC3"} is the default suggested by the \code{sandwich} package.
-#' @param cluster \strong{[only for \code{lm} and \code{glm}]}
+#' @param cluster \strong{[Only for \code{lm} and \code{glm}]}
 #' Cluster-robust standard errors are computed if cluster is set to the name of the input data's cluster variable or is a vector of clusters.
 #' If you specify \code{cluster}, you may also specify the type of \code{robust}. If you do not specify \code{robust}, \code{"HC1"} will be set as default.
 #' @param digits,nsmall Number of decimal places of output. Default is 3.
-#' @param ... Other parameters. You may re-define \code{formula}, \code{data}, or \code{family}.
+#' @param ... Other arguments. You may re-define \code{formula}, \code{data}, or \code{family}.
 #'
 #' @return No return value.
 #'
@@ -559,7 +566,6 @@ model_summary=function(model_list,
 #' }
 #' @seealso \code{\link{HLM_summary}}, \code{\link{regress}}
 #'
-#' @importFrom stats qt anova
 #' @export
 GLM_summary=function(model, robust=FALSE, cluster=NULL,
                      digits=3, nsmall=digits, ...) {
@@ -757,7 +763,7 @@ GLM_summary=function(model, robust=FALSE, cluster=NULL,
       Print("<<blue Robust S.E.: type = {robust}{ifelse(is.null(cluster), '', glue('; clustering variable = {paste(cluster, collapse=', ')}'))}.>>")
     }
   } else {
-    stop("'GLM_summary' can only deal with 'lm' or 'glm' models.")
+    stop("GLM_summary() can only deal with 'lm' or 'glm' models.", call.=TRUE)
   }
 }
 
@@ -778,9 +784,9 @@ HLM_vartypes=function(model=NULL,
   formula=formula_expand(formula)
   fx=as.character(formula)[3]
   ## Level-1 predictor variables with random slopes
-  L1.rand.comp=stringr::str_split(gsub(" ", "", stringr::str_extract_all(fx, "(?<=\\()[^\\)]+(?=\\))", simplify=T)), "\\|")
+  L1.rand.comp=str_split(gsub(" ", "", str_extract_all(fx, "(?<=\\()[^\\)]+(?=\\))", simplify=T)), "\\|")
   for(comp in L1.rand.comp) {
-    vars.1=stringr::str_split(comp[1], "\\+")  # a list
+    vars.1=str_split(comp[1], "\\+")  # a list
     for(var in vars.1[[1]]) {
       if(var %in% names(data))
         if(is.factor(data[,var]))
@@ -789,9 +795,9 @@ HLM_vartypes=function(model=NULL,
     L1.rand.vars[comp[2]]=vars.1
   }
   ## Level-2 predictor variables
-  L2.comp=stringr::str_split(stringr::str_split(gsub(" ", "", level2.predictors), ";", simplify=T), ":")
+  L2.comp=str_split(str_split(gsub(" ", "", level2.predictors), ";", simplify=T), ":")
   for(comp in L2.comp) {
-    vars.2=stringr::str_split(comp[2], "\\+")  # a list
+    vars.2=str_split(comp[2], "\\+")  # a list
     for(var in vars.2[[1]]) {
       if(var %in% names(data))
         if(is.factor(data[,var]))
@@ -807,7 +813,7 @@ HLM_vartypes=function(model=NULL,
       vartype="Intercept"
     } else if(grepl(":", var)) {
       ## interaction term ##
-      inter.vars=stringr::str_split(var, ":")[[1]]
+      inter.vars=str_split(var, ":")[[1]]
       fd.1=find(inter.vars, L1.rand.vars)
       fd.2=find(inter.vars, L2.vars)
       if(fd.2$n==length(inter.vars)) {
@@ -888,7 +894,7 @@ HLM_ICC=function(model, nsmall=3) {
   ## Initialize ICC data.frame ##
   N=nrow(model@frame)
   K=sumModel[["ngrps"]][RE$grp]
-  group.id=stats::na.omit(names(K))
+  group.id=na.omit(names(K))
   ICC=data.frame(RE[1], K, RE[2], RE[3])
   names(ICC)=c("Group", "K", "Parameter", "Variance")
   var.resid=ICC[ICC$Group=="Residual", "Variance"]
@@ -955,7 +961,7 @@ HLM_ICC=function(model, nsmall=3) {
 #' the \code{HLM} software provides \emph{df}s that totally depend on the variable types (i.e., a theory-driven approach).
 #'
 #' @param model A model fitted by \code{lmer} or \code{glmer} function using the \code{lmerTest} package.
-#' @param level2.predictors \strong{[only for \code{lmer}]} [optional] Default is \code{NULL}.
+#' @param level2.predictors \strong{[Only for \code{lmer}]} [optional] Default is \code{NULL}.
 #' If you have predictors at level 2, besides putting them into the formula in the \code{lmer} function as usual,
 #' you may \strong{also} define here the level-2 grouping/clustering variables and corresponding level-2 predictor variables.
 #'
@@ -964,16 +970,16 @@ HLM_ICC=function(model, nsmall=3) {
 #' \code{W1 & W2} are school-level predictors,
 #' and there is no house-level predictor.
 #'
-#' *** If there is no level-2 predictor in the formula of \code{lmer}, just leave this parameter blank.
-#' @param vartypes \strong{[only for \code{lmer}]} Manually setting variable types. Needless in most situations.
-#' @param test.rand \strong{[only for \code{lmer}]} \code{TRUE} or \code{FALSE} (default).
+#' *** If there is no level-2 predictor in the formula of \code{lmer}, just leave this argument blank.
+#' @param vartypes \strong{[Only for \code{lmer}]} Manually setting variable types. Needless in most situations.
+#' @param test.rand \strong{[Only for \code{lmer}]} \code{TRUE} or \code{FALSE} (default).
 #' Test random effects (i.e., variance components) by using the likelihood-ratio test (LRT), which is asymptotically chi-square distributed. For large datasets, it is much time-consuming.
 ## *** Note that its results would be different from those in the default output of \code{HLM_summary()} (see "Wald \emph{Z} test" in the output),
 ## because they differ in the principle of statistics. The LRT is based on model comparison and the reduction of AIC, whereas the Wald \emph{Z} test is estimated by approximation.
 ## The Wald \emph{Z} test can also be seen in the output of SPSS (the \code{MIXED} syntax).
 #' @param digits,nsmall Number of decimal places of output. Default is 3.
 #' But for some statistics (e.g., \emph{R}^2, ICC), to provide more precise information, we fix the decimal places to 5.
-#' @param ... Other optional parameters. You may re-define \code{formula}, \code{data}, or \code{family}.
+#' @param ... Other arguments. You may re-define \code{formula}, \code{data}, or \code{family}.
 #'
 #' @return No return value.
 #'
@@ -1018,7 +1024,6 @@ HLM_ICC=function(model, nsmall=3) {
 #'
 #' @seealso \code{\link{GLM_summary}}, \code{\link{regress}}
 #'
-#' @importFrom stats qt var residuals model.response model.frame anova
 #' @export
 HLM_summary=function(model=NULL,
                      level2.predictors=NULL,
@@ -1231,9 +1236,9 @@ HLM_summary=function(model=NULL,
     ICC$Group=as.character(ICC$Group)
     ICC$K=as.numeric(as.character(ICC$K))
     ICC$ICC=as.numeric(as.character(ICC$ICC))
-    RE=dplyr::left_join(cbind(dplyr::left_join(RE[1], ICC[1:2], by="Group"),
-                              RE[2:3]),
-                        ICC[c(1,3)], by="Group")
+    RE=left_join(cbind(left_join(RE[1], ICC[1:2], by="Group"),
+                       RE[2:3]),
+                 ICC[c(1,3)], by="Group")
     RE$K=formatF(RE$K, 0)
     RE$Variance=formatF(RE$Variance, 5)
     RE$ICC=formatF(RE$ICC, 5)
@@ -1248,7 +1253,7 @@ HLM_summary=function(model=NULL,
            and log(1/exp(intercept)+1) in poisson models (count data).>>")
   } else {
     Print("Please fit your model with '<<red lmerTest::lmer()>>' or '<<red lme4::glmer()>>'!")
-    stop("Model type.")
+    stop("Model type.", call.=TRUE)
   }
 
   ## Print: Likelihood-Ratio Test (LRT) for Random Effects ##
@@ -1271,18 +1276,6 @@ HLM_summary=function(model=NULL,
 #'
 #' @details
 #' \describe{
-#'   \item{* Note for the following formulas}{
-#'   \itemize{
-#'     \item \eqn{\sigma_{u0}^2}: between-group variance (i.e., tau00)
-#'     \item \eqn{\sigma_{e}^2}: within-group variance (i.e., residual variance)
-#'     \item \eqn{n_k}: group size of the k-th group
-#'     \item \eqn{K}: number of groups
-#'     \item \eqn{\sigma^2}: actual group variance of the k-th group
-#'     \item \eqn{\sigma_{MJ}^2}: mean value of actual group variance of the k-th group across all J items
-#'     \item \eqn{\sigma_{EU}^2}: expected random variance (i.e., the variance of uniform distribution)
-#'     \item \eqn{J}: number of items
-#'   }
-#'   }
 #'   \item{\strong{ICC(1) (intra-class correlation, or non-independence of data)}}{
 #'     ICC(1) = var.u0 / (var.u0 + var.e) = \eqn{\sigma_{u0}^2 / (\sigma_{u0}^2 + \sigma_{e}^2)})
 #'
@@ -1303,6 +1296,18 @@ HLM_summary=function(model=NULL,
 #'     rWG(J) = \eqn{1 - (\sigma_{MJ}^2 / \sigma_{EU}^2) / [J * (1 - \sigma_{MJ}^2 / \sigma_{EU}^2) + \sigma_{MJ}^2 / \sigma_{EU}^2]}
 #'
 #'     rWG/rWG(J) is a measure of within-group agreement or consensus. Each group has an rWG/rWG(J).
+#'   }
+#'   \item{* Note for the above formulas}{
+#'   \itemize{
+#'     \item \eqn{\sigma_{u0}^2}: between-group variance (i.e., tau00)
+#'     \item \eqn{\sigma_{e}^2}: within-group variance (i.e., residual variance)
+#'     \item \eqn{n_k}: group size of the k-th group
+#'     \item \eqn{K}: number of groups
+#'     \item \eqn{\sigma^2}: actual group variance of the k-th group
+#'     \item \eqn{\sigma_{MJ}^2}: mean value of actual group variance of the k-th group across all J items
+#'     \item \eqn{\sigma_{EU}^2}: expected random variance (i.e., the variance of uniform distribution)
+#'     \item \eqn{J}: number of items
+#'   }
 #'   }
 #' }
 #'
@@ -1349,7 +1354,6 @@ HLM_summary=function(model=NULL,
 #'             rwg.vars=c("Sweetness", "Bitter", "Crisp"),
 #'             rwg.levels=7)
 #'
-#' @importFrom stats na.omit
 #' @export
 HLM_ICC_rWG=function(data, group, icc.var,
                      rwg.vars=icc.var,
@@ -1411,7 +1415,7 @@ HLM_ICC_rWG=function(data, group, icc.var,
 
   Print("
   \n
-  <<yellow ---------- Sample Size Information ---------->>
+  <<cyan ------ Sample Size Information ------>>
 
   Level 1: <<italic N>> = {N} observations (\"{icc.var}\")
   Level 2: <<italic K>> = {length(n.k)} groups (\"{group}\")
@@ -1423,7 +1427,7 @@ HLM_ICC_rWG=function(data, group, icc.var,
 
   Print("
   \n
-  <<yellow ---------- ICC(1), ICC(2), and {rwg.name} ---------->>
+  <<cyan ------ ICC(1), ICC(2), and {rwg.name} ------>>
 
   ICC variable: \"{icc.var}\"
 

@@ -43,7 +43,6 @@
 #'
 #' \strong{[Data]:}
 #' \itemize{
-#'   \item \strong{\code{rio}}: Data import and export (for all file formats). (\code{\link[rio]{import}} / \code{\link[rio]{export}})
 #'   \item \strong{\code{dplyr}}: Data manipulation and processing.
 #'   \item \strong{\code{tidyr}}: Data cleaning and reshaping.
 #'   \item \strong{\code{stringr}}: Toolbox for string operation (with regular expressions).
@@ -53,10 +52,9 @@
 #'
 #' \strong{[Stat]:}
 #' \itemize{
-#'   \item \strong{\code{psych}}: Toolbox for psychological and psychometric research.
-#'   \item \strong{\code{emmeans}}: Toolbox for estimated marginal means and contrasts.
-#'   \item \strong{\code{effectsize}}: Indices of effect size and standardized parameters.
-#'   \item \strong{\code{performance}}: Assessment of regression models performance.
+#'   \item \strong{\code{emmeans}}: Estimates of marginal means and multiple contrasts.
+#'   \item \strong{\code{effectsize}}: Estimates of effect sizes and standardized parameters.
+#'   \item \strong{\code{performance}}: Estimates of regression models performance.
 #' }
 #'
 #' \strong{[Plot]:}
@@ -71,13 +69,18 @@
 #'
 #' \describe{
 #'   \item{\strong{(1) Basic R Programming}}{
-#'       \code{\link{set.wd}}
+#'       \code{\link{set.wd}} (alias: \code{set_wd})
+#'
+#'       \code{\link{import}},
+#'       \code{\link{export}}
 #'
 #'       \code{\link{pkg_depend}},
 #'       \code{\link{pkg_install_suggested}}
 #'
 #'       \code{\link{formatF}},
 #'       \code{\link{formatN}}
+#'
+#'       \code{\link{print_table}}
 #'
 #'       \code{\link{Print}},
 #'       \code{\link{Glue}},
@@ -110,7 +113,7 @@
 #'   \item{\strong{(3) Reliability and Factor Analyses}}{
 #'       \code{\link{Alpha}}
 #'
-#'       \code{\link{EFA}}
+#'       \code{\link{EFA}} / \code{\link{PCA}}
 #'
 #'       \code{\link{CFA}}
 #'   }
@@ -125,7 +128,9 @@
 #'       \code{\link{cor_diff}}
 #'   }
 #'
-#'   \item{\strong{(5) Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison}}{
+#'   \item{\strong{(5) T-Test, Multi-Factor ANOVA, Simple-Effect Analysis, and Post-Hoc Multiple Comparison}}{
+#'       \code{\link{TTEST}}
+#'
 #'       \code{\link{MANOVA}}
 #'
 #'       \code{\link{EMMEANS}}
@@ -133,6 +138,8 @@
 #'
 #'   \item{\strong{(6) Tidy Report of Regression Models}}{
 #'       \code{\link{model_summary}}
+#'
+#'       \code{\link{lavaan_summary}}
 #'
 #'       \code{\link{GLM_summary}}
 #'
@@ -145,8 +152,6 @@
 #'
 #'   \item{\strong{(7) Mediation and Moderation Analyses}}{
 #'       \code{\link{PROCESS}}
-#'
-#'       \code{\link{lavaan_summary}}
 #'
 #'       \code{\link{med_summary}}
 #'   }
@@ -185,53 +190,73 @@ NULL
 
 #### Package-Loading Information ####
 
-.onAttach=function(libname, pkgname) {
-  # packageStartupMessage("Welcome to my package")
 
+#' @import stringr
+#' @import ggplot2
+#' @importFrom stats sd var cor median na.omit complete.cases
+#' @importFrom stats p.adjust pnorm pt pf pchisq qnorm qt quantile rnorm anova update terms drop1
+#' @importFrom stats lm coef confint residuals df.residual sigma as.formula terms.formula model.response model.frame
+#' @importFrom dplyr %>% select left_join sym group_by summarise mutate across
+.onAttach=function(libname, pkgname) {
   pkgs=c(
     ## DATA ##
-    "rio", "dplyr", "tidyr", "stringr", "forcats", "data.table",
+    "dplyr", "tidyr", "stringr", "forcats", "data.table",
     ## STAT ##
-    "psych", "emmeans", "effectsize", "performance",
+    "emmeans", "effectsize", "performance",
     ## PLOT ##
     "ggplot2", "ggtext", "cowplot", "see"
   )
-  suppressWarnings({
-    loaded=pacman::p_load(char=pkgs, character.only=TRUE, install=FALSE)
-  })
-  if(!all(loaded)) {
-    packageStartupMessage(
-      "These R packages have not been installed: ",
-      paste(pkgs[loaded==FALSE], collapse=", "))
+
+  # suppressWarnings({
+  #   loaded=pacman::p_load(char=pkgs, character.only=TRUE, install=FALSE)
+  # })
+  suppressMessages({suppressWarnings({
+    loaded=sapply(pkgs, require, character.only=TRUE)
+  })})
+
+  if(all(loaded)) {
+    LOGO=c(bell="\ud83d\udd14",
+           bulb="\ud83d\udca1",
+           gift="\ud83c\udf81",
+           bolt="\u26a1",
+           star="\u2b50")
+    logo=sample(LOGO, 1)
+    version=as.character(utils::packageVersion("bruceR"))
+    Print("
+    \n
+    <<bold
+    {logo} bruceR (v{version})
+    [<<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions]
+    >>
+
+    <<bold Packages also been loaded:>>
+    <<underline Data\t\tStat\t\tPlot\t\t>>
+    <<blue
+    <<green \u2714>> dplyr \t<<green \u2714>> emmeans \t<<green \u2714>> ggplot2
+    <<green \u2714>> tidyr \t<<green \u2714>> effectsize \t<<green \u2714>> ggtext
+    <<green \u2714>> stringr \t<<green \u2714>> performance \t<<green \u2714>> cowplot
+    <<green \u2714>> forcats \t\t\t<<green \u2714>> see
+    <<green \u2714>> data.table
+    >>
+
+    <<bold Key functions of `bruceR`:>>
+    <<underline Basic\t\tVariable\tModeling\t>>
+    <<cyan
+    set_wd() \tDescribe() \tTTEST()
+    import() \tFreq()  \tMANOVA()
+    export() \tCorr()  \tEMMEANS()
+    print_table() \tAlpha() \tPROCESS()
+    MEAN()  \tEFA()   \tmodel_summary()
+    LOOKUP() \tCFA()   \tlavaan_summary()
+    >>
+    \n
+    ")
+  } else {
+    packageStartupMessage(Glue("
+    \n
+    These R packages have not been installed:
+    {paste(pkgs[loaded==FALSE], collapse=', ')}
+    \n
+    "))
   }
-
-  # {rep_char('=', 56)}
-  # \u2714 yes
-  # \u2501 hyphen
-  LOGO=c(bell="\ud83d\udd14",
-         bulb="\ud83d\udca1",
-         gift="\ud83c\udf81",
-         bolt="\u26a1",
-         star="\u2b50")
-  logo=sample(LOGO, 1)
-  Print("
-  \n
-  <<bold <<magenta
-  {logo} bruceR: <<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions
-  >>>>
-
-  <<bold <<blue Loaded other R packages:>>>>
-  <<green
-  <<yellow [Data]:>> rio / dplyr / tidyr / stringr / forcats / data.table
-  <<yellow [Stat]:>> psych / emmeans / effectsize / performance
-  <<yellow [Plot]:>> ggplot2 / ggtext / cowplot / see
-  >>
-
-  <<bold <<blue Frequently used functions in `bruceR`:>>>>
-  <<cyan set.wd() / print_table() / model_summary()>>
-  <<cyan Describe() / Freq() / Corr() / Alpha()>>
-  <<cyan RECODE() / MEAN() / SUM() / LOOKUP()>>
-  <<cyan MANOVA() / EMMEANS() / PROCESS()>>
-  \n
-  ")
 }
