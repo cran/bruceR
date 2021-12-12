@@ -55,6 +55,7 @@
 #'   \item \strong{\code{emmeans}}: Estimates of marginal means and multiple contrasts.
 #'   \item \strong{\code{effectsize}}: Estimates of effect sizes and standardized parameters.
 #'   \item \strong{\code{performance}}: Estimates of regression models performance.
+#'   \item \strong{\code{lmerTest}}: Tests of linear mixed effects models (LMM, also known as HLM and multilevel models).
 #' }
 #'
 #' \strong{[Plot]:}
@@ -197,12 +198,24 @@ NULL
 #' @importFrom stats p.adjust pnorm pt pf pchisq qnorm qt quantile rnorm anova update terms drop1
 #' @importFrom stats lm coef confint residuals df.residual sigma as.formula terms.formula model.response model.frame
 #' @importFrom dplyr %>% select left_join sym group_by summarise mutate across
+#' @importFrom glue glue glue_col
+#' @importFrom crayon bold italic underline reset blurred inverse hidden strikethrough
+#' @importFrom crayon black white silver red green blue yellow cyan magenta
+#' @importFrom crayon bgBlack bgWhite bgRed bgGreen bgBlue bgYellow bgCyan bgMagenta
 .onAttach=function(libname, pkgname) {
+  ## Version Check
+  xml=suppressWarnings({
+    try({
+      readLines("https://cran.r-project.org/web/packages/bruceR/index.html")
+    }, silent=TRUE)
+  })
+
+  ## Loaded Package
   pkgs=c(
     ## DATA ##
     "dplyr", "tidyr", "stringr", "forcats", "data.table",
     ## STAT ##
-    "emmeans", "effectsize", "performance",
+    "emmeans", "effectsize", "performance", "lmerTest",
     ## PLOT ##
     "ggplot2", "ggtext", "cowplot", "see"
   )
@@ -210,44 +223,46 @@ NULL
   # suppressWarnings({
   #   loaded=pacman::p_load(char=pkgs, character.only=TRUE, install=FALSE)
   # })
-  suppressMessages({suppressWarnings({
-    loaded=sapply(pkgs, require, character.only=TRUE)
-  })})
+  suppressMessages({
+    suppressWarnings({
+      loaded=sapply(pkgs, require, character.only=TRUE)
+    })
+  })
 
+  ## Welcome Message
   if(all(loaded)) {
-    LOGO=c(bell="\ud83d\udd14",
-           bulb="\ud83d\udca1",
-           gift="\ud83c\udf81",
-           bolt="\u26a1",
-           star="\u2b50")
-    logo=sample(LOGO, 1)
-    version=as.character(utils::packageVersion("bruceR"))
+    # LOGO=c(bell="\ud83d\udd14",
+    #        bulb="\ud83d\udca1",
+    #        gift="\ud83c\udf81",
+    #        bolt="\u26a1",
+    #        star="\u2b50")
+    # logo=sample(LOGO, 1)
+    # yes: \u2714 \u221a
+    inst.ver=as.character(utils::packageVersion("bruceR"))
     Print("
     \n
     <<bold
-    {logo} bruceR (v{version})
-    [<<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions]
+    \ud83c\udf81 bruceR (version {inst.ver})
+    <<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions
     >>
 
     <<bold Packages also been loaded:>>
-    <<underline Data\t\tStat\t\tPlot\t\t>>
     <<blue
-    <<green \u2714>> dplyr \t<<green \u2714>> emmeans \t<<green \u2714>> ggplot2
-    <<green \u2714>> tidyr \t<<green \u2714>> effectsize \t<<green \u2714>> ggtext
-    <<green \u2714>> stringr \t<<green \u2714>> performance \t<<green \u2714>> cowplot
-    <<green \u2714>> forcats \t\t\t<<green \u2714>> see
+    <<green \u2714>> dplyr     \t<<green \u2714>> emmeans     \t<<green \u2714>> ggplot2
+    <<green \u2714>> tidyr     \t<<green \u2714>> effectsize  \t<<green \u2714>> ggtext
+    <<green \u2714>> stringr   \t<<green \u2714>> performance \t<<green \u2714>> cowplot
+    <<green \u2714>> forcats   \t<<green \u2714>> lmerTest    \t<<green \u2714>> see
     <<green \u2714>> data.table
     >>
 
     <<bold Key functions of `bruceR`:>>
-    <<underline Basic\t\tVariable\tModeling\t>>
     <<cyan
-    set_wd() \tDescribe() \tTTEST()
-    import() \tFreq()  \tMANOVA()
-    export() \tCorr()  \tEMMEANS()
-    print_table() \tAlpha() \tPROCESS()
-    MEAN()  \tEFA()   \tmodel_summary()
-    LOOKUP() \tCFA()   \tlavaan_summary()
+    set_wd()      \tDescribe() \tTTEST()
+    import()      \tFreq()     \tMANOVA()
+    export()      \tCorr()     \tEMMEANS()
+    print_table() \tAlpha()    \tPROCESS()
+    MEAN()        \tEFA()      \tmodel_summary()
+    LOOKUP()      \tCFA()      \tlavaan_summary()
     >>
     \n
     ")
@@ -259,4 +274,23 @@ NULL
     \n
     "))
   }
+
+  ## Update Message
+  if(!inherits(xml, "try-error")) {
+    try({
+      cran.ver=xml[grep("Version:", xml, fixed=TRUE)+1]
+      cran.ymd=xml[grep("Published:", xml, fixed=TRUE)+1]
+      if(!is.na(cran.ver) & length(cran.ver)==1) {
+        cran.ver=substr(cran.ver, 5, nchar(cran.ver)-5)
+        cran.ymd=substr(cran.ymd, 5, nchar(cran.ymd)-5)
+        if(numeric_version(inst.ver)<numeric_version(cran.ver))
+          packageStartupMessage(Glue("
+          NEWS: An updated version of bruceR (version {cran.ver}) is available!
+          Please update: install.packages(\"bruceR\")
+          \n
+          "))
+      }
+    }, silent=TRUE)
+  }
 }
+

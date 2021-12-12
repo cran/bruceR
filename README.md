@@ -2,7 +2,7 @@
 
 **BR**oadly **U**seful **C**onvenient and **E**fficient **R** functions that **BR**ing **U**sers **C**oncise and **E**legant **R** data analyses.
 
-This package includes easy-to-use functions for **(1)** basic R programming (e.g., set working directory to the path of currently opened file, import/export data from/to files with any format, print strings with rich formats and colors); **(2)** multivariate computation (e.g., compute scale sums/means/... with reverse scoring); **(3)** reliability and factor analyses (PCA, EFA, CFA); **(4)** descriptive statistics and correlation analyses; **(5)** *t*-test, multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison; **(6)** tidy report of statistical models (to R Console and Microsoft Word); **(7)** mediation and moderation analyses (PROCESS); and **(8)** additional toolbox for statistics and graphics.
+This package includes easy-to-use functions for **(1)** basic R programming (e.g., set working directory to the path of currently opened file, import/export data from/to files with any format, print strings with rich formats and colors); **(2)** multivariate computation (e.g., compute scale sums/means/... with reverse scoring); **(3)** reliability analyses and factor analyses (PCA, EFA, CFA); **(4)** descriptive statistics and correlation analyses; **(5)** *t*-test, multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison; **(6)** tidy report of statistical models (to R Console and Microsoft Word); **(7)** mediation and moderation analyses (PROCESS); and **(8)** additional toolbox for statistics and graphics.
 
 [![CRAN-Version](https://www.r-pkg.org/badges/version/bruceR?color=red)](https://CRAN.R-project.org/package=bruceR) [![CRAN-Downloads](https://cranlogs.r-pkg.org/badges/grand-total/bruceR)](https://cranlogs.r-pkg.org/downloads/daily/last-month/bruceR) [![GitHub-Version](https://img.shields.io/github/r-package/v/psychbruce/bruceR?label=GitHub&color=orange)](https://github.com/psychbruce/bruceR) [![Travis-Build-Status](https://api.travis-ci.com/psychbruce/bruceR.svg?branch=master)](https://app.travis-ci.com/github/psychbruce/bruceR) [![Logo-Designer](https://img.shields.io/badge/Logo%20Designer-Meijia%20Li-blueviolet?logo=github-sponsors)](https://github.com/Stellapros) [![GitHub-Commits](https://img.shields.io/github/commit-activity/y/psychbruce/bruceR?logo=github&label=commits&style=social)](https://github.com/psychbruce/bruceR/commits) [![GitHub-Stars](https://img.shields.io/github/stars/psychbruce/bruceR?style=social)](https://github.com/psychbruce/bruceR/stargazers)
 
@@ -20,11 +20,15 @@ Website: [psychbruce.github.io](https://psychbruce.github.io)
 
 ## Citation
 
--   Bao, H.-W.-S. (2021). bruceR: Broadly useful convenient and efficient R functions. R package version 0.x.x. <https://CRAN.R-project.org/package=bruceR>
+-   Bao, H.-W.-S. (2021). bruceR: Broadly useful convenient and efficient R functions. R package version 0.8.x. <https://CRAN.R-project.org/package=bruceR>
 
 ## User Guide
 
 [Release Notes](https://github.com/psychbruce/bruceR/blob/master/NEWS.md)
+
+[Chinese Documentation for bruceR: I. Overview](https://zhuanlan.zhihu.com/p/281150493)
+
+[Chinese Documentation for bruceR: II. FAQ](https://zhuanlan.zhihu.com/p/432931518)
 
 ### Installation
 
@@ -34,7 +38,7 @@ install.packages("bruceR")
 
 ## Method 2: Install from GitHub
 install.packages("devtools")
-devtools::install_github("psychbruce/bruceR", force=TRUE, upgrade=FALSE)
+devtools::install_github("psychbruce/bruceR", force=TRUE)
 ```
 
 **Tips:**
@@ -64,6 +68,7 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
     -   [`emmeans`](https://cran.r-project.org/package=emmeans): Estimates of marginal means and multiple contrasts.
     -   [`effectsize`](https://cran.r-project.org/package=effectsize): Estimates of effect sizes and standardized parameters.
     -   [`performance`](https://cran.r-project.org/package=performance): Estimates of regression models performance.
+    -   [`lmerTest`](https://cran.r-project.org/package=lmerTest): Tests of linear mixed effects models (LMM, also known as HLM and multilevel models).
 
 -   **[Plot]:**
 

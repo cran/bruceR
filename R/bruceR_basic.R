@@ -194,10 +194,10 @@ pkg_install_suggested=function(by) {
     dplyr, tidyr, stringr, forcats, data.table,
     rio, haven, foreign, readxl, openxlsx, clipr,
     tibble, plyr, glue, crayon,
-    psych, emmeans, effectsize, performance,
+    emmeans, effectsize, performance,
     pwr, simr, MASS, sampling, careless,
     irr, correlation, corpcor, corrplot,
-    afex, car, lmtest, nnet,
+    afex, car, psych, lmtest, nnet,
     lme4, lmerTest, multilevel, r2mlm, MuMIn,
     metafor, meta, metaSEM, metapower,
     mediation, interactions, JSmediation,
@@ -292,49 +292,12 @@ Print=function(...) {
 
 #' @describeIn Print Paste strings.
 #'
-## @importFrom glue glue glue_col
-## @importFrom crayon bold italic underline reset blurred inverse hidden strikethrough
-## @importFrom crayon black white silver red green blue yellow cyan magenta
-## @importFrom crayon bgBlack bgWhite bgRed bgGreen bgBlue bgYellow bgCyan bgMagenta
 #' @export
 Glue=function(...) {
   output=glue::glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
   output_color=glue::glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
   return(output_color)
 }
-
-
-glue=glue::glue
-glue_col=glue::glue_col
-
-
-bold=crayon::bold
-italic=crayon::italic
-underline=crayon::underline
-reset=crayon::reset
-blurred=crayon::blurred
-inverse=crayon::inverse
-hidden=crayon::hidden
-strikethrough=crayon::strikethrough
-
-black=crayon::black
-white=crayon::white
-silver=crayon::silver
-red=crayon::red
-green=crayon::green
-blue=crayon::blue
-yellow=crayon::yellow
-cyan=crayon::cyan
-magenta=crayon::magenta
-
-bgBlack=crayon::bgBlack
-bgWhite=crayon::bgWhite
-bgRed=crayon::bgRed
-bgGreen=crayon::bgGreen
-bgBlue=crayon::bgBlue
-bgYellow=crayon::bgYellow
-bgCyan=crayon::bgCyan
-bgMagenta=crayon::bgMagenta
 
 
 sprintf_transformer=function(text, envir) {
@@ -389,7 +352,7 @@ Run=function(..., silent=FALSE) {
 #'
 #' @export
 rep_char=function(char, rep.times) {
-  paste(rep(char, rep.times), collapse="")
+  paste(rep(char, times=rep.times), collapse="")
 }
 
 
@@ -444,6 +407,8 @@ capitalize=function(string) {
 #' }
 #'
 #' @examples
+#' print_table(data.frame(x=1))
+#'
 #' print_table(airquality, file="airquality.doc")
 #' unlink("airquality.doc")  # delete file for code check
 #'
@@ -462,19 +427,7 @@ print_table=function(x, digits=3, nsmalls=digits,
                      file.align.head="auto",
                      file.align.text="auto") {
   ## Preprocess data.frame ##
-
-  # Good-looking tabs !!!
-  # Print("\u2500\u2501\u2502\u2503\u2504\u2505\u2506\u2507\u2508\u2509")
-  # linechar1="\u2501"  # top-and-down '=' [bug in some computers!]
-  # linechar2="\u2500"  # in-table '-'
-  if(line) {
-    linechar1=linechar2="\u2500"
-  } else {
-    linechar1="="
-    linechar2="-"
-  }
-
-  if(class(x) %nonein% c("matrix", "data.frame", "data.table")) {
+  if(!inherits(x, c("matrix", "data.frame", "data.table"))) {
     coef.table=coef(summary(x))
     if(!is.null(coef.table)) x=coef.table
   }
@@ -527,47 +480,37 @@ print_table=function(x, digits=3, nsmalls=digits,
   }
 
   ## Compute length to generate line-chars ##
+  linechar=ifelse(line, "\u2500", "-")
   title.length=nchar(names(x), type="width")
   vars.length=c()  # bug: vars.length=apply(apply(x, 2, nchar), 2, max)
   for(j in 1:length(x)) vars.length[j]=max(nchar(x[,j], type="width"))
-
-  ## Generate a row with 'linechar2' ##
   n.lines=apply(rbind(title.length, vars.length), 2, max)+2
   n.lines.rn=max(nchar(row.names(x), type="width"))+2
-  n.lines.table=n.lines.rn+sum(n.lines)
-  line.row=data.frame()
-  for(j in 1:length(x))
-    line.row[1,j]=rep_char(linechar2, n.lines[j])
-  names(line.row)=names(x)
-  row.names(line.row)[1]=rep_char(linechar2, n.lines.rn)
-
-  ## Row-bind and deal with 'row.names' (T or F) ##
-  xr=rbind(line.row, x)
-  if(row.names==FALSE)
-    n.lines.table=n.lines.table-n.lines.rn
-  table.line=rep_char(linechar1, n.lines.table)
+  if(row.names)
+    table.line=rep_char(linechar, sum(n.lines)+n.lines.rn)
+  else
+    table.line=rep_char(linechar, sum(n.lines))
 
   ## Output ##
   if(is.null(file)) {
     if(title!="") Print(title)
     Print(table.line)
-    if(row.names==TRUE)
+    if(row.names)
       cat(rep_char(" ", n.lines.rn))
-    for(j in 1:length(xr)) {
-      # cat(sprintf(glue("% {n.lines[j]}s"), names(xr)[j]))
-      name.j=names(xr)[j]
+    for(j in 1:length(x)) {
+      name.j=names(x)[j]
       cat(rep_char(" ", n.lines[j]-nchar(name.j, type="width")) %^% name.j)
     }
     cat("\n")
-    for(i in 1:nrow(xr)) {
-      if(row.names==TRUE) {
-        # cat(sprintf(glue("%-{n.lines.rn}s"), row.names(xr[i,])))
-        row.name.i=row.names(xr[i,])
+    Print(table.line)
+    for(i in 1:nrow(x)) {
+      if(row.names) {
+        row.name.i=row.names(x)[i]
         cat(row.name.i %^% rep_char(" ", n.lines.rn-nchar(row.name.i, type="width")))
       }
-      for(j in 1:length(xr)) {
+      for(j in 1:length(x)) {
         # cat(sprintf(glue("% {n.lines[j]}s"), ifelse(is.na(xr[i,j]) | grepl("NA$", xr[i,j]), "", xr[i,j])))
-        x.ij=ifelse(is.na(xr[i,j]) | grepl("NA$", xr[i,j]), "", xr[i,j])
+        x.ij=ifelse(is.na(x[i,j]) | grepl("NA$", x[i,j]), "", x[i,j])
         cat(rep_char(" ", n.lines[j]-nchar(x.ij, type="width")) %^% x.ij)
       }
       cat("\n")
@@ -575,7 +518,7 @@ print_table=function(x, digits=3, nsmalls=digits,
     Print(table.line)
     if(note!="") Print(note)
   }
-  if(row.names==TRUE) {
+  if(row.names) {
     x=cbind(rn=row.names(x), x)
     names(x)[1]=""
   }
