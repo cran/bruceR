@@ -1014,7 +1014,8 @@ PROCESS=function(data,
       Run(run.process.mod.xy(eff.tag="(Conditional Direct Effects [c'] of X on Y)"))
     } else {
       Print("<<cyan <<underline Direct Effect:>> \"{x}\" (X) ==> \"{y}\" (Y)>>")
-      de=as.data.frame(coef(summary(model.y)))[2,]
+      de=as.data.frame(coef(summary(model.y)))
+      de=de[which(row.names(de)==x),]
       de$df=NULL
       conf.int=confint(model.y)
       conf.int=conf.int[which(row.names(conf.int)==row.names(de)),]
@@ -1039,7 +1040,7 @@ PROCESS=function(data,
   ## File Closing
   # if(!is.null(file)) {
   #   close(FILE)
-  #   Print("<<green \u2714>> All results (plain text) are saved to <<blue '{paste0(getwd(), '/', file)}'>>")
+  #   Print("<<green \u221a>> All results (plain text) are saved to <<blue '{paste0(getwd(), '/', file)}'>>")
   #   cat("\n")
   # }
 
