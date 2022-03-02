@@ -218,6 +218,12 @@ fix_long_data=function(data.long, ivs) {
 #' \code{between}, \code{within},
 #' \code{data.wide}, \code{data.long}.
 #'
+#' @section Interaction Plot:
+#' You can save the returned object and use the \code{\link[emmeans:emmip]{emmeans::emmip()}} function
+#' to create an interaction plot (based on the fitted model and a formula specification).
+#' For usage, please see the help page of \code{\link[emmeans:emmip]{emmeans::emmip()}}.
+#' It returns an object of class \code{ggplot}, which can be easily modified and saved using \code{ggplot2} syntax.
+#'
 #' @examples
 #' #### Between-Subjects Design ####
 #'
@@ -229,6 +235,14 @@ fix_long_data=function(data.long, ivs) {
 #'
 #' between.3
 #' MANOVA(between.3, dv="SCORE", between=c("A", "B", "C"))
+#'
+#' ## How to create an interaction plot using `emmeans::emmip()`?
+#' ## See help page for its usage: ?emmeans::emmip()
+#' m = MANOVA(between.2, dv="SCORE", between=c("A", "B"))
+#' emmip(m, ~ A | B, CIs=TRUE)
+#' emmip(m, ~ B | A, CIs=TRUE)
+#' emmip(m, B ~ A, CIs=TRUE)
+#' emmip(m, A ~ B, CIs=TRUE)
 #'
 #'
 #' #### Within-Subjects Design ####
@@ -578,6 +592,12 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' For alternative methods, see \code{\link[emmeans:eff_size]{emmeans::eff_size()}} and \code{\link[effectsize:t_to_r]{effectsize::t_to_d()}}.
 #' Users should \emph{not} take the default output as the only right results and are completely responsible for specifying \code{sd.pooled}.
 #'
+#' @section Interaction Plot:
+#' You can save the returned object and use the \code{\link[emmeans:emmip]{emmeans::emmip()}} function
+#' to create an interaction plot (based on the fitted model and a formula specification).
+#' For usage, please see the help page of \code{\link[emmeans:emmip]{emmeans::emmip()}}.
+#' It returns an object of class \code{ggplot}, which can be easily modified and saved using \code{ggplot2} syntax.
+#'
 #' @section Statistical Details:
 #'
 #' Some may confuse the statistical terms "simple effects", "post-hoc tests", and "multiple comparisons".
@@ -667,11 +687,12 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' @return
 #' The same model object as returned by
 #' \code{\link{MANOVA}} (for recursive use),
-#' along with a list of \code{EMMEANS} tables:
+#' along with a list of tables:
 #' \code{sim} (simple effects),
 #' \code{emm} (estimated marginal means),
 #' \code{con} (contrasts).
-#' Each \code{EMMEANS} appends one list to the returned object.
+#'
+#' Each \code{EMMEANS(...)} appends one list to the returned object.
 #'
 #' @examples
 #' #### Between-Subjects Design ####
@@ -690,14 +711,21 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' MANOVA(between.2, dv="SCORE", between=c("A", "B")) %>%
 #'   EMMEANS("A", by="B") %>%
 #'   EMMEANS("B", by="A")
+#' ## How to create an interaction plot using `emmeans::emmip()`?
+#' ## See help page for its usage: ?emmeans::emmip()
+#' m = MANOVA(between.2, dv="SCORE", between=c("A", "B"))
+#' emmip(m, ~ A | B, CIs=TRUE)
+#' emmip(m, ~ B | A, CIs=TRUE)
+#' emmip(m, B ~ A, CIs=TRUE)
+#' emmip(m, A ~ B, CIs=TRUE)
 #'
 #' between.3
 #' MANOVA(between.3, dv="SCORE", between=c("A", "B", "C")) %>%
 #'   EMMEANS("A", by="B") %>%
 #'   EMMEANS(c("A", "B"), by="C") %>%
 #'   EMMEANS("A", by=c("B", "C"))
-#' ## just to name a few
-#' ## you may test other combinations
+#' ## Just to name a few...
+#' ## You may test other combinations...
 #'
 #'
 #' #### Within-Subjects Design ####
@@ -715,7 +743,7 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #' # :::::::::::::::::::::::::::::::::::::::
 #' # This would produce a WARNING because of
 #' # the linear dependence of A2B2 and A2B3.
-#' # see: Corr(within.2[c("A2B2", "A2B3")])
+#' # See: Corr(within.2[c("A2B2", "A2B3")])
 #'
 #' \donttest{within.3
 #' MANOVA(within.3, dvs="A1B1C1:A2B2C2", dvs.pattern="A(.)B(.)C(.)",
@@ -723,8 +751,8 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #'   EMMEANS("A", by="B") %>%
 #'   EMMEANS(c("A", "B"), by="C") %>%
 #'   EMMEANS("A", by=c("B", "C"))
-#' ## just to name a few
-#' ## you may test other combinations
+#' ## Just to name a few...
+#' ## You may test other combinations...
 #' }
 #'
 #' #### Mixed Design ####
@@ -741,8 +769,8 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #'   EMMEANS("A", by="B") %>%
 #'   EMMEANS(c("A", "B"), by="C") %>%
 #'   EMMEANS("A", by=c("B", "C"))
-#' ## just to name a few
-#' ## you may test other combinations
+#' ## Just to name a few...
+#' ## You may test other combinations...
 #'
 #' mixed.3_2b1w
 #' MANOVA(mixed.3_2b1w, dvs="B1:B2", dvs.pattern="B(.)",
@@ -751,8 +779,8 @@ MANOVA=function(data, subID=NULL, dv=NULL,
 #'   EMMEANS("A", by="C") %>%
 #'   EMMEANS(c("A", "B"), by="C") %>%
 #'   EMMEANS("B", by=c("A", "C"))
-#' ## just to name a few
-#' ## you may test other combinations
+#' ## Just to name a few...
+#' ## You may test other combinations...
 #'
 #'
 #' #### Other Examples ####
@@ -789,6 +817,12 @@ EMMEANS=function(model, effect=NULL, by=NULL,
   #   model=model.raw
   # }
 
+  if(is.null(model)) {
+    stop("MANOVA() did not run successfully (model is null).
+       Please run MANOVA() without any code of EMMEANS()
+       to check what the problem is.", call.=FALSE)
+  }
+
   ## Simple Effect (omnibus)
   # see 'weights' in ?emmeans
   try({
@@ -800,7 +834,7 @@ EMMEANS=function(model, effect=NULL, by=NULL,
         weights="equal",
         model=model.type)
     })
-    note="note" %in% names(sim)
+    # note="note" %in% names(sim)
     sim$note=NULL
     names(sim)[1]="Effect"
     sim$Effect=str_replace_all(sim$Effect, ":", " x ")
@@ -810,6 +844,10 @@ EMMEANS=function(model, effect=NULL, by=NULL,
                       formatF(eta2$CI_low, nsmall), ", ",
                       formatF(eta2$CI_high, nsmall), "]") %>%
       str_replace_all("0\\.", ".")
+    if(length(by)>0) {
+      vns=names(sim)[2:(length(by)+1)]
+      names(sim)[2:(length(by)+1)]="\"" %^% vns %^% "\""
+    }
     names(sim)[(length(by)+4):(length(by)+6)]=
       c("F", "pval", "\u03b7\u00b2p [90% CI of \u03b7\u00b2p]")
   }, silent=TRUE)
@@ -818,13 +856,18 @@ EMMEANS=function(model, effect=NULL, by=NULL,
   Print("<<cyan ------ EMMEANS (effect = \"{effect.text}\") ------>>")
   cat("\n")
   Print("Joint Tests of \"{effect.text}\":")
-  if(is.null(sim) | note) {
-    message("Warning (also in SPSS):
-    Within-cells error matrix is SINGULAR.
-    Some variables are LINEARLY DEPENDENT.
-    Please check your data and variables.
-    The same error also appears in SPSS!")
+  if(is.null(sim)) {
+    stop("Package `afex` is required but is not installed.
+       Please install it:
+       install.packages(\"afex\")", call.=FALSE)
   }
+  # if(note) {
+  #   message("Warning (also in SPSS):
+  #   Within-cells error matrix is SINGULAR.
+  #   Some variables are LINEARLY DEPENDENT.
+  #   Please check your data and variables.
+  #   The same error also appears in SPSS!")
+  # }
   print_table(sim, nsmalls=c(rep(0, length(by)+3),
                              nsmall, 0, 0),
               row.names=FALSE)
@@ -887,7 +930,9 @@ EMMEANS=function(model, effect=NULL, by=NULL,
   emm$MeanCI=paste0(formatF(emm$emmean, nsmall), " [",
                     formatF(emm$lower.CL, nsmall), ", ",
                     formatF(emm$upper.CL, nsmall), "]")
-  emm=cbind(emm[c(1:(length(by)+1))], emm[c("MeanCI", "SE")])
+  vns=names(emm)[1:(length(by)+1)]
+  names(emm)[1:(length(by)+1)]="\"" %^% vns %^% "\""
+  emm=cbind(emm[1:(length(by)+1)], emm[c("MeanCI", "SE")])
   names(emm)[length(emm)-1]="Mean [95% CI of Mean]"
 
   Print("Estimated Marginal Means of \"{effect.text}\":")
@@ -953,6 +998,10 @@ EMMEANS=function(model, effect=NULL, by=NULL,
   con$d=paste0(formatF(con$estimate/sd.pooled, nsmall), " [",
                formatF(conCI$lower.CL/sd.pooled, nsmall), ", ",
                formatF(conCI$upper.CL/sd.pooled, nsmall), "]")
+  if(length(by)>0) {
+    vns=names(con)[2:(length(con)-6)]
+    names(con)[2:(length(con)-6)]="\"" %^% vns %^% "\""
+  }
   names(con)[c(1, (length(con)-5):length(con))]=
     c("Contrast", "Estimate", "SE", "df", "t", "pval",
       "Cohen\u2019s d [95% CI of d]")

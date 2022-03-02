@@ -1,5 +1,23 @@
 **If you are viewing this file on CRAN, please check [latest news on GitHub](https://github.com/psychbruce/bruceR/blob/master/NEWS.md) where the formatting is also better.**
 
+# bruceR 0.8.5 (Mar 2022)
+
+### New Features
+
+-   New function `cc()`: Split up a string (with separators) into a character vector (whitespace around separator is trimmed). For example, `cc("A 1 , B 2 ; C 3 | D 4 \t E 5")` produces a vector of `c("A 1", "B 2", "C 3", "D 4", "E 5")`. The default separators include `, ; | \n \t`. Users may also specify a separator.
+
+### Minor Changes
+
+-   Added a guideline and examples for creating interaction plots using the returned object of `MANOVA()` and `EMMEANS()`. You can save the returned object and use the `emmeans::emmip()` function to create an interaction plot (based on the fitted model and a formula specification). For usage, please see the help page of `emmeans::emmip()`. It returns an object of class `ggplot`, which can be easily modified and saved using `ggplot2` syntax.
+
+-   Added an explanation of the automatic grand-mean centering in `PROCESS()`.
+
+### Bug Fixes
+
+-   Users who have not installed the `afex` package would see an unusual error when using the `EMMEANS()` function (`Error: $ operator is invalid for atomic vectors`). So now `afex` is again a *strong dependency* of `bruceR`, such that it is automatically installed when installing `bruceR`.
+-   Improved debugging information for `EMMEANS()` (when `model` is null).
+-   Fixed a bug of interaction tests in `PROCESS()` when setting `mod.type="3-way"` for multilevel models.
+
 # bruceR 0.8.3 (Jan 2022)
 
 ### Minor Changes

@@ -1,7 +1,7 @@
 Package: bruceR
 Title: Broadly Useful Convenient and Efficient R Functions
-Version: 0.8.3
-Date: 2022-01-18
+Version: 0.8.5
+Date: 2022-03-02
 Authors@R: 
     c(person(given = "Han-Wu-Shuang",
              family = "Bao",
@@ -33,14 +33,15 @@ LazyData: true
 URL: https://github.com/psychbruce/bruceR
 BugReports: https://github.com/psychbruce/bruceR/issues
 Depends: R (>= 4.0.0)
-Imports: dplyr, tidyr, stringr, forcats, data.table, psych, emmeans,
-        effectsize, performance, lmerTest, mediation, interactions,
-        lavaan, glue, crayon, ggplot2, ggtext, cowplot, see
+Imports: dplyr, tidyr, stringr, forcats, data.table, psych, afex,
+        emmeans, effectsize, performance, lmerTest, mediation,
+        interactions, lavaan, glue, crayon, ggplot2, ggtext, cowplot,
+        see
 Suggests: rstudioapi, pacman, rio, haven, foreign, readxl, openxlsx,
-        clipr, tibble, plyr, afex, car, phia, lmtest, lme4, vars,
+        clipr, tibble, plyr, car, phia, lmtest, lme4, vars,
         GPArotation, jtools, texreg, MuMIn, BayesFactor, GGally
 RoxygenNote: 7.1.2
 NeedsCompilation: no
-Packaged: 2022-01-18 07:53:08 UTC; Bruce
+Packaged: 2022-03-02 11:51:49 UTC; Bruce
 Repository: CRAN
-Date/Publication: 2022-01-18 08:32:53 UTC
+Date/Publication: 2022-03-02 12:30:02 UTC
