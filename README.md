@@ -1,22 +1,24 @@
-# bruceR <a href="https://github.com/psychbruce/bruceR/tree/master/logo"><img src="https://raw.githubusercontent.com/psychbruce/bruceR/master/logo/bruceR-logo-gifs.gif" align="right" height="180px"/></a>
+# bruceR <img src="man/figures/logo.png" align="right" width="160"/>
 
 **BR**oadly **U**seful **C**onvenient and **E**fficient **R** functions that **BR**ing **U**sers **C**oncise and **E**legant **R** data analyses.
 
 This package includes easy-to-use functions for **(1)** basic R programming (e.g., set working directory to the path of currently opened file, import/export data from/to files with any format, print strings with rich formats and colors); **(2)** multivariate computation (e.g., compute scale sums/means/... with reverse scoring); **(3)** reliability analyses and factor analyses (PCA, EFA, CFA); **(4)** descriptive statistics and correlation analyses; **(5)** *t*-test, multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison; **(6)** tidy report of statistical models (to R Console and Microsoft Word); **(7)** mediation and moderation analyses (PROCESS); and **(8)** additional toolbox for statistics and graphics.
 
-[![CRAN-Version](https://www.r-pkg.org/badges/version/bruceR?color=red)](https://CRAN.R-project.org/package=bruceR) [![CRAN-Downloads](https://cranlogs.r-pkg.org/badges/grand-total/bruceR)](https://cranlogs.r-pkg.org/downloads/daily/last-month/bruceR) [![GitHub-Version](https://img.shields.io/github/r-package/v/psychbruce/bruceR?label=GitHub&color=orange)](https://github.com/psychbruce/bruceR) [![Travis-Build-Status](https://api.travis-ci.com/psychbruce/bruceR.svg?branch=master)](https://app.travis-ci.com/github/psychbruce/bruceR) [![Logo-Designer](https://img.shields.io/badge/Logo%20Designer-Meijia%20Li-blueviolet?logo=github-sponsors)](https://github.com/Stellapros) [![GitHub-Commits](https://img.shields.io/github/commit-activity/y/psychbruce/bruceR?logo=github&label=commits&style=social)](https://github.com/psychbruce/bruceR/commits) [![GitHub-Stars](https://img.shields.io/github/stars/psychbruce/bruceR?style=social)](https://github.com/psychbruce/bruceR/stargazers)
+<!-- badges: start -->
+
+[![CRAN-Version](https://www.r-pkg.org/badges/version/bruceR?color=red)](https://CRAN.R-project.org/package=bruceR) [![GitHub-Version](https://img.shields.io/github/r-package/v/psychbruce/bruceR?label=GitHub&color=orange)](https://github.com/psychbruce/bruceR) [![R-CMD-check](https://github.com/psychbruce/bruceR/workflows/R-CMD-check/badge.svg)](https://github.com/psychbruce/bruceR/actions) [![CRAN-Downloads](https://cranlogs.r-pkg.org/badges/grand-total/bruceR)](https://CRAN.R-project.org/package=bruceR) [![Logo-Designer](https://img.shields.io/badge/Logo%20Designer-Meijia%20Li-blueviolet?logo=github-sponsors)](https://github.com/Stellapros) [![GitHub-Stars](https://img.shields.io/github/stars/psychbruce/bruceR?style=social)](https://github.com/psychbruce/bruceR/stargazers)
+
+<!-- badges: end -->
 
 <img src="https://s1.ax1x.com/2020/07/28/aAjUJg.jpg" width="120px" height="42px"/>
 
 ## Author
 
-[包寒吴霜 \| Bao H.-W.-S.](https://psychbruce.github.io)
+Han-Wu-Shuang (Bruce) Bao 包寒吴霜
 
-E-mail: [baohws\@foxmail.com](mailto:baohws@foxmail.com)
+Email: [baohws\@foxmail.com](mailto:baohws@foxmail.com)
 
-Website: [psychbruce.github.io](https://psychbruce.github.io)
-
-[ResearchGate](https://www.researchgate.net/profile/Han-Wu-Shuang-Bao) \| [GitHub](https://github.com/psychbruce) \| [知乎](https://www.zhihu.com/people/psychbruce)
+Homepage: [psychbruce.github.io](https://psychbruce.github.io)
 
 ## Citation
 
@@ -45,11 +47,12 @@ update.packages(ask=FALSE)
 
 **Tips:**
 
-1.  Please **restart (close and reopen) RStudio** before installation.
-2.  If you see a dialog asking *"Do you want to install from sources the package which needs compilation?"*, it would be better to **choose "No"** (to save your time).
-3.  If you fail to install, please read carefully the warning messages and find out the key R package(s) causing the failure, **manually uninstall and reinstall these R package(s)**, and then retry the main installation.
-4.  It would be better to update R to its [latest version](https://www.r-project.org/) (v4.0+).
-5.  It would be better to download and install [Rtools.exe](https://CRAN.R-project.org/bin/windows/Rtools/) on Windows system.
+1.  Good practice: **restart RStudio** before installation.
+2.  Good practice: **update R** to the [latest version](https://www.r-project.org/) (v4.0+).
+3.  Good practice: **install** [Rtools.exe](https://CRAN.R-project.org/bin/windows/Rtools/) (it is *not* an R package) on Windows system.
+4.  If you see *"Do you want to restart R prior to install?"*, **choose "Yes"** at the first time and then **choose "No"**.
+5.  If you see *"Do you want to install from sources the package which needs compilation?"*, just **choose "No"**.
+6.  If you fail to install, please carefully read the warning messages and find out the R package(s) causing the failure, **manually uninstall and reinstall these R package(s)**, and then retry the main installation.
 
 ### Package Dependency
 
@@ -83,9 +86,9 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
 
 1.  **Basic R Programming**
 
+    -   `cc()`
     -   `set.wd()` (alias: `set_wd()`)
     -   `import()`, `export()`
-    -   `cc()`
     -   `pkg_depend()`, `pkg_install_suggested()`
     -   `formatF()`, `formatN()`
     -   `print_table()`
@@ -176,8 +179,8 @@ Examples:
 Corr(airquality, file="cor.doc")
 
 ## Regression analysis
-lm1=lm(Temp ~ Month + Day, data=airquality)
-lm2=lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
+lm1 = lm(Temp ~ Month + Day, data=airquality)
+lm2 = lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
 model_summary(list(lm1, lm2), file="reg.doc")
 model_summary(list(lm1, lm2), std=TRUE, file="reg_std.doc")
 ```

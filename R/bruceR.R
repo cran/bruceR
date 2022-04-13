@@ -1,15 +1,42 @@
 #### For Developer ####
+
 # Install Package: 'Ctrl + Shift + B'
 # Check Package:   'Ctrl + Shift + E'
 # Test Package:    'Ctrl + Shift + T'
 
-# devtools::check()
-# devtools::spell_check()
-# devtools::check_rhub()
-# devtools::check_win_devel()
+if(FALSE) {
+  devtools::check()
+  devtools::spell_check()
+  devtools::check_rhub()
+  devtools::check_mac_release()
+  devtools::check_win_release()
+  devtools::check_win_devel()
 
-# devtools::release()
-# devtools::submit_cran()
+  devtools::release()
+  devtools::submit_cran()
+
+  usethis::use_github_actions()  # R-CMD-check
+
+  ## Build Site on GitHub
+  usethis::use_pkgdown()
+  # usethis::use_pkgdown_github_pages()  # with a bug!
+  # usethis::use_github_pages()  # with a bug!
+  usethis::use_github_action("pkgdown")  # GitHub Pages
+  # Set "GitHub Pages" after pushing the above changes:
+  # Branch: gh-pages, / (root)
+  # Push another change in main branch
+  # Done
+
+  ## Build Site Locally
+  pkgdown::build_site()
+  pkgdown::init_site()
+  pkgdown::build_home_index()
+
+  usethis::use_coverage()  # Test Coverage
+  usethis::use_github_action("test-coverage")  # Test Coverage
+
+  usethis::use_logo("ignore/logo/bruceR-logo.png")
+}
 
 
 #### Main Description ####
@@ -18,6 +45,8 @@
 #' bruceR: \strong{BR}oadly \strong{U}seful \strong{C}onvenient and \strong{E}fficient \strong{R} functions
 #'
 #' @description
+#' \if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+#'
 #' \strong{BR}oadly
 #' \strong{U}seful
 #' \strong{C}onvenient
@@ -33,12 +62,15 @@
 #' \strong{R}
 #' data analyses.
 #'
-#' Install the latest \href{https://github.com/psychbruce/bruceR}{development version} by \code{devtools::install_github("psychbruce/bruceR")}
+#' Package homepage: \url{https://psychbruce.github.io/bruceR/}
 #'
-#' Check updates in \href{https://github.com/psychbruce/bruceR/blob/master/NEWS.md}{Release Notes}.
+#' Install the latest \href{https://github.com/psychbruce/bruceR}{development version}
+#' from GitHub:
+#' \code{devtools::install_github("psychbruce/bruceR")}
 #'
-#' Report bugs in \href{https://github.com/psychbruce/bruceR/issues}{GitHub Issues}.
+#' Report bugs at \href{https://github.com/psychbruce/bruceR/issues}{GitHub Issues}.
 #'
+#' @details
 #' Loading \code{bruceR} by \code{library(bruceR)} will also load these R packages for you:
 #'
 #' \strong{[Data]:}
@@ -183,7 +215,7 @@
 #' @author
 #' \href{https://psychbruce.github.io}{Han-Wu-Shuang (Bruce) Bao}
 #'
-#' E-mail: \email{baohws@@foxmail.com}
+#' Email: \email{baohws@@foxmail.com}
 #'
 #' @docType package
 #' @name bruceR-package
@@ -204,10 +236,10 @@ NULL
 #' @importFrom crayon bold italic underline reset blurred inverse hidden strikethrough
 #' @importFrom crayon black white silver red green blue yellow cyan magenta
 #' @importFrom crayon bgBlack bgWhite bgRed bgGreen bgBlue bgYellow bgCyan bgMagenta
-.onAttach=function(libname, pkgname) {
+.onAttach = function(libname, pkgname) {
   ## Version Check
-  inst.ver=as.character(utils::packageVersion("bruceR"))
-  xml=suppressWarnings({
+  inst.ver = as.character(utils::packageVersion("bruceR"))
+  xml = suppressWarnings({
     try({
       readLines("https://cran.r-project.org/web/packages/bruceR/index.html")
     }, silent=TRUE)
@@ -216,11 +248,11 @@ NULL
   ## Update Message
   if(!inherits(xml, "try-error")) {
     try({
-      cran.ver=xml[grep("Version:", xml, fixed=TRUE)+1]
-      cran.ymd=xml[grep("Published:", xml, fixed=TRUE)+1]
+      cran.ver = xml[grep("Version:", xml, fixed=TRUE) + 1]
+      cran.ymd = xml[grep("Published:", xml, fixed=TRUE) + 1]
       if(!is.na(cran.ver) & length(cran.ver)==1) {
-        cran.ver=substr(cran.ver, 5, nchar(cran.ver)-5)
-        cran.ymd=substr(cran.ymd, 5, nchar(cran.ymd)-5)
+        cran.ver = substr(cran.ver, 5, nchar(cran.ver)-5)
+        cran.ymd = substr(cran.ymd, 5, nchar(cran.ymd)-5)
         if(numeric_version(inst.ver)<numeric_version(cran.ver))
           packageStartupMessage(Glue("
           \n
@@ -234,7 +266,7 @@ NULL
   }
 
   ## Loaded Package
-  pkgs=c(
+  pkgs = c(
     ## DATA ##
     "dplyr", "tidyr", "stringr", "forcats", "data.table",
     ## STAT ##
@@ -244,11 +276,11 @@ NULL
   )
 
   # suppressWarnings({
-  #   loaded=pacman::p_load(char=pkgs, character.only=TRUE, install=FALSE)
+  #   loaded = pacman::p_load(char=pkgs, character.only=TRUE, install=FALSE)
   # })
   suppressMessages({
     suppressWarnings({
-      loaded=sapply(pkgs, require, character.only=TRUE)
+      loaded = sapply(pkgs, require, character.only=TRUE)
     })
   })
 
@@ -264,12 +296,10 @@ NULL
     # star: \u2605
     Print("
     \n
-    <<bold
-    \u2605 bruceR (version {inst.ver})
-    <<blue <<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions
-    >>>>
+    <<bold bruceR (version {inst.ver})>>
+    <<blue <<underline BR>>oadly <<underline U>>seful <<underline C>>onvenient and <<underline E>>fficient <<underline R>> functions>>
 
-    <<bold Packages also been loaded:>>
+    <<bold Packages also loaded:>>
     <<green
     \u221a dplyr     \t\u221a emmeans     \t\u221a ggplot2
     \u221a tidyr     \t\u221a effectsize  \t\u221a ggtext
@@ -278,14 +308,14 @@ NULL
     \u221a data.table
     >>
 
-    <<bold Key functions of `bruceR`:>>
+    <<bold Main functions of `bruceR`:>>
     <<cyan
-    set_wd()      \tDescribe() \tTTEST()
-    import()      \tFreq()     \tMANOVA()
-    export()      \tCorr()     \tEMMEANS()
-    print_table() \tAlpha()    \tPROCESS()
-    MEAN()        \tEFA()      \tmodel_summary()
-    LOOKUP()      \tCFA()      \tlavaan_summary()
+    cc()          \tDescribe() \tTTEST()
+    set_wd()      \tFreq()     \tMANOVA()
+    import()      \tCorr()     \tEMMEANS()
+    export()      \tAlpha()    \tPROCESS()
+    print_table() \tEFA()      \tmodel_summary()
+    MEAN()        \tCFA()      \tlavaan_summary()
     >>
     \n
     ")

@@ -20,7 +20,10 @@ A character string of time difference.
 Timer (compute time difference).
 }
 \examples{
-t0=Sys.time()
+\dontrun{
+
+t0 = Sys.time()
 dtime(t0)
+}
 
 }
