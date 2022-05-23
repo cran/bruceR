@@ -1,9 +1,6 @@
 #### Pipeline Functions ####
 
 
-# `%>%` = dplyr::`%>%`
-
-
 #' Paste strings together.
 #'
 #' Paste strings together. A wrapper of \code{paste0()}.
@@ -138,7 +135,7 @@
 #' Check dependencies of R packages.
 #'
 #' @param pkgs Package(s).
-#' @param excludes [optional] Package(s) and their dependencies excluded from the dependencies of \code{pkgs}.
+#' @param excludes [Optional] Package(s) and their dependencies excluded from the dependencies of \code{pkgs}.
 #' Useful if you want to see the unique dependencies of \code{pkgs}.
 #'
 #' @return A character vector of package names.
@@ -280,8 +277,8 @@ pkg_install_suggested = function(by) {
 #' @export
 Print = function(...) {
   tryCatch({
-    output = glue::glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
-    output_color = glue::glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
+    output = glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
+    output_color = glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
     print(output_color)
   }, error = function(e) {
     warning(e)
@@ -294,14 +291,14 @@ Print = function(...) {
 #'
 #' @export
 Glue = function(...) {
-  output = glue::glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
-  output_color = glue::glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
+  output = glue(..., .transformer=sprintf_transformer, .envir=parent.frame())
+  output_color = glue_col( gsub("<<", "{", gsub(">>", "}", output)) )
   return(output_color)
 }
 
 
 sprintf_transformer = function(text, envir) {
-  text = glue::glue(text, .envir=envir)
+  text = glue(text, .envir=envir)
   m = regexpr(":.+$", text)
   if(m!=-1) {
     format = substring(regmatches(text, m), 2)
@@ -328,7 +325,7 @@ sprintf_transformer = function(text, envir) {
 #'
 #' @export
 Run = function(..., silent=FALSE) {
-  text = glue::glue(..., .sep="\n", .envir=parent.frame())
+  text = glue(..., .sep="\n", .envir=parent.frame())
   if(silent) {
     suppressWarnings({
       eval(parse(text=text), envir=parent.frame())
@@ -347,8 +344,10 @@ Run = function(..., silent=FALSE) {
 #'
 #' @param ... Character string(s).
 #' @param sep Pattern for separation.
-#'
-#' Default is \code{"auto"}, including 5 common separators: , ; | \\n \\t.
+#' Default is \code{"auto"}:
+#' \code{,} \code{;} \code{|} \code{\\n} \code{\\t}
+#' @param trim Remove whitespace from start and end of string(s)?
+#' Default is \code{TRUE}.
 #'
 #' @return Character vector.
 #'
@@ -356,6 +355,8 @@ Run = function(..., silent=FALSE) {
 #' cc("a,b,c,d,e")
 #'
 #' cc(" a , b , c , d , e ")
+#'
+#' cc(" a , b , c , d , e ", trim=FALSE)
 #'
 #' cc("1, 2, 3, 4, 5")
 #'
@@ -372,15 +373,14 @@ Run = function(..., silent=FALSE) {
 #' ")
 #'
 #' @export
-cc = function(..., sep="auto") {
+cc = function(..., sep="auto", trim=TRUE) {
   dots = list(...)
   x = paste(sapply(dots, function(i) paste(i, collapse=",")), collapse=",")
-  as.character(
-    stringr::str_split(
-      stringr::str_trim(x),
-      ifelse(sep=="auto", "\\s*[,;\\|\\n\\t]\\s*", sep),
-      simplify=TRUE)
-  )
+  x = ifelse(trim, str_trim(x), x)
+  sep = ifelse(sep=="auto",
+               ifelse(trim, "\\s*[,;\\|\\n\\t]\\s*", "[,;\\|\\n\\t]"),
+               sep)
+  as.character(str_split(x, sep, simplify=TRUE))
 }
 
 
@@ -392,7 +392,7 @@ cc_ci = function(llci, ulci, nsmall) {
 
 
 cc_m_ci = function(mean, llci, ulci, nsmall) {
-  paste0(formatF(mean, nsmall), "[",
+  paste0(formatF(mean, nsmall), " [",
          formatF(llci, nsmall), ", ",
          formatF(ulci, nsmall), "]")
 }

@@ -15,6 +15,8 @@ if(FALSE) {
   devtools::release()
   devtools::submit_cran()
 
+  usethis::use_data_table()
+
   usethis::use_github_actions()  # R-CMD-check
 
   ## Build Site on GitHub
@@ -102,7 +104,7 @@ if(FALSE) {
 #'
 #' \describe{
 #'   \item{\strong{(1) Basic R Programming}}{
-#'       \code{\link{set.wd}} (alias: \code{set_wd})
+#'       \code{\link{set.wd}} (alias: \code{\link{set_wd}})
 #'
 #'       \code{\link{import}},
 #'       \code{\link{export}}
@@ -132,6 +134,12 @@ if(FALSE) {
 #'   }
 #'
 #'   \item{\strong{(2) Multivariate Computation}}{
+#'       \code{\link{add}},
+#'       \code{\link{added}}
+#'
+#'       \code{\link{.sum}},
+#'       \code{\link{.mean}}
+#'
 #'       \code{\link{SUM}},
 #'       \code{\link{MEAN}},
 #'       \code{\link{STD}},
@@ -208,14 +216,8 @@ if(FALSE) {
 #'   }
 #' }
 #'
-#' @note
-#' Please always use \href{https://www.rstudio.com/products/rstudio/download/preview/}{RStudio}
-#' as an \href{https://en.wikipedia.org/wiki/Integrated_development_environment}{IDE} instead of using the raw R software.
-#'
 #' @author
 #' \href{https://psychbruce.github.io}{Han-Wu-Shuang (Bruce) Bao}
-#'
-#' Email: \email{baohws@@foxmail.com}
 #'
 #' @docType package
 #' @name bruceR-package
@@ -231,7 +233,9 @@ NULL
 #' @importFrom stats sd var cor median na.omit complete.cases
 #' @importFrom stats p.adjust pnorm pt pf pchisq qnorm qt quantile rnorm anova update terms drop1
 #' @importFrom stats lm coef confint residuals df.residual sigma as.formula terms.formula model.response model.frame
-#' @importFrom dplyr %>% select left_join sym group_by summarise mutate across
+#' @importFrom dplyr %>% select left_join sym group_by summarise mutate transmute across
+#' @importFrom data.table data.table is.data.table as.data.table
+#' @importFrom data.table := .BY .EACHI .GRP .I .N .NGRP .SD
 #' @importFrom glue glue glue_col
 #' @importFrom crayon bold italic underline reset blurred inverse hidden strikethrough
 #' @importFrom crayon black white silver red green blue yellow cyan magenta
@@ -251,9 +255,9 @@ NULL
       cran.ver = xml[grep("Version:", xml, fixed=TRUE) + 1]
       cran.ymd = xml[grep("Published:", xml, fixed=TRUE) + 1]
       if(!is.na(cran.ver) & length(cran.ver)==1) {
-        cran.ver = substr(cran.ver, 5, nchar(cran.ver)-5)
-        cran.ymd = substr(cran.ymd, 5, nchar(cran.ymd)-5)
-        if(numeric_version(inst.ver)<numeric_version(cran.ver))
+        cran.ver = substr(cran.ver, 5, nchar(cran.ver) - 5)
+        cran.ymd = substr(cran.ymd, 5, nchar(cran.ymd) - 5)
+        if(numeric_version(inst.ver) < numeric_version(cran.ver))
           packageStartupMessage(Glue("
           \n
           NEWS: A new version of bruceR (version {cran.ver}) is available on {cran.ymd}!
@@ -311,12 +315,14 @@ NULL
     <<bold Main functions of `bruceR`:>>
     <<cyan
     cc()          \tDescribe() \tTTEST()
-    set_wd()      \tFreq()     \tMANOVA()
-    import()      \tCorr()     \tEMMEANS()
-    export()      \tAlpha()    \tPROCESS()
-    print_table() \tEFA()      \tmodel_summary()
-    MEAN()        \tCFA()      \tlavaan_summary()
+    add()         \tFreq()     \tMANOVA()
+    .mean()       \tCorr()     \tEMMEANS()
+    set.wd()      \tAlpha()    \tPROCESS()
+    import()      \tEFA()      \tmodel_summary()
+    print_table() \tCFA()      \tlavaan_summary()
     >>
+
+    https://psychbruce.github.io/bruceR/
     \n
     ")
   } else {

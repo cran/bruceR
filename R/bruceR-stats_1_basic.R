@@ -1,3 +1,261 @@
+#### Data Manipulation ####
+
+
+#' Create, modify, and delete variables.
+#'
+#' Enhanced functions to create, modify, and/or delete variables.
+#' The functions \strong{combine} the advantages of
+#' \code{\link[base:within]{within}} (base),
+#' \code{\link[dplyr:mutate]{mutate}} (dplyr),
+#' \code{\link[dplyr:transmute]{transmute}} (dplyr), and
+#' \code{\link[data.table:data.table]{:=}} (data.table).
+#' See examples below for the usage and convenience.
+#'
+#' @param data A \code{\link[data.table:data.table]{data.table}}
+#' (preferred).
+#' @param expr R expression(s) enclosed in \code{{...}} to compute variables.
+#'
+#' Passing to \code{\link[data.table:data.table]{data.table}}:
+#' \code{DT[ , `:=`(expr), ]}
+#'
+#' Execute each line of expression in \code{{...}} \emph{one by one},
+#' such that newly created variables are available immediately.
+#' This is an advantage of \code{\link[dplyr:mutate]{mutate}} and
+#' has been implemented here for \code{\link[data.table:data.table]{data.table}}.
+#' @param when [Optional] Compute for which rows or rows meeting what condition(s)?
+#'
+#' Passing to \code{\link[data.table:data.table]{data.table}}:
+#' \code{DT[when, , ]}
+#' @param by [Optional] Compute by what group(s)?
+#'
+#' Passing to \code{\link[data.table:data.table]{data.table}}:
+#' \code{DT[ , , by]}
+#' @param drop Drop existing variables and return only new variables?
+#' Default is \code{FALSE}, which returns all variables.
+#'
+#' @return
+#' \code{add()} returns a new
+#' \code{\link[data.table:data.table]{data.table}},
+#' with the raw data unchanged.
+#'
+#' \code{added()} returns nothing and has already changed the raw data.
+#'
+#' @examples
+#' ## ====== Usage 1: add() ====== ##
+#'
+#' d = as.data.table(within.1)
+#' d$XYZ = 1:8
+#' d
+#'
+#' # add() does not change the raw data:
+#' add(d, {B = 1; C = 2})
+#' d
+#'
+#' # new data should be assigned to an object:
+#' d = d %>% add({
+#'   ID = str_extract(ID, "\\d")  # modify a variable
+#'   XYZ = NULL                   # delete a variable
+#'   A = .mean("A", 1:4)          # create a new variable
+#'   B = A * 4    # new variable is immediately available
+#'   C = 1        # never need ,/; at the end of any line
+#' })
+#' d
+#'
+#'
+#' ## ====== Usage 2: added() ====== ##
+#'
+#' d = as.data.table(within.1)
+#' d$XYZ = 1:8
+#' d
+#'
+#' # added() has already changed the raw data:
+#' added(d, {B = 1; C = 2})
+#' d
+#'
+#' # raw data has already become the new data:
+#' added(d, {
+#'   ID = str_extract(ID, "\\d")
+#'   XYZ = NULL
+#'   A = .mean("A", 1:4)
+#'   B = A * 4
+#'   C = 1
+#' })
+#' d
+#'
+#'
+#' ## ====== Using `when` and `by` ====== ##
+#'
+#' d = as.data.table(between.2)
+#' d
+#'
+#' added(d, {SCORE2 = SCORE - mean(SCORE)},
+#'       A == 1 & B %in% 1:2,  # `when`: for what conditions
+#'       by=B)                 # `by`: by what groups
+#' d
+#' na.omit(d)
+#'
+#'
+#' ## ====== Return Only New Variables ====== ##
+#'
+#' newvars = add(within.1, {
+#'   ID = str_extract(ID, "\\d")
+#'   A = .mean("A", 1:4)
+#' }, drop=TRUE)
+#' newvars
+#'
+#'
+#' ## ====== Better Than `base::within()` ====== ##
+#'
+#' d = as.data.table(within.1)
+#'
+#' # wrong order: C B A
+#' within(d, {
+#'   A = 4
+#'   B = A + 1
+#'   C = 6
+#' })
+#'
+#' # correct order: A B C
+#' add(d, {
+#'   A = 4
+#'   B = A + 1
+#'   C = 6
+#' })
+#'
+#' @describeIn
+#' add Return the \emph{new data}.
+#'
+#' You need to assign the new data to an object:
+#'
+#' \preformatted{data = add(data, {...})}
+#'
+#' @export
+add = function(data, expr, when, by, drop=FALSE) {
+  data = as.data.table(data)
+  exprs = as.character(substitute(expr))
+  when = deparse(substitute(when))
+  by = deparse(substitute(by))
+  if(exprs[1]!="{")
+    stop("Please use { } for expressions.\nSee: help(add)", call.=FALSE)
+  for(e in exprs[-1]) {
+    es = str_split(e, " \\= | <- ", n=2, simplify=TRUE)[1,]
+    if(str_detect(es[2], "^\\.(mean|sum)\\(.*\\)$"))
+      e = paste(es[1], "=", eval(parse(text=es[2])))
+    else if(str_detect(es[2], "\\.(mean|sum)\\("))
+      stop("Please use ONLY `.mean()` or `.sum()` for one line, without any other expression.", call.=TRUE)
+    eval(parse(text=glue("data[{when}, `:=`({e}), {by}][]")))
+  }
+  if(drop) {
+    dn = names(data)
+    dn.new = str_split(exprs[-1], " \\= | <- ", n=2, simplify=TRUE)[,1]
+    dn.drop = base::setdiff(dn, dn.new)
+    data[, (dn.drop) := NULL][]
+  }
+  return(data)
+}
+
+
+#' @describeIn
+#' add Return nothing and \emph{change the raw data immediately}.
+#'
+#' NO need to assign the new data:
+#'
+#' \preformatted{added(data, {...})}
+#'
+#' @export
+added = function(data, expr, when, by, drop=FALSE) {
+  if(!is.data.table(data))
+    stop("Data must be a `data.table`!\nSee: help(added)", call.=FALSE)
+  exprs = as.character(substitute(expr))
+  when = deparse(substitute(when))
+  by = deparse(substitute(by))
+  if(exprs[1]!="{")
+    stop("Please use { } for expressions.\nSee: help(add)", call.=FALSE)
+  for(e in exprs[-1]) {
+    es = str_split(e, " \\= | <- ", n=2, simplify=TRUE)[1,]
+    if(str_detect(es[2], "^\\.(mean|sum)\\(.*\\)$"))
+      e = paste(es[1], "=", eval(parse(text=es[2])))
+    else if(str_detect(es[2], "\\.(mean|sum)\\("))
+      stop("Please use ONLY `.mean()` or `.sum()` for one line, without any other expression.", call.=TRUE)
+    eval(parse(text=glue("data[{when}, `:=`({e}), {by}][]")))
+  }
+  if(drop) {
+    dn = names(data)
+    dn.new = str_split(exprs[-1], " \\= | <- ", n=2, simplify=TRUE)[,1]
+    dn.drop = base::setdiff(dn, dn.new)
+    data[, (dn.drop) := NULL][]
+  }
+  Print("<<green \u221a>> Raw data has already been changed. Please check.")
+  invisible(data)
+}
+
+
+#' Recode a variable.
+#'
+#' A wrapper of \code{\link[car:recode]{car::recode()}}.
+#'
+#' @param var Variable (numeric, character, or factor).
+#' @param recodes A character string definine the rule of recoding. e.g., \code{"lo:1=0; c(2,3)=1; 4=2; 5:hi=3; else=999"}
+#'
+#' @return A vector of recoded variable.
+#'
+#' @examples
+#' d = data.table(var=c(NA, 0, 1, 2, 3, 4, 5, 6))
+#' added(d, {
+#'   var.new = RECODE(var, "lo:1=0; c(2,3)=1; 4=2; 5:hi=3; else=999")
+#' })
+#' d
+#'
+#' @export
+RECODE = function(var, recodes) {
+  car::recode(var, recodes)
+}
+
+
+#' Rescale a variable (e.g., from 5-point to 7-point).
+#'
+#' @param var Variable (numeric).
+#' @param from Numeric vector, the range of old scale (e.g., \code{1:5}).
+#' If not defined, it will compute the range of \code{var}.
+#' @param to Numeric vector, the range of new scale (e.g., \code{1:7}).
+#'
+#' @return A vector of rescaled variable.
+#'
+#' @examples
+#' d = data.table(var=rep(1:5, 2))
+#' added(d, {
+#'   var1 = RESCALE(var, to=1:7)
+#'   var2 = RESCALE(var, from=1:5, to=1:7)
+#' })
+#' d  # var1 is equal to var2
+#'
+#' @export
+RESCALE = function(var, from=range(var, na.rm=T), to) {
+  (var - median(from)) / (max(from) - median(from)) * (max(to) - median(to)) + median(to)
+}
+
+
+#' Min-max scaling (min-max normalization).
+#'
+#' This function resembles \code{\link[bruceR:RESCALE]{RESCALE()}}
+#' and it is just equivalent to \code{RESCALE(var, to=0:1)}.
+#'
+#' @param v Variable (numeric vector).
+#' @param min Minimum value (default is 0).
+#' @param max Maximum value (default is 1).
+#'
+#' @return A vector of rescaled variable.
+#'
+#' @examples
+#' scaler(1:5)
+#' # the same: RESCALE(1:5, to=0:1)
+#'
+#' @export
+scaler = function(v, min=0, max=1) {
+  min + (v - min(v, na.rm=T)) * (max - min) / (max(v, na.rm=T) - min(v, na.rm=T))
+}
+
+
 #### Significance Test and Report ####
 
 
@@ -163,15 +421,15 @@ sig.trans = function(p) {
 #' Describe(psych::bfi[c("age", "gender", "education")])
 #'
 #' d = as.data.table(psych::bfi)
-#' d[, `:=`(
-#'   gender = as.factor(gender),
-#'   education = as.factor(education),
-#'   E = MEAN(d, "E", 1:5, rev=c(1,2), likert=1:6),
-#'   A = MEAN(d, "A", 1:5, rev=1, likert=1:6),
-#'   C = MEAN(d, "C", 1:5, rev=c(4,5), likert=1:6),
-#'   N = MEAN(d, "N", 1:5, likert=1:6),
-#'   O = MEAN(d, "O", 1:5, rev=c(2,5), likert=1:6)
-#' )]
+#' added(d, {
+#'   gender = as.factor(gender)
+#'   education = as.factor(education)
+#'   E = .mean("E", 1:5, rev=c(1,2), range=1:6)
+#'   A = .mean("A", 1:5, rev=1, range=1:6)
+#'   C = .mean("C", 1:5, rev=c(4,5), range=1:6)
+#'   N = .mean("N", 1:5, range=1:6)
+#'   O = .mean("O", 1:5, rev=c(2,5), range=1:6)
+#' })
 #' Describe(d[, .(age, gender, education)], plot=TRUE, all.as.numeric=FALSE)
 #' Describe(d[, .(age, gender, education, E, A, C, N, O)], plot=TRUE)
 #' }
@@ -353,15 +611,15 @@ Freq = function(x, varname, labels, sort="",
 #' Corr(airquality, p.adjust="bonferroni")
 #'
 #' d = as.data.table(psych::bfi)
-#' d[, `:=`(
-#'   gender = as.factor(gender),
-#'   education = as.factor(education),
-#'   E = MEAN(d, "E", 1:5, rev=c(1,2), likert=1:6),
-#'   A = MEAN(d, "A", 1:5, rev=1, likert=1:6),
-#'   C = MEAN(d, "C", 1:5, rev=c(4,5), likert=1:6),
-#'   N = MEAN(d, "N", 1:5, likert=1:6),
-#'   O = MEAN(d, "O", 1:5, rev=c(2,5), likert=1:6)
-#' )]
+#' added(d, {
+#'   gender = as.factor(gender)
+#'   education = as.factor(education)
+#'   E = .mean("E", 1:5, rev=c(1,2), range=1:6)
+#'   A = .mean("A", 1:5, rev=1, range=1:6)
+#'   C = .mean("C", 1:5, rev=c(4,5), range=1:6)
+#'   N = .mean("N", 1:5, range=1:6)
+#'   O = .mean("O", 1:5, rev=c(2,5), range=1:6)
+#' })
 #' Corr(d[, .(age, gender, education, E, A, C, N, O)])
 #'
 #' @seealso \code{\link{Describe}}
@@ -746,7 +1004,7 @@ cor_plot <- function (r, numbers = TRUE, colors = TRUE, n = 51, main = NULL,
 #'
 #' @param r1,r2 Correlation coefficients (Pearson's \emph{r}).
 #' @param n,n1,n2 Sample sizes.
-#' @param rcov [optional] Only for nonindependent \emph{r}s:
+#' @param rcov [Optional] Only for nonindependent \emph{r}s:
 #'
 #' \code{r1} is r(X,Y),
 #'

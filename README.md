@@ -1,8 +1,18 @@
 # bruceR <img src="man/figures/logo.png" align="right" width="160"/>
 
-**BR**oadly **U**seful **C**onvenient and **E**fficient **R** functions that **BR**ing **U**sers **C**oncise and **E**legant **R** data analyses.
+**BR**oadly **U**seful **C**onvenient and **E**fficient **R** functions that  
+**BR**ing **U**sers **C**oncise and **E**legant **R** data analyses.
 
-This package includes easy-to-use functions for **(1)** basic R programming (e.g., set working directory to the path of currently opened file, import/export data from/to files with any format, print strings with rich formats and colors); **(2)** multivariate computation (e.g., compute scale sums/means/... with reverse scoring); **(3)** reliability analyses and factor analyses (PCA, EFA, CFA); **(4)** descriptive statistics and correlation analyses; **(5)** *t*-test, multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison; **(6)** tidy report of statistical models (to R Console and Microsoft Word); **(7)** mediation and moderation analyses (PROCESS); and **(8)** additional toolbox for statistics and graphics.
+This package includes easy-to-use functions for:
+
+1.  Basic R programming (e.g., set working directory to the path of currently opened file; import/export data from/to files in any format; print tables to Microsoft Word);
+2.  Multivariate computation (e.g., compute scale sums/means/... with reverse scoring);
+3.  Reliability analyses and factor analyses (PCA, EFA, CFA);
+4.  Descriptive statistics and correlation analyses;
+5.  *t*-test, multi-factor analysis of variance (ANOVA), simple-effect analysis, and post-hoc multiple comparison;
+6.  Tidy report of statistical models (to R Console and Microsoft Word);
+7.  Mediation and moderation analyses (PROCESS);
+8.  Additional toolbox for statistics and graphics.
 
 <!-- badges: start -->
 
@@ -26,7 +36,7 @@ Homepage: [psychbruce.github.io](https://psychbruce.github.io)
 
 ## User Guide
 
-[NEWS (GitHub version)](https://github.com/psychbruce/bruceR/blob/master/NEWS.md)
+[NEWS (Changelog)](https://psychbruce.github.io/bruceR/news/index.html)
 
 [Chinese Documentation for bruceR: I. Overview](https://zhuanlan.zhihu.com/p/281150493)
 
@@ -86,9 +96,9 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
 
 1.  **Basic R Programming**
 
-    -   `cc()`
-    -   `set.wd()` (alias: `set_wd()`)
-    -   `import()`, `export()`
+    -   `cc()` (suggested)
+    -   `set.wd()` (alias: `set_wd()`) (suggested)
+    -   `import()`, `export()` (suggested)
     -   `pkg_depend()`, `pkg_install_suggested()`
     -   `formatF()`, `formatN()`
     -   `print_table()`
@@ -99,6 +109,8 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
 
 2.  **Multivariate Computation**
 
+    -   `add()`, `added()` (suggested)
+    -   `.sum()`, `.mean()` (suggested)
     -   `SUM()`, `MEAN()`, `STD()`, `MODE()`, `COUNT()`, `CONSEC()`
     -   `RECODE()`, `RESCALE()`
     -   `LOOKUP()`
@@ -124,7 +136,7 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
 
 6.  **Tidy Report of Regression Models**
 
-    -   `model_summary()`
+    -   `model_summary()` (suggested)
     -   `lavaan_summary()`
     -   `GLM_summary()`
     -   `HLM_summary()`
@@ -133,7 +145,7 @@ Loading `bruceR` by `library(bruceR)` will also load these R packages for you:
 
 7.  **Mediation and Moderation Analyses**
 
-    -   `PROCESS()`
+    -   `PROCESS()` (suggested)
     -   `med_summary()`
 
 8.  **Additional Toolbox for Statistics and Graphics**
@@ -197,6 +209,9 @@ help(bruceR)
 
 ## See help pages of functions
 ## (use `?function` or `help(function)`)
+?cc
+?add
+?.mean
 ?set.wd
 ?import
 ?export

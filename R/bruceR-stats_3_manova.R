@@ -57,6 +57,7 @@
 #' \href{https://book.douban.com/subject/1195181/}{Multi-Factor Experimental Design in Psychology and Education}
 #'
 #' @name bruceR-demodata
+#' @keywords internal
 #' @aliases
 #' between.1 between.2 between.3
 #' mixed.2_1b1w mixed.3_1b2w mixed.3_2b1w
@@ -162,11 +163,20 @@ fix_long_data = function(data.long, ivs) {
 #' }
 #' @param dvs Repeated measures. Only for \strong{wide-format} data (within-subjects or mixed designs).
 #'
-#' Two ways to specify this argument:
+#' Can be:
 #' \itemize{
-#'   \item Use \code{":"} to specify the range of variables: e.g., \code{"A1B1:A2B3"}
-#'   (similar to the SPSS syntax "TO" and the order of variables matters)
-#'   \item Use a character vector to specify variable names: e.g., \code{c("Cond1", "Cond2", "Cond3")}
+#'   \item \code{"start:stop"} to specify the range of variables
+#'   (sensitive to the order of variables):
+#'
+#'   e.g., \code{"A1B1:A2B3"} is matched to all variables in the data
+#'   between \code{"A1B1"} and \code{"A2B3"}
+#'
+#'   \item a character vector to directly specify variables
+#'   (insensitive to the order of variables):
+#'
+#'   e.g., \code{c("Cond1", "Cond2", "Cond3")} or \code{cc("Cond1, Cond2, Cond3")}
+#'
+#'   See \code{\link{cc}} for its usage.
 #' }
 #' @param dvs.pattern If you use \code{dvs}, you should also specify the pattern of variable names
 #' using \emph{regular expression}.
@@ -339,7 +349,7 @@ MANOVA = function(data, subID=NULL, dv=NULL,
     }
     if((!is.null(dv) & is.null(subID)) | (!is.null(dvs) & is.null(dvs.pattern))) {
       stop(Glue("
-      Wrong usage of MANOVA() function.
+      Wrong usage of MANOVA().
       - For wide-format data, please specify both `dvs` and `dvs.pattern`.
       - For long-format data, please specify both `dv` and `subID`.
       See: help(MANOVA)"), call.=FALSE)
@@ -357,10 +367,13 @@ MANOVA = function(data, subID=NULL, dv=NULL,
   ## Long: dv (within)
   if(is.null(dv)) {
     data.wide = data
-    if(length(dvs)==1 & any(grepl(":", dvs)))
+    if(length(dvs)==1 & any(grepl(":", dvs))) {
       DVS = dv.vars = convert2vars(data, varrange=dvs)$vars.raw
-    else
+      message("\n", Glue("Note:\ndvs=\"{dvs}\" is matched to variables:"),
+              "\n", paste(DVS, collapse=", "))
+    } else {
       DVS = dv.vars = dvs
+    }
     dv = "bruceR.Y"  # "Y" will generate an error when dvs are like "X1Y1"
     data.long = tidyr::pivot_longer(
       data, cols=dv.vars,
@@ -391,22 +404,33 @@ MANOVA = function(data, subID=NULL, dv=NULL,
   }
 
   ## Main ANOVA Function
-  suppressMessages({
-    aov.ez = afex::aov_ez(
-      data=data.long,
-      id=subID,  # "bruceR.ID"
-      dv=dv,  # "bruceR.Y"
-      between=between,
-      within=within,
-      covariate=covariate,
-      type=ss.type,
-      # observed=which.observed,
-      anova_table=list(correction=sph.correction, es="ges"),
-      fun_aggregate=mean,
-      include_aov=aov.include,
-      factorize=FALSE,
-      print.formula=FALSE)
-  })
+  try({
+    err = TRUE
+    suppressMessages({
+      aov.ez = afex::aov_ez(
+        data=data.long,
+        id=subID,  # "bruceR.ID"
+        dv=dv,  # "bruceR.Y"
+        between=between,
+        within=within,
+        covariate=covariate,
+        type=ss.type,
+        # observed=which.observed,
+        anova_table=list(correction=sph.correction, es="ges"),
+        fun_aggregate=mean,
+        include_aov=aov.include,
+        factorize=FALSE,
+        print.formula=FALSE)
+    })
+    err = FALSE
+  }, silent=TRUE)
+  if(err) {
+    cat("\n")
+    stop("
+    Failed to perform MANOVA.
+    Please follow the correct usage.
+    See: help(MANOVA)", call.=FALSE)
+  }
   at = aov.ez$anova_table
   names(at)[1:2] = c("df1", "df2")
   at$MS = at$`F`*at$`MSE`
@@ -419,7 +443,7 @@ MANOVA = function(data, subID=NULL, dv=NULL,
   names(at)[7:8] = c("\u03b7\u00b2p [90% CI of \u03b7\u00b2p]",
                      "\u03b7\u00b2G")
   row.names(at) = row.names(aov.ez$anova_table) %>%
-    str_replace_all(":", " x ")
+    str_replace_all(":", " * ")
   df.nsmall = ifelse(sph.correction=="none", 0, nsmall)
   at.nsmalls = c(nsmall, nsmall, df.nsmall, df.nsmall, nsmall, 0, 0, 0)
 
@@ -508,7 +532,7 @@ MANOVA = function(data, subID=NULL, dv=NULL,
       class(sph) = "matrix"
       sph = as.data.frame(sph)
       names(sph) = c("Mauchly's W", "pval")
-      row.names(sph) = str_replace_all(row.names(sph), ":", " x ")
+      row.names(sph) = str_replace_all(row.names(sph), ":", " * ")
       print_table(sph, nsmalls=4)
       if(min(sph[,2])<.05 & sph.correction=="none") {
         Print("<<red The sphericity assumption is violated.
@@ -586,20 +610,19 @@ MANOVA = function(data, subID=NULL, dv=NULL,
 #'   \item the square root of \emph{mean square error} (MSE) for between-subjects designs;
 #'   \item the square root of \emph{mean variance of all paired differences of the residuals of repeated measures} for within-subjects and mixed designs.
 #' }
-#' In both situations, it extracts the \code{lm} object from the returned value of \code{MANOVA()}.
-#' Then, it mainly uses \code{sigma()} and \code{residuals()}, respectively, to do these estimates.
-#' For source code, please see the file \code{bruceR_stats_03_manova.R} on the \href{https://github.com/psychbruce/bruceR}{GitHub Repository}.
 #'
 #' \strong{\emph{Disclaimer}:}
 #' There is substantial disagreement on the appropriate pooled \emph{SD} to use in computing the effect size.
 #' For alternative methods, see \code{\link[emmeans:eff_size]{emmeans::eff_size()}} and \code{\link[effectsize:t_to_r]{effectsize::t_to_d()}}.
 #' Users should \emph{not} take the default output as the only right results and are completely responsible for specifying \code{sd.pooled}.
 #'
-#' @section Interaction Plot:
+#' @section Interaction Plot (See Examples Below):
 #' You can save the returned object and use the \code{\link[emmeans:emmip]{emmeans::emmip()}} function
-#' to create an interaction plot (based on the fitted model and a formula specification).
-#' For usage, please see the help page of \code{\link[emmeans:emmip]{emmeans::emmip()}}.
-#' It returns an object of class \code{ggplot}, which can be easily modified and saved using \code{ggplot2} syntax.
+#' to create an interaction plot (based on the fitted model and a formula).
+#' See examples below for the usage.
+#'
+#' Note: \code{\link[emmeans:emmip]{emmeans::emmip()}} returns a \code{ggplot} object,
+#' which can be modified and saved with \code{ggplot2} syntax.
 #'
 #' @section Statistical Details:
 #'
@@ -817,60 +840,41 @@ EMMEANS = function(model, effect=NULL, by=NULL,
   #   model=model.raw
   # }
 
-  if(is.null(model)) {
-    stop("MANOVA() did not run successfully (model is null).
-       Please run MANOVA() without any code of EMMEANS()
-       to check what the problem is.", call.=FALSE)
-  }
+  if(is.null(model))
+    stop("`model` is invalid. Run MANOVA() without EMMEANS() to check.", call.=FALSE)
 
-  if(!inherits(model, "afex_aov")) {
-    stop("Please use EMMEANS() together with MANOVA()!
-       See the help page for its usage:  ?EMMEANS", call.=FALSE)
-  }
-
-  ## Simple Effect (omnibus)
-  # see 'weights' in ?emmeans
-  try({
-    sim = NULL
-    note = FALSE
-    suppressMessages({
-      sim = emmeans::joint_tests(
-        object=model, by=by,
-        weights="equal",
-        model=model.type)
-    })
-    # note = "note" %in% names(sim)
-    sim$note = NULL
-    names(sim)[1] = "Effect"
-    sim$Effect = str_replace_all(sim$Effect, ":", " x ")
-    eta2 = effectsize::F_to_eta2(sim$F.ratio, sim$df1, sim$df2,
-                                 ci=0.90, alternative="two.sided")
-    sim$p.eta2 = cc_m_ci(eta2$Eta2_partial, eta2$CI_low, eta2$CI_high, nsmall) %>%
-      str_replace_all("0\\.", ".")
-    if(length(by)>0) {
-      vns = names(sim)[2:(length(by)+1)]
-      names(sim)[2:(length(by)+1)] = "\"" %^% vns %^% "\""
-    }
-    names(sim)[(length(by)+4):(length(by)+6)] =
-      c("F", "pval", "\u03b7\u00b2p [90% CI of \u03b7\u00b2p]")
-  }, silent=TRUE)
+  if(!inherits(model, "afex_aov"))
+    stop("EMMEANS() should be used with MANOVA()!\nSee: help(MANOVA)", call.=FALSE)
 
   effect.text = paste(effect, collapse='\" & \"')
   Print("<<cyan ------ EMMEANS (effect = \"{effect.text}\") ------>>")
   cat("\n")
-  Print("Joint Tests of \"{effect.text}\":")
-  if(is.null(sim)) {
-    stop("Package `afex` is required but is not installed.
-       Please install it:
-       install.packages(\"afex\")", call.=FALSE)
+
+  ## Simple Effect (omnibus)
+  # see 'weights' in ?emmeans
+  suppressMessages({
+    sim = emmeans::joint_tests(
+      object=model, by=by,
+      weights="equal",
+      model=model.type)
+  })
+  if(is.null(sim))
+    stop("`model` or `by` is invalid. Please check your code.\nSee: help(MANOVA)", call.=FALSE)
+  sim$note = NULL
+  names(sim)[1] = "Effect"
+  sim$Effect = str_replace_all(sim$Effect, ":", " * ")
+  eta2 = effectsize::F_to_eta2(sim$F.ratio, sim$df1, sim$df2,
+                               ci=0.90, alternative="two.sided")
+  sim$p.eta2 = cc_m_ci(eta2$Eta2_partial, eta2$CI_low, eta2$CI_high, nsmall) %>%
+    str_replace_all("0\\.", ".")
+  if(length(by)>0) {
+    vns = names(sim)[2:(length(by)+1)]
+    names(sim)[2:(length(by)+1)] = "\"" %^% vns %^% "\""
   }
-  # if(note) {
-  #   message("Warning (also in SPSS):
-  #   Within-cells error matrix is SINGULAR.
-  #   Some variables are LINEARLY DEPENDENT.
-  #   Please check your data and variables.
-  #   The same error also appears in SPSS!")
-  # }
+  names(sim)[(length(by)+4):(length(by)+6)] =
+    c("F", "pval", "\u03b7\u00b2p [90% CI of \u03b7\u00b2p]")
+
+  Print("Joint Tests of \"{effect.text}\":")
   print_table(sim, nsmalls=c(rep(0, length(by)+3),
                              nsmall, 0, 0),
               row.names=FALSE)
@@ -1022,7 +1026,7 @@ EMMEANS = function(model, effect=NULL, by=NULL,
   con$df = formatF(con$df, 0)
   print_table(con, nsmalls=nsmall, row.names=FALSE)
   cat(paste(attr(con, "mesg"), collapse="\n"))
-  cat("\n")
+  cat("\n\n")
   Print("<<green Disclaimer:
   By default, pooled SD is <<italic Root Mean Square Error>> (RMSE).
   There is much disagreement on how to compute Cohen\u2019s d.

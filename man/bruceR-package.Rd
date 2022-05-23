@@ -59,16 +59,12 @@ Loading \code{bruceR} by \code{library(bruceR)} will also load these R packages 
   \item \strong{\code{see}}: Advanced toolbox for \code{ggplot2} (geoms, scales, themes, and color palettes).
 }
 }
-\note{
-Please always use \href{https://www.rstudio.com/products/rstudio/download/preview/}{RStudio}
-as an \href{https://en.wikipedia.org/wiki/Integrated_development_environment}{IDE} instead of using the raw R software.
-}
 \section{Main Functions in \code{bruceR}}{
 
 
 \describe{
   \item{\strong{(1) Basic R Programming}}{
-      \code{\link{set.wd}} (alias: \code{set_wd})
+      \code{\link{set.wd}} (alias: \code{\link{set_wd}})
 
       \code{\link{import}},
       \code{\link{export}}
@@ -98,6 +94,12 @@ as an \href{https://en.wikipedia.org/wiki/Integrated_development_environment}{ID
   }
 
   \item{\strong{(2) Multivariate Computation}}{
+      \code{\link{add}},
+      \code{\link{added}}
+
+      \code{\link{.sum}},
+      \code{\link{.mean}}
+
       \code{\link{SUM}},
       \code{\link{MEAN}},
       \code{\link{STD}},
@@ -177,6 +179,4 @@ as an \href{https://en.wikipedia.org/wiki/Integrated_development_environment}{ID
 
 \author{
 \href{https://psychbruce.github.io}{Han-Wu-Shuang (Bruce) Bao}
-
-Email: \email{baohws@foxmail.com}
 }
