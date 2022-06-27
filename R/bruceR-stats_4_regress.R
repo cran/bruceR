@@ -275,57 +275,54 @@ regress = function(formula, data, family=NULL,
 #' \code{\link{PROCESS}}
 #'
 #' @examples
-#' \dontrun{
+#' #### Example 1: Linear Model ####
+#' lm1 = lm(Temp ~ Month + Day, data=airquality)
+#' lm2 = lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
+#' model_summary(lm1)
+#' model_summary(lm2)
+#' model_summary(list(lm1, lm2))
+#' model_summary(list(lm1, lm2), std=TRUE, digits=2)
+#' model_summary(list(lm1, lm2), file="OLS Models.doc")
+#' unlink("OLS Models.doc")  # delete file for code check
 #'
-#'   #### Example 1: Linear Model ####
-#'   lm1 = lm(Temp ~ Month + Day, data=airquality)
-#'   lm2 = lm(Temp ~ Month + Day + Wind + Solar.R, data=airquality)
-#'   model_summary(lm1)
-#'   model_summary(lm2)
-#'   model_summary(list(lm1, lm2))
-#'   model_summary(list(lm1, lm2), std=TRUE, digits=2)
-#'   model_summary(list(lm1, lm2), file="OLS Models.doc")
-#'   unlink("OLS Models.doc")  # delete file for code check
+#' #### Example 2: Generalized Linear Model ####
+#' glm1 = glm(case ~ age + parity,
+#'            data=infert, family=binomial)
+#' glm2 = glm(case ~ age + parity + education + spontaneous + induced,
+#'            data=infert, family=binomial)
+#' model_summary(list(glm1, glm2))  # "std" is not applicable to glm
+#' model_summary(list(glm1, glm2), file="GLM Models.doc")
+#' unlink("GLM Models.doc")  # delete file for code check
 #'
-#'   #### Example 2: Generalized Linear Model ####
-#'   glm1 = glm(case ~ age + parity,
-#'              data=infert, family=binomial)
-#'   glm2 = glm(case ~ age + parity + education + spontaneous + induced,
-#'              data=infert, family=binomial)
-#'   model_summary(list(glm1, glm2))  # "std" is not applicable to glm
-#'   model_summary(list(glm1, glm2), file="GLM Models.doc")
-#'   unlink("GLM Models.doc")  # delete file for code check
+#' #### Example 3: Linear Mixed Model ####
+#' library(lmerTest)
+#' hlm1 = lmer(Reaction ~ (1 | Subject), data=sleepstudy)
+#' hlm2 = lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
+#' hlm3 = lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
+#' model_summary(list(hlm1, hlm2, hlm3))
+#' model_summary(list(hlm1, hlm2, hlm3), std=TRUE)
+#' model_summary(list(hlm1, hlm2, hlm3), file="HLM Models.doc")
+#' unlink("HLM Models.doc")  # delete file for code check
 #'
-#'   #### Example 3: Linear Mixed Model ####
-#'   library(lmerTest)
-#'   hlm1 = lmer(Reaction ~ (1 | Subject), data=sleepstudy)
-#'   hlm2 = lmer(Reaction ~ Days + (1 | Subject), data=sleepstudy)
-#'   hlm3 = lmer(Reaction ~ Days + (Days | Subject), data=sleepstudy)
-#'   model_summary(list(hlm1, hlm2, hlm3))
-#'   model_summary(list(hlm1, hlm2, hlm3), std=TRUE)
-#'   model_summary(list(hlm1, hlm2, hlm3), file="HLM Models.doc")
-#'   unlink("HLM Models.doc")  # delete file for code check
+#' #### Example 4: Generalized Linear Mixed Model ####
+#' library(lmerTest)
+#' data.glmm = MASS::bacteria
+#' glmm1 = glmer(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
+#' glmm2 = glmer(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
+#' model_summary(list(glmm1, glmm2))  # "std" is not applicable to glmm
+#' model_summary(list(glmm1, glmm2), file="GLMM Models.doc")
+#' unlink("GLMM Models.doc")  # delete file for code check
 #'
-#'   #### Example 4: Generalized Linear Mixed Model ####
-#'   library(lmerTest)
-#'   data.glmm = MASS::bacteria
-#'   glmm1 = glmer(y ~ trt + week + (1 | ID), data=data.glmm, family=binomial)
-#'   glmm2 = glmer(y ~ trt + week + hilo + (1 | ID), data=data.glmm, family=binomial)
-#'   model_summary(list(glmm1, glmm2))  # "std" is not applicable to glmm
-#'   model_summary(list(glmm1, glmm2), file="GLMM Models.doc")
-#'   unlink("GLMM Models.doc")  # delete file for code check
-#'
-#'   #### Example 5: Multinomial Logistic Model ####
-#'   library(nnet)
-#'   d = airquality
-#'   d$Month = as.factor(d$Month)  # Factor levels: 5, 6, 7, 8, 9
-#'   mn1 = multinom(Month ~ Temp, data=d, Hess=TRUE)
-#'   mn2 = multinom(Month ~ Temp + Wind + Ozone, data=d, Hess=TRUE)
-#'   model_summary(mn1)
-#'   model_summary(mn2)
-#'   model_summary(mn2, file="Multinomial Logistic Model.doc")
-#'   unlink("Multinomial Logistic Model.doc")  # delete file for code check
-#' }
+#' #### Example 5: Multinomial Logistic Model ####
+#' library(nnet)
+#' d = airquality
+#' d$Month = as.factor(d$Month)  # Factor levels: 5, 6, 7, 8, 9
+#' mn1 = multinom(Month ~ Temp, data=d, Hess=TRUE)
+#' mn2 = multinom(Month ~ Temp + Wind + Ozone, data=d, Hess=TRUE)
+#' model_summary(mn1)
+#' model_summary(mn2)
+#' model_summary(mn2, file="Multinomial Logistic Model.doc")
+#' unlink("Multinomial Logistic Model.doc")  # delete file for code check
 #'
 #' @export
 model_summary = function(model.list,
@@ -1098,13 +1095,13 @@ HLM_summary = function(model=NULL,
 #' @description
 #' Compute ICC(1) (non-independence of data),
 #' ICC(2) (reliability of group means),
-#' and rWG/rWG(J) (within-group agreement for single-item/multi-item measures)
+#' and \eqn{r_{WG}}/\eqn{r_{WG(J)}} (within-group agreement for single-item/multi-item measures)
 #' in multilevel analysis (HLM).
 #'
 #' @details
 #' \describe{
 #'   \item{\strong{ICC(1) (intra-class correlation, or non-independence of data)}}{
-#'     ICC(1) = var.u0 / (var.u0 + var.e) = \eqn{\sigma_{u0}^2 / (\sigma_{u0}^2 + \sigma_{e}^2)})
+#'     ICC(1) = var.u0 / (var.u0 + var.e) = \eqn{\sigma_{u0}^2 / (\sigma_{u0}^2 + \sigma_{e}^2)}
 #'
 #'     ICC(1) is the ICC we often compute and report in multilevel analysis
 #'     (usually in the Null Model, where only the random intercept of group is included).
@@ -1117,12 +1114,12 @@ HLM_summary = function(model=NULL,
 #'     ICC(2) is a measure of \strong{"the representativeness of group-level aggregated means for within-group individual values"}
 #'     or \strong{"the degree to which an individual score can be considered a reliable assessment of a group-level construct"}.
 #'   }
-#'   \item{\strong{rWG/rWG(J) (within-group agreement for single-item/multi-item measures)}}{
-#'     rWG = \eqn{1 - \sigma^2 / \sigma_{EU}^2}
+#'   \item{\strong{\eqn{r_{WG}}/\eqn{r_{WG(J)}} (within-group agreement for single-item/multi-item measures)}}{
+#'     \eqn{r_{WG} = 1 - \sigma^2 / \sigma_{EU}^2}
 #'
-#'     rWG(J) = \eqn{1 - (\sigma_{MJ}^2 / \sigma_{EU}^2) / [J * (1 - \sigma_{MJ}^2 / \sigma_{EU}^2) + \sigma_{MJ}^2 / \sigma_{EU}^2]}
+#'     \eqn{r_{WG(J)} = 1 - (\sigma_{MJ}^2 / \sigma_{EU}^2) / [J * (1 - \sigma_{MJ}^2 / \sigma_{EU}^2) + \sigma_{MJ}^2 / \sigma_{EU}^2]}
 #'
-#'     rWG/rWG(J) is a measure of within-group agreement or consensus. Each group has an rWG/rWG(J).
+#'     \eqn{r_{WG}}/\eqn{r_{WG(J)}} is a measure of within-group agreement or consensus. Each group has an \eqn{r_{WG}}/\eqn{r_{WG(J)}}.
 #'   }
 #'   \item{* Note for the above formulas}{
 #'   \itemize{
@@ -1146,12 +1143,12 @@ HLM_summary = function(model=NULL,
 #'   \item A single variable (\emph{single-item} measure), then computing rWG.
 #'   \item Multiple variables (\emph{multi-item} measure), then computing rWG(J), where J = the number of items.
 #' }
-#' @param rwg.levels As rWG/rWG(J) compares the actual group variance to the expected random variance (i.e., the variance of uniform distribution, \eqn{\sigma_EU^2}),
+#' @param rwg.levels As \eqn{r_{WG}}/\eqn{r_{WG(J)}} compares the actual group variance to the expected random variance (i.e., the variance of uniform distribution, \eqn{\sigma_{EU}^2}),
 #' it is required to specify which type of uniform distribution is.
 #' \itemize{
-#'   \item For \emph{continuous} uniform distribution, \eqn{\sigma_EU^2 = (max - min)^2 / 12}.
+#'   \item For \emph{continuous} uniform distribution, \eqn{\sigma_{EU}^2 = (max - min)^2 / 12}.
 #'   Then \code{rwg.levels} is not useful and will be set to \code{0} (the default).
-#'   \item For \emph{discrete} uniform distribution, \eqn{\sigma_EU^2 = (A^2 - 1) / 12},
+#'   \item For \emph{discrete} uniform distribution, \eqn{\sigma_{EU}^2 = (A^2 - 1) / 12},
 #'   where A is the number of response options (levels).
 #'   Then \code{rwg.levels} should be provided (= A in the above formula).
 #'   For example, if the measure is a 5-point Likert scale, you should set \code{rwg.levels=5}.
