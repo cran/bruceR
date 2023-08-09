@@ -340,7 +340,7 @@ sprintf_transformer = function(text, envir) {
 #'
 #' @param ... Character string(s) to run.
 #' You can use \code{"{ }"} to insert any R object in the environment.
-#' @param silent Suppress error/warning messages. Default is \code{FALSE}.
+#' @param silent Suppress error/warning messages. Defaults to \code{FALSE}.
 #'
 #' @return Invisibly return the running expression(s).
 #'
@@ -369,10 +369,10 @@ Run = function(..., silent=FALSE) {
 #'
 #' @param ... Character string(s).
 #' @param sep Pattern for separation.
-#' Default is \code{"auto"}:
+#' Defaults to \code{"auto"}:
 #' \code{,} \code{;} \code{|} \code{\\n} \code{\\t}
 #' @param trim Remove whitespace from start and end of string(s)?
-#' Default is \code{TRUE}.
+#' Defaults to \code{TRUE}.
 #'
 #' @return Character vector.
 #'
@@ -409,17 +409,17 @@ cc = function(..., sep="auto", trim=TRUE) {
 }
 
 
-cc_ci = function(llci, ulci, nsmall) {
+cc_ci = function(llci, ulci, digits) {
   paste0("[",
-         formatF(llci, nsmall), ", ",
-         formatF(ulci, nsmall), "]")
+         formatF(llci, digits), ", ",
+         formatF(ulci, digits), "]")
 }
 
 
-cc_m_ci = function(mean, llci, ulci, nsmall) {
-  paste0(formatF(mean, nsmall), " [",
-         formatF(llci, nsmall), ", ",
-         formatF(ulci, nsmall), "]")
+cc_m_ci = function(mean, llci, ulci, digits) {
+  paste0(formatF(mean, digits), " [",
+         formatF(llci, digits), ", ",
+         formatF(ulci, digits), "]")
 }
 
 
@@ -466,9 +466,9 @@ fct_rev = function(f) {
 #' It has been used in many other functions of \code{bruceR} (see below).
 #'
 #' @param x Matrix, data.frame (or data.table), or any model object (e.g., \code{lm, glm, lmer, glmer, ...}).
-#' @param digits,nsmalls Numeric vector specifying the number of decimal places of output. Default is \code{3}.
-#' @param nspaces Number of whitespaces between columns. Default is \code{1}.
-#' @param row.names,col.names Print row/column names. Default is \code{TRUE} (column names are always printed).
+#' @param digits Numeric vector specifying the number of decimal places of output. Defaults to \code{3}.
+#' @param nspaces Number of whitespaces between columns. Defaults to \code{1}.
+#' @param row.names,col.names Print row/column names. Defaults to \code{TRUE} (column names are always printed).
 #' To modify the names, you can use a character vector with the same length as the raw names.
 #' @param title Title text, which will be inserted in <p></p> (HTML code).
 #' @param note Note text, which will be inserted in <p></p> (HTML code).
@@ -514,15 +514,17 @@ fct_rev = function(f) {
 #' unlink("model.doc")  # delete file for code check
 #'
 #' @export
-print_table = function(x, digits=3, nsmalls=digits,
-                       nspaces=1,
-                       row.names=TRUE,
-                       col.names=TRUE,
-                       title="", note="", append="",
-                       line=TRUE,
-                       file=NULL,
-                       file.align.head="auto",
-                       file.align.text="auto") {
+print_table = function(
+    x, digits=3,
+    nspaces=1,
+    row.names=TRUE,
+    col.names=TRUE,
+    title="", note="", append="",
+    line=TRUE,
+    file=NULL,
+    file.align.head="auto",
+    file.align.text="auto"
+) {
   ## Preprocess data.frame ##
   if(!inherits(x, c("matrix", "data.frame", "data.table"))) {
     coef.table = coef(summary(x))
@@ -530,7 +532,7 @@ print_table = function(x, digits=3, nsmalls=digits,
   }
   x = as.data.frame(x)
   sig = NULL
-  if(length(nsmalls)==1) nsmalls = rep(nsmalls, length(x))
+  if(length(digits)==1) digits = rep(digits, length(x))
   for(j in 1:length(x)) {
     if(inherits(x[,j], "factor"))
       x[,j] = as.character(x[,j])
@@ -540,7 +542,7 @@ print_table = function(x, digits=3, nsmalls=digits,
         names(x)[j] = "p"
       x[,j] = p.trans(x[,j])
     } else {
-      x[,j] = formatF(x[,j], nsmalls[j])
+      x[,j] = formatF(x[,j], digits[j])
     }
     if(grepl("^S\\.E\\.$|^Std\\. Error$|^se$|^SE$|^BootSE$", names(x)[j])) {
       x[,j] = paste0("(", x[,j], ")")  # add ( ) to S.E.
@@ -760,7 +762,7 @@ formatN = function(x, mark=",") {
 #' Format numeric values.
 #'
 #' @param x A number or numeric vector.
-#' @param digits,nsmall Number of decimal places of output. Default is \code{3}.
+#' @param digits Number of decimal places of output. Defaults to \code{3}.
 #'
 #' @return Formatted character string.
 #'
@@ -770,12 +772,12 @@ formatN = function(x, mark=",") {
 #' @seealso \code{\link[base:format]{format}}, \code{\link{formatN}}
 #'
 #' @export
-formatF = function(x, digits=3, nsmall=digits) {
-  # format(x, digits=0, nsmall=nsmall, scientific=FALSE)
+formatF = function(x, digits=3) {
+  # format(x, digits=0, nsmall=digits, scientific=FALSE)
   if(inherits(x, "character")) {
     xf = sprintf(paste0("%-", max(nchar(x), na.rm=TRUE), "s"), x)  # left adjustment
   } else {
-    x = sprintf(paste0("%.", nsmall, "f"), x)
+    x = sprintf(paste0("%.", digits, "f"), x)
     xf = sprintf(paste0("%", max(nchar(x), na.rm=TRUE), "s"), x)
   }
   return(xf)
@@ -803,8 +805,8 @@ RGB = function(r, g, b, alpha) {
 #' Timer (compute time difference).
 #'
 #' @param t0 Time at the beginning.
-#' @param unit Options: \code{"auto", "secs", "mins", "hours", "days", "weeks"}. Default is \code{"secs"}.
-#' @param digits,nsmall Number of decimal places of output. Default is \code{0}.
+#' @param unit Options: \code{"auto", "secs", "mins", "hours", "days", "weeks"}. Defaults to \code{"secs"}.
+#' @param digits Number of decimal places of output. Defaults to \code{0}.
 #'
 #' @return A character string of time difference.
 #'
@@ -816,9 +818,9 @@ RGB = function(r, g, b, alpha) {
 #' }
 #'
 #' @export
-dtime = function(t0, unit="secs", digits=0, nsmall=digits) {
+dtime = function(t0, unit="secs", digits=0) {
   dt = difftime(Sys.time(), t0, units=unit)
-  format(dt, digits=1, nsmall=nsmall)
+  format(dt, digits=1, nsmall=digits)
 }
 
 
@@ -835,7 +837,7 @@ dtime = function(t0, unit="secs", digits=0, nsmall=digits) {
 #' (version >= 1.2) is required for running this function.
 #'
 #' @param path \code{NULL} (default) or a specific path.
-#' Default is to extract the path of the currently opened file
+#' Defaults to extract the path of the currently opened file
 #' (usually .R or .Rmd) using the \code{rstudioapi::getSourceEditorContext} function.
 #' @param ask \code{TRUE} or \code{FALSE} (default).
 #' If \code{TRUE}, you can select a folder with the prompt of a dialog.
@@ -924,11 +926,11 @@ file_ext = function(filename) {
 #' \itemize{
 #'   \item Plain text (.txt, .csv, .csv2, .tsv, .psv), using \code{\link[data.table:fread]{data.table::fread()}}
 #'   \item Excel (.xls, .xlsx), using \code{\link[readxl:read_excel]{readxl::read_excel()}}
-#'   \item SPSS (.sav), using \code{\link[foreign:read.spss]{foreign::read.spss()}};
-#'   if failed, using \code{\link[haven:read_spss]{haven::read_sav()}} instead
-#'   \item Stata (.dta), using \code{\link[foreign:read.dta]{foreign::read.dta()}};
-#'   if failed, using \code{\link[haven:read_dta]{haven::read_dta()}} instead
-#'   \item R objects (.rda, .rdata, .Rdata), using \code{\link[base:load]{base::load()}}
+#'   \item SPSS (.sav), using \code{\link[haven:read_spss]{haven::read_sav()}}
+#'   or \code{\link[foreign:read.spss]{foreign::read.spss()}}
+#'   \item Stata (.dta), using \code{\link[haven:read_dta]{haven::read_dta()}}
+#'   or \code{\link[foreign:read.dta]{foreign::read.dta()}}
+#'   \item R objects (.rda, .rdata, .RData), using \code{\link[base:load]{base::load()}}
 #'   \item R serialized objects (.rds), using \code{\link[base:readRDS]{base::readRDS()}}
 #'   \item Clipboard (on Windows and Mac OS), using \code{\link[clipr:read_clip_tbl]{clipr::read_clip_tbl()}}
 #'   \item Other formats, using \code{\link[rio:import]{rio::import()}}
@@ -936,26 +938,39 @@ file_ext = function(filename) {
 #'
 #' @param file File name (with extension).
 #' If unspecified, then data will be imported from clipboard.
-#' @param sheet [Only for Excel] Excel sheet name (or sheet number).
-#' Default is the first sheet.
-#' Ignored if the sheet is specified via \code{range}.
-#' @param range [Only for Excel] Excel cell range. Default are all cells in a sheet.
-#' You may specify it as \code{range="A1:E100"} or \code{range="Sheet1!A1:E100"}.
-#' @param encoding File encoding. Default is \code{NULL}.
-#' Alternatives can be \code{"UTF-8"}, \code{"GBK"}, \code{"CP936"}, etc.
+#' @param encoding File encoding. Defaults to \code{NULL}.
+#' Options: \code{"UTF-8"}, \code{"GBK"}, \code{"CP936"}, etc.
 #'
 #' If you find messy code for Chinese text in the imported data,
 #' it is usually effective to set \code{encoding="UTF-8"}.
-#' @param header Does the first row contain column names (\code{TRUE} or \code{FALSE})? Default is \code{"auto"}.
-#' @param setclass,as Class of the imported data. Default is \code{"data.frame"}.
-#' Ignored if the data file is R object (.rds, .rda, .rdata, .Rdata).
+#' @param header Does the first row contain column names (\code{TRUE} or \code{FALSE})?
+#' Defaults to \code{"auto"}.
+#' @param sheet [Only for Excel] Excel sheet name (or sheet number).
+#' Defaults to the first sheet.
+#' Ignored if the sheet is specified via \code{range}.
+#' @param range [Only for Excel] Excel cell range.
+#' Defaults to all cells in a sheet.
+#' You may specify it as \code{range="A1:E100"} or \code{range="Sheet1!A1:E100"}.
+#' @param pkg [Only for SPSS & Stata] Use which R package to read
+#' SPSS (.sav) or Stata (.dta) data file?
+#' Defaults to \code{"haven"}. You may also use \code{"foreign"}.
 #'
-#' Alternatives can be:
+#' Notably, \code{"haven"} may be preferred because it is more robust to
+#' non-English characters and can also keep variable labels (descriptions)
+#' from SPSS.
+#' @param value.labels [Only for SPSS & Stata] Convert variables with value labels
+#' into R factors with those levels? Defaults to \code{FALSE}.
+#' @param as Class of the imported data.
+#' Defaults to \code{"data.frame"}.
+#' Ignored if the file is an R data object (.rds, .rda, .rdata, .RData).
+#'
+#' Options:
 #' \itemize{
 #'   \item data.frame: \code{"data.frame"}, \code{"df"}, \code{"DF"}
 #'   \item data.table: \code{"data.table"}, \code{"dt"}, \code{"DT"}
 #'   \item tbl_df: \code{"tibble"}, \code{"tbl_df"}, \code{"tbl"}
 #' }
+#' @param verbose Print data information? Defaults to \code{FALSE}.
 #'
 #' @return A data object (default class is \code{data.frame}).
 #'
@@ -976,10 +991,17 @@ file_ext = function(filename) {
 #' @seealso \code{\link{export}}
 #'
 #' @export
-import = function(file,
-                  sheet=NULL, range=NULL,
-                  encoding=NULL, header="auto",
-                  setclass=as, as="data.frame") {
+import = function(
+    file,
+    encoding=NULL,
+    header="auto",
+    sheet=NULL,
+    range=NULL,
+    pkg=c("haven", "foreign"),
+    value.labels=FALSE,
+    as="data.frame",
+    verbose=FALSE
+) {
   ## initialize
   if(missing(file)) {
     file = "clipboard"
@@ -1029,51 +1051,65 @@ import = function(file,
                               range=range,
                               col_names=header)
   } else if(fmt %in% c("sav")) {
-    installed("foreign")
-    try({
-      error = TRUE
-      data = foreign::read.spss(
-        file=file,
-        reencode=ifelse(is.null(encoding), NA, encoding),
-        to.data.frame=TRUE,
-        use.value.labels=FALSE)
-      error = FALSE
-    }, silent=TRUE)
-    if(error) {
-      message("[Retry] Using `haven::read_sav()` to import the data...")
+    error = TRUE
+    if(pkg[1]=="foreign") {
+      # pkg="foreign"
+      installed("foreign")
+      try({
+        data = foreign::read.spss(
+          file=file,
+          reencode=ifelse(is.null(encoding), NA, encoding),
+          to.data.frame=TRUE,
+          use.value.labels=value.labels)
+        error = FALSE
+      }, silent=TRUE)
+    }
+    if(error | pkg[1]=="haven") {
+      # pkg="haven"
+      if(pkg[1]=="foreign")
+        message("[Retry] Using `haven::read_sav()` to import the data...")
       installed("haven")
       data = haven::read_sav(file=file, encoding=encoding)
+      if(value.labels) data = haven::as_factor(data)
     }
   } else if(fmt %in% c("dta")) {
-    installed("foreign")
-    try({
-      error = TRUE
-      data = foreign::read.dta(file=file, convert.factors=FALSE)
-      error = FALSE
-    }, silent=TRUE)
-    if(error) {
-      message("[Retry] Using `haven::read_dta()` to import the data...")
+    error = TRUE
+    if(pkg[1]=="foreign") {
+      # pkg="foreign"
+      installed("foreign")
+      try({
+        data = foreign::read.dta(file=file, convert.factors=value.labels)
+        error = FALSE
+      }, silent=TRUE)
+    }
+    if(error | pkg[1]=="haven") {
+      # pkg="haven"
+      if(pkg[1]=="foreign")
+        message("[Retry] Using `haven::read_dta()` to import the data...")
       installed("haven")
       data = haven::read_dta(file=file, encoding=encoding)
+      if(value.labels) data = haven::as_factor(data)
     }
   } else {
     data = rio::import(file=file)
   }
 
   ## report data
-  if(is.data.frame(data))
-    Print("<<green \u2714>> Successfully imported: {nrow(data)} obs. of {ncol(data)} variables")
-  else
-    Print("<<green \u2714>> Successfully imported: {length(data)} values of class `{class(data)[1]}`")
+  if(verbose) {
+    if(is.data.frame(data))
+      Print("<<green \u2714>> Successfully imported: {nrow(data)} obs. of {ncol(data)} variables")
+    else
+      Print("<<green \u2714>> Successfully imported: {length(data)} values of class `{class(data)[1]}`")
+  }
 
   ## return data
-  if(is.null(setclass) | fmt %in% c("rds", "rda", "rdata")) {
+  if(is.null(as) | fmt %in% c("rds", "rda", "rdata")) {
     return(data)
-  } else if(setclass %in% c("data.frame", "df", "DF")) {
-    return(base::as.data.frame(data))
-  } else if(setclass %in% c("data.table", "dt", "DT")) {
+  } else if(as %in% c("data.frame", "df", "DF")) {
+    return(as.data.frame(data))
+  } else if(as %in% c("data.table", "dt", "DT")) {
     return(data.table::as.data.table(data))
-  } else if(setclass %in% c("tibble", "tbl_df", "tbl")) {
+  } else if(as %in% c("tibble", "tbl_df", "tbl")) {
     installed("tibble")
     return(tibble::as_tibble(data))
   } else {
@@ -1099,7 +1135,7 @@ import = function(file,
 #'   \item Excel (.xls, .xlsx), using \code{\link[openxlsx:write.xlsx]{openxlsx::write.xlsx()}}
 #'   \item SPSS (.sav), using \code{\link[haven:read_spss]{haven::write_sav()}}
 #'   \item Stata (.dta), using \code{\link[haven:read_dta]{haven::write_dta()}}
-#'   \item R objects (.rda, .rdata, .Rdata), using \code{\link[base:save]{base::save()}}
+#'   \item R objects (.rda, .rdata, .RData), using \code{\link[base:save]{base::save()}}
 #'   \item R serialized objects (.rds), using \code{\link[base:readRDS]{base::saveRDS()}}
 #'   \item Clipboard (on Windows and Mac OS), using \code{\link[clipr:write_clip]{clipr::write_clip()}}
 #'   \item Other formats, using \code{\link[rio:export]{rio::export()}}
@@ -1109,20 +1145,21 @@ import = function(file,
 #' Multiple R objects should be included in a \emph{named} \code{list} (see examples).
 #'
 #' If you want to save R objects other than a data frame (e.g., model results),
-#' you'd better specify \code{file} with extensions .rda, .rdata, or .Rdata.
+#' you'd better specify \code{file} with extensions .rda, .rdata, or .RData.
 #' @param file File name (with extension).
 #' If unspecified, then data will be exported to clipboard.
-#' @param sheet [Only for Excel] Excel sheet name(s).
-#' Default is Sheet1, Sheet2, ...
-#' You may specify multiple sheet names in a character vector
-#' \code{c()} with the \emph{same length} as \code{x} (see examples).
-#' @param encoding File encoding. Default is \code{NULL}.
-#' Alternatives can be \code{"UTF-8"}, \code{"GBK"}, \code{"CP936"}, etc.
+#' @param encoding File encoding. Defaults to \code{NULL}.
+#' Options: \code{"UTF-8"}, \code{"GBK"}, \code{"CP936"}, etc.
 #'
 #' If you find messy code for Chinese text in the exported data (often in CSV when opened with Excel),
-#' it is usually effective to set \code{encoding="GBK"} or \code{encoding="CP936"}.
-#' @param header Does the first row contain column names (\code{TRUE} or \code{FALSE})? Default is \code{"auto"}.
-#' @param overwrite Overwrite the existing file (if any)? Default is \code{TRUE}.
+#' it is usually useful to set \code{encoding="GBK"} or \code{encoding="CP936"}.
+#' @param header Does the first row contain column names (\code{TRUE} or \code{FALSE})? Defaults to \code{"auto"}.
+#' @param sheet [Only for Excel] Excel sheet name(s).
+#' Defaults to "Sheet1", "Sheet2", ...
+#' You may specify multiple sheet names in a character vector
+#' \code{c()} with the \emph{same length} as \code{x} (see examples).
+#' @param overwrite Overwrite the existing file (if any)? Defaults to \code{TRUE}.
+#' @param verbose Print output information? Defaults to \code{FALSE}.
 #'
 #' @return No return value.
 #'
@@ -1153,9 +1190,14 @@ import = function(file,
 #' @seealso \code{\link{import}}, \code{\link{print_table}}
 #'
 #' @export
-export = function(x, file, sheet=NULL,
-                  encoding=NULL, header="auto",
-                  overwrite=TRUE) {
+export = function(
+    x, file,
+    encoding=NULL,
+    header="auto",
+    sheet=NULL,
+    overwrite=TRUE,
+    verbose=FALSE
+) {
   ## initialize
   if(missing(file)) {
     file = "clipboard"
@@ -1272,10 +1314,12 @@ export = function(x, file, sheet=NULL,
   }
 
   ## report status
-  if(fmt=="clipboard")
-    Print("<<green \u2714>> Successfully paste to clipboard")
-  else
-    Print("<<green \u2714>> Successfully saved to <<bold \"{paste0(getwd(), '/', file)}\">>")
+  if(verbose) {
+    if(fmt=="clipboard")
+      Print("<<green \u2714>> Successfully paste to clipboard")
+    else
+      Print("<<green \u2714>> Successfully saved to <<bold \"{paste0(getwd(), '/', file)}\">>")
+  }
 }
 
 

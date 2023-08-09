@@ -1,6 +1,21 @@
 **Please check the [latest news (change log)](https://psychbruce.github.io/bruceR/news/index.html) and keep this package updated.**
 
-# bruceR 0.9.0 (ongoing...)
+# bruceR 2023.8
+
+## New Features
+
+-   New function `cor_multilevel()`: Multilevel correlations (within-level and between-level).
+-   Added arguments `pkg` and `value.labels` to `import()`, providing more flexible settings and allowing for converting variables with value labels into R factors.
+
+## Major Changes
+
+-   Now use "YYYY.M" as package version number.
+-   Improved `Corr()`: Now it uses `ggplot2` to produce correlation plot.
+-   Deprecated the argument `nsmall` for all functions. Now always use `digits` instead. (Both were acceptable in former versions.)
+
+## Bug Fixes
+
+-   Fixed `EMMEANS()` output when `"d"` is used as a variable name.
 
 # bruceR 0.8.10 (Mar 2023)
 

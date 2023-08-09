@@ -7,10 +7,11 @@
 export(
   x,
   file,
-  sheet = NULL,
   encoding = NULL,
   header = "auto",
-  overwrite = TRUE
+  sheet = NULL,
+  overwrite = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -18,25 +19,27 @@ export(
 Multiple R objects should be included in a \emph{named} \code{list} (see examples).
 
 If you want to save R objects other than a data frame (e.g., model results),
-you'd better specify \code{file} with extensions .rda, .rdata, or .Rdata.}
+you'd better specify \code{file} with extensions .rda, .rdata, or .RData.}
 
 \item{file}{File name (with extension).
 If unspecified, then data will be exported to clipboard.}
 
+\item{encoding}{File encoding. Defaults to \code{NULL}.
+Options: \code{"UTF-8"}, \code{"GBK"}, \code{"CP936"}, etc.
+
+If you find messy code for Chinese text in the exported data (often in CSV when opened with Excel),
+it is usually useful to set \code{encoding="GBK"} or \code{encoding="CP936"}.}
+
+\item{header}{Does the first row contain column names (\code{TRUE} or \code{FALSE})? Defaults to \code{"auto"}.}
+
 \item{sheet}{[Only for Excel] Excel sheet name(s).
-Default is Sheet1, Sheet2, ...
+Defaults to "Sheet1", "Sheet2", ...
 You may specify multiple sheet names in a character vector
 \code{c()} with the \emph{same length} as \code{x} (see examples).}
 
-\item{encoding}{File encoding. Default is \code{NULL}.
-Alternatives can be \code{"UTF-8"}, \code{"GBK"}, \code{"CP936"}, etc.
+\item{overwrite}{Overwrite the existing file (if any)? Defaults to \code{TRUE}.}
 
-If you find messy code for Chinese text in the exported data (often in CSV when opened with Excel),
-it is usually effective to set \code{encoding="GBK"} or \code{encoding="CP936"}.}
-
-\item{header}{Does the first row contain column names (\code{TRUE} or \code{FALSE})? Default is \code{"auto"}.}
-
-\item{overwrite}{Overwrite the existing file (if any)? Default is \code{TRUE}.}
+\item{verbose}{Print output information? Defaults to \code{FALSE}.}
 }
 \value{
 No return value.
@@ -56,7 +59,7 @@ It supports many file formats and uses corresponding R functions:
   \item Excel (.xls, .xlsx), using \code{\link[openxlsx:write.xlsx]{openxlsx::write.xlsx()}}
   \item SPSS (.sav), using \code{\link[haven:read_spss]{haven::write_sav()}}
   \item Stata (.dta), using \code{\link[haven:read_dta]{haven::write_dta()}}
-  \item R objects (.rda, .rdata, .Rdata), using \code{\link[base:save]{base::save()}}
+  \item R objects (.rda, .rdata, .RData), using \code{\link[base:save]{base::save()}}
   \item R serialized objects (.rds), using \code{\link[base:readRDS]{base::saveRDS()}}
   \item Clipboard (on Windows and Mac OS), using \code{\link[clipr:write_clip]{clipr::write_clip()}}
   \item Other formats, using \code{\link[rio:export]{rio::export()}}

@@ -4,18 +4,22 @@
 \alias{granger_test}
 \title{Granger causality test (bivariate).}
 \usage{
-granger_test(formula, data, lags = 1:5, test.reverse = TRUE, file = NULL)
+granger_test(formula, data, lags = 1:5, test.reverse = TRUE, file = NULL, ...)
 }
 \arguments{
 \item{formula}{Model formula like \code{y ~ x}.}
 
 \item{data}{Data frame.}
 
-\item{lags}{Time lags. Default is \code{1:5}.}
+\item{lags}{Time lags. Defaults to \code{1:5}.}
 
-\item{test.reverse}{Whether to test reverse causality. Default is \code{TRUE}.}
+\item{test.reverse}{Whether to test reverse causality. Defaults to \code{TRUE}.}
 
 \item{file}{File name of MS Word (\code{.doc}).}
+
+\item{...}{Further arguments passed to \code{\link[lmtest:grangertest]{lmtest::grangertest()}}.
+For example, you may use \emph{robust} standard errors by specifying
+the \code{vcov} argument (see \href{https://github.com/psychbruce/bruceR/issues/23}{GitHub Issue #23}).}
 }
 \value{
 A data frame of results.
