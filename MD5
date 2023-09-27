@@ -1,4 +1,4 @@
-496e08cc3500a04dbd944b2a56ae6eca *DESCRIPTION
+c16eaf0903ef93eda9c5c088a8fd5d36 *DESCRIPTION
 9f88d65f4c0a508d2baba9ea0e36b3cb *NAMESPACE
 3ab3934c3782f50a9a7f61314c4d518f *NEWS.md
 0df5f9cf2781dbeaed603e190afa43c0 *R/bruceR-stats_1_basic.R
@@ -10,7 +10,7 @@ c8af7478706d9bee70d4c3fef0d3647b *R/bruceR-stats_3_manova.R
 238beb5aa0710b06e48781ae5b28860f *R/bruceR.R
 19fb3c002a30b91277192436e111d4bb *R/bruceR_utils.R
 dd956817c398b199a8b5d5d32dcd8d2f *R/deprecated.R
-64fd15f1e1b0a5f672b818edeb6ce39c *README.md
+4fc795d19b2f14a276dcf20107f3ab9a *README.md
 40f85b519418e3596306f0fbb74aeb68 *data/between.1.rda
 b21c448a8ceb4ff80d6dc79895297b8c *data/between.2.rda
 b359b4bcde1d7b355f0ebe87d4008328 *data/between.3.rda
